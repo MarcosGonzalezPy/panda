@@ -1,0 +1,29 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">Agregar Servicios</div>
+    <div class="panel-body">
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Codigo</label>
+                <div class="col-sm-3">
+                    <input autofocus  style="text-transform:uppercase"  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Descripcion</label>
+                <div class="col-sm-5">
+                    <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.descripcion" maxlength="50"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <!--|| !datos.descripcion || !datos.dominio-->
+                    <input ng-disabled="!datos.codigo || !datos.descripcion" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                    <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>

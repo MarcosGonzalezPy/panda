@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html >
+<body>
+<head>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+</head>
+<div class="panel panel-primary">
+    <div class="panel-heading">Paises</div>
+    <div class="panel-body">
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Codigo</label>
+                <div class="col-sm-5">
+                    <input uppercase autofocus  maxlength="3" required primary type="text" class="form-control" ng-model="datos.codigo"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Descripcion</label>
+                <div class="col-sm-5">
+                    <input required type="text" class="form-control" ng-model="datos.descripcion" maxlength="50"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" class="btn btn-primary" value="Agregar" ng-disabled="!datos.codigo || !datos.descripcion"/>
+                    <input type="button" ng-click = "limpiar()" class="btn btn-warning" value="Limpiar"/>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<table class="table" ng-show="cartData.length > 0">
+    <thead>
+    <tr>
+        <th>Codigo</th>
+        <th>Descripcion</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="item in cartData">
+        <td>{{item.codigo}}</td>
+        <td>{{item.descripcion}}</td>
+        <td>
+            <button ng-click="remove($index)" class="btn btn-danger">Remove</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+
+</body>
+</html>

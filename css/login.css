@@ -1,0 +1,51 @@
+img{
+    max-width: 100%;
+}
+.quitar-float{
+    float: none;
+}
+.espacio-arriba{
+    margin-top: 70px;
+}
+.letra-formateada{
+    font-family: 'Shrikhand', cursive;
+}
+.azul-1{
+    color: #4E7AC7;
+}
+
+.azul-2{
+    color: #ADD5F7;
+}
+.inline-block{
+    float: none;
+    display: inline-block;
+    margin-right: -4px;
+}
+.background-azul-1{
+    background: #94A1A6;
+}
+.letra-blanca{
+    color: #F5F3F4;
+}
+.padding-largo{
+    padding: 5px 10px;
+}
+.a{
+    color: #F2F2F2;
+}
+.espacio-derecha{
+    margin-right: 1em;
+}
+.no-lista li{
+    list-style-type: none;
+}
+.no-lista{
+    margin: 0px;
+    padding: 0px;
+}
+.retraso-1{
+    -webkit-animation-delay:1s;
+    -moz-animation-delay: 1s;
+    animation-delay: 1s;
+}

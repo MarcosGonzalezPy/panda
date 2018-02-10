@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Roles</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Rol</label>
+                <!--<div class="col-sm-3">-->
+                    <!--<input autofocus  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.rol"/>-->
+                <!--</div>-->
+
+                <div class="col-sm-3">
+                    <select class="col-sm-2 form-control"
+                            ng-model=datos.rol>
+                        <option value> --Seleccionar --</option>
+                        <option ng-repeat="c in listaRolesDominios"
+                                value="{{c.rol}}">{{c.rol}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Modulo</label>
+                <div class="col-sm-3">
+                    <select class="col-sm-2 form-control"
+                            ng-model=datos.modulo>
+                        <option value> --Seleccionar --</option>
+                        <option ng-repeat="c in listaRolesModulos"
+                                value="{{c.valor}}">{{c.valor}}</option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input ng-disabled="!datos.rol" type="button" ng-click="modificar()"  class="btn btn-success btn-sm" value="Modificar" />
+                    <input ng-disabled="!datos.rol" type="button" ng-click="eliminarById(datos.rol)"  class="btn btn-danger btn-sm" value="Eliminar" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<div class="panel panel-default" ng-show="listaRoles.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Rol</th>
+                <th>Modulo</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaRoles">
+                <td>{{item.rol}}</td>
+                <td>{{item.modulo}}</td>
+
+                <td>
+                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+</body>
+</html>

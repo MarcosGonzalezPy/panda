@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Detalle del cliente</div>
+        <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Cliente</label>
+
+                    <!--onchange="alert('Seleccionado')"-->
+                     <div class="col-sm-8">
+                        <input autofocus ng-model="datos.cliente" class="form-control input-sm" style="text-transform:uppercase" list="browsers" name="browser" class="nopadding col-sm-8" onchange="pruebaAlert()">
+                        <datalist id="browsers" >
+                            <option ng-repeat="c in listaClientes"
+                                    value="{{c.nombre}} {{c.apellido}}">
+                        </datalist>
+
+                        <!--<input required type="text" class="form-control input-sm" ng-model="datos.cliente " maxlength="50"/>-->
+                     </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Encargado</label>
+                    <div class="col-sm-8">
+                         <!--<input     maxlength="20" required primary type="text"  ng-model="datos.encargado"/>-->
+                         <input ng-model="datos.encargado" style="text-transform:uppercase" list="browsers" name="browser" class="form-control input-sm" onchange="pruebaAlert()">
+                        <datalist id="browsers2" >
+                            <option ng-repeat="c in listaClientes"
+                                    value="{{c.nombre}} {{c.apellido}}">
+                        </datalist>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Telefono</label>
+                    <div class="col-sm-4">
+                        <input  class="form-control input-sm"  maxlength="20" required primary type="text"  ng-model="datos.telefono"/>
+                    </div>
+
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Correo</label>
+                    <div class="col-sm-8">
+                        <input  class="form-control input-sm"  maxlength="250" required primary type="text"  ng-model="datos.correo"/>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Responsable:</label>
+                    <div class="col-sm-8">
+                        <input disabled class="form-control input-sm"  maxlength="20"  type="text"  ng-model="datos.responsable"/>
+                    </div>
+
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Fecha:</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm"  maxlength="20" required primary type="text"
+                    ng-model="datos.fecha"/>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Servicio N:</label>
+                    <div class="col-sm-4">
+                        <input  disabled class="form-control input-sm"  maxlength="20" required primary type="text"  ng-model="datos.secuencia"/>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Taller:</label>
+                    <div class="col-sm-8">
+                        <select id="taller"   class="form-control input-sm"
+                                ng-model=datos.taller>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaTaller"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+
+                        </select>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">Ingresar Equipo</div>
+            <div class="panel-body padding-minimo" >
+            <form ng-submit="add()" class="form-horizontal">
+                <div class="col-lg-6">
+                    <div class="form-group margin-bottom-5">
+                        <div class="col-sm-4">
+                            Detalle del Equipo
+                         </div>
+                         <div>
+                            <textarea rows="4" cols="50">
+
+                            </textarea>
+                         </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="form-group margin-bottom-5">
+                        <div class="col-sm-6">
+                            Detalle de Trabajo Solicitado
+                        </div>
+                        <div>
+                            <textarea rows="4" cols="50">
+
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="form-group margin-bottom-5">
+                        <div class="col-sm-6">
+                            Observacion
+                        </div>
+                        <div>
+                            <textarea rows="2" cols="125">
+
+                            </textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-sm-offset-5 col-sm-10">
+                        <!--|| !datos.descripcion || !datos.dominio-->
+                        </br>
+                        <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Aceptar" />
+
+                        <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                    </div>
+                </div>
+
+
+
+            </form>
+            </div>
+        </div>
+
+
+
+</body>
+</html>
+</body>
+</html>

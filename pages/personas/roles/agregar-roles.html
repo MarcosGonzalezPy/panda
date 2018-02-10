@@ -1,0 +1,34 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">Agregar Roles</div>
+    <div class="panel-body">
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Rol:</label>
+                <div class="col-sm-3">
+                    <input  style="text-transform:uppercase"  required type="text" class="form-control input-sm" ng-model="datos.rol" maxlength="50"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Modulo:</label>
+                <div class="col-sm-3">
+                    <!--ng-model="{{c.valor}}"-->
+                    <div ng-repeat="c in listaModulos">
+                        <input type="checkbox" id="checkboxModulo" name="checkboxModulo" value="{{c.valor}}"  /> {{c.valor}} <br>
+
+                    </div>
+                    <!--<input type="checkbox" name="vehicle2" value="Car"> I have a car-->
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-5 col-sm-10">
+                    <!--|| !datos.descripcion || !datos.dominio-->
+                    <input ng-disabled=" !datos.rol" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>

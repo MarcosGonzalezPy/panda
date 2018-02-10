@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html ng-app='app'>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="css/login.css"/>
+    <link rel="stylesheet" type="text/css" href="css/animate.css"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="https://code.angularjs.org/1.2.32/angular-cookies.js"></script>-->
+    <!--<script src="https://code.angularjs.org/1.6.3/angular-cookies.js"></script>-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.7/angular.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.3/angular-route.js"></script>
+    <script src="https://code.angularjs.org/1.2.32/angular-cookies.js"></script>
+
+
+    <script src="librerias/ui-bootstrap-tpls-0.6.0.js" type="text/javascript"></script>
+    <!--<script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.6.0.js" type="text/javascript"></script>-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="librerias/dialogs.min.js" type="text/javascript"></script>
+    <!--<script src="http://m-e-conroy.github.io/angular-dialog-service/javascripts/dialogs.min.js" type="text/javascript"></script>-->
+
+
+
+    <!--login-->
+    <!--<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+    <link href="https://fonts.googleapis.com/css?family=Shrikhand" rel="stylesheet" type="text/css">
+    <script src="app.js"></script>
+    <script src="js/utiles/angular-jqgrid.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/dialog.css"/>
+
+    <title>Panda</title>
+</head>
+<body ng-controller='mainController'>
+
+<div ng-show="!mostrarMain">
+    <div class= "col-md-12 quitar-float text-center espacio-arriba">
+        <img src="imgs/logo.png" class="animated fadeIn">
+        <h1 class="letra-formateada azul-1 animated fadeIn retraso-1">Panda</h1>
+        <!--<h3>Es simple y sencillo.</h3>-->
+
+        <form action="checklogin.php" method="post" >
+
+            <div class="col-sm-2 col-sm-offset-5">
+                <input ng-model="datos.usuario"  type="text" id="username" class="form-control input-sm" required placeholder="Usuario">
+                   <br>
+                <input ng-model="datos.password"  type="password" id="password" class="form-control input-sm" required placeholder="Contraseña">
+                <br>
+                <!--input type="submit" name="Submit" value="LOGIN">-->
+                <input type="button" ng-click="login()"  class="btn btn-primary btn-sm" value="Login" />
+            </div>
+        </form>
+
+    </div>
+    <!--<footer>-->
+        <!--&copy;2017 <a href="http://www.google.com">FP UNA - Proyecto 2</a>-->
+    <!--</footer>-->
+
+</div>
+
+<div  ng-show="mostrarMain"  class="container-fluid">
+
+    <div class="row">
+        <div class="col-md-2">
+            <br>
+            <h2>Panda</h2>
+
+        </div>
+        <div class="col-md-10">
+            <br>
+            <br>
+            <nav class="navbar navbar-default" role="navigation">
+                <!-- El logotipo y el icono que despliega el menú se agrupan
+                     para mostrarlos mejor en los dispositivos móviles -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse"
+                            data-target=".navbar-ex1-collapse">
+                        <span class="sr-only">Desplegar navegación</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Logotipo</a>
+                </div>
+
+                <!-- Agrupar los enlaces de navegación, los formularios y cualquier
+                     otro elemento que se pueda ocultar al minimizar la barra -->
+                <div class="collapse navbar-collapse navbar-ex1-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="#">Enlace #1</a></li>
+                        <li><a href="#">Enlace #2</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Menú #1 <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Acción #1</a></li>
+                                <li><a href="#">Acción #2</a></li>
+                                <li><a href="#">Acción #3</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Acción #4</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Acción #5</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Buscar">
+                        </div>
+                        <button type="submit" class="btn btn-default">Enviar</button>
+                    </form>
+
+                    <ul class="nav navbar-nav navbar-right">
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                Menú #2 <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Acción #1</a></li>
+                                <li><a href="#">Acción #2</a></li>
+                                <li><a href="#">Acción #3</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Acción #4</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="#salir">Salir <span class="glyphicon glyphicon-share"></span></a></li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+    </div>
+
+    <!--para mostrar la linea horizontal - deprecado-->
+    <!--<hr>-->
+
+
+    <div class="row">
+        <div class="col-md-2">
+
+            <!-- menu -->
+            <div id="MainMenu">
+                <div class="list-group panel">
+
+                    <!--<a href="#prueba" ng-show="rolDesarrollo" class="list-group-item list-group-item-success" data-parent="#MainMenu">Desarrollo</a>-->
+                    <!--<a href="#demo3" ng-show="false" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Item 3 <i class="fa fa-caret-down"></i></a>-->
+                    <!--<div class="collapse" id="demo3">-->
+                        <!--<a href="#SubMenu1" class="list-group-item" data-toggle="collapse" data-parent="#SubMenu1">Subitem 1 <i class="fa fa-caret-down"></i></a>-->
+                        <!--<div class="collapse list-group-submenu" id="SubMenu1">-->
+                            <!--<a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 1 a</a>-->
+                            <!--<a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 2 b</a>-->
+                            <!--<a href="#SubSubMenu1" class="list-group-item" data-toggle="collapse" data-parent="#SubSubMenu1">Subitem 3 c <i class="fa fa-caret-down"></i></a>-->
+                            <!--<div class="collapse list-group-submenu list-group-submenu-1" id="SubSubMenu1">-->
+                                <!--<a href="#" class="list-group-item" data-parent="#SubSubMenu1">Sub sub item 1</a>-->
+                                <!--<a href="#" class="list-group-item" data-parent="#SubSubMenu1">Sub sub item 2</a>-->
+                            <!--</div>-->
+                            <!--<a href="#" class="list-group-item" data-parent="#SubMenu1">Subitem 4 d</a>-->
+                        <!--</div>-->
+                        <!--<a href="javascript:;" class="list-group-item">Subitem 2</a>-->
+                        <!--<a href="javascript:;" class="list-group-item">Subitem 3</a>-->
+                    <!--</div>-->
+
+                    <!--ng-show="rolCatalogo"-->
+                    <a href="#demo4" ng-show="rolCatalogo" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Catalogo  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo4">
+                        <a href="#dominios" class="list-group-item">Dominios</a>
+                        <a href="#valores" class="list-group-item">Valores</a>
+                        <a href="#articulos" class="list-group-item">Articulos</a>
+
+                        <a href="#cuentas-bancarias" class="list-group-item">Cuentas Bancarias</a>
+                        <!--<a href="#paises" class="list-group-item">Paises</a>-->
+                    </div>
+
+                    <!--ng-show="rolPersonas"-->
+                    <a href="#demo10" ng-show="rolPersonas"  class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Personas  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo10">
+                        <a href="#roles" class="list-group-item">Roles</a>
+                        <a href="#usuarios" class="list-group-item">Usuarios</a>
+                        <a href="#clientes" class="list-group-item">Clientes</a>
+                        <a href="#proveedores" class="list-group-item">Proveedores</a>
+                    </div>
+
+                    <!--ng-show="rolVentas"-->
+                    <a href="#demo5" ng-show="rolVentas" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Ventas  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo5">
+                        <a href="#cajas" class="list-group-item">Cajas</a>
+                        <a href="#cajas-movimientos" class="list-group-item">Cajas Movimientos</a>
+                        <a href="#habilitar-caja" class="list-group-item">Circuito Caja</a>
+                        <a href="#ventas" class="list-group-item">Ventas</a>
+                        <a href="#ventas/saldo-cliente" class="list-group-item">Saldo Cliente</a>
+                        <a href="" class="list-group-item">Timbrado</a>
+                        <a href="" class="list-group-item">Pagares</a>
+
+                    </div>
+                    <!--ng-show="rolCompras"-->
+                    <a href="#demo6" ng-show="rolCompras"  class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Compras  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo6">
+                        <a href="#compras" class="list-group-item">Compras</a>
+                        <!--<a href="#pedido-compra" class="list-group-item">Pedido de Compra</a>-->
+                        <!--<a href="#admin-recepcion-compra" class="list-group-item">Recepción de Compra</a>-->
+                    </div>
+                    <!--ng-show="rolStock"-->
+                    <a href="#demo7" ng-show="rolInventario" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Inventario  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo7">
+                        <a href="#inventario" class="list-group-item">Inventario</a>
+                        <a href="#ajuste-inventario" class="list-group-item">Ajuste Inventario</a>
+                    </div>
+                    <!--ng-show="rolServicios"-->
+                    <a href="#demo8" ng-show="rolServicios" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Servicios  <i class="fa fa-caret-down"></i></a>
+                    <div class="collapse" id="demo8">
+                        <a href="#circuito" class="list-group-item">Circuito</a>
+                        <a href="#ingresar-equipo" class="list-group-item">Ingresar Equipo</a>
+                        <a href="#cotizacion" class="list-group-item">Cotizacion</a>
+                        <a href="" class="list-group-item">Circuito de Reparacion</a>
+                        <a href="#servicios" class="list-group-item">Servicios</a>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div id="main">
+                <!-- Aquí inyectamos las vistas -->
+                <div ng-view></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+</body>
+</html>

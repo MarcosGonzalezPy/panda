@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<div class="panel panel-primary">
+    <div class="panel-heading">Agregar Cajas Movimientos</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Estado:</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm" style="text-transform:uppercase" maxlength="200" required primary type="text"  ng-model="datos.estado"/>
+                    </div>
+                </div>
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Monto Apertura:</label>
+                    <div class="col-sm-6">
+                        <input class="form-control input-sm" style="text-transform:uppercase" maxlength="50" required primary type="text"  ng-model="datos.montoApertura"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Caja:</label>
+                    <div class="col-sm-8">
+                        <select id="caja"     class="form-control input-sm"
+                                ng-model=datos.codigoCaja>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaCajas"
+                                    value="{{c.codigo}}">{{c.codigo}} - {{c.numero}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Usuario:</label>
+                    <div class="col-sm-8">
+                        <select id="usuario"  class="form-control input-sm"
+                                ng-model=datos.usuario>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaUsuarios"
+                                    value="{{c.usuario}}">{{c.usuario}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+
+                <div class="col-sm-offset-5 col-sm-10">
+                    <!--ng-disabled="!datos.codigo || !datos.descripcion"-->
+                    </br>
+                    <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                    <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+                </div>
+            </div>
+
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
+
+</body>
+</html>

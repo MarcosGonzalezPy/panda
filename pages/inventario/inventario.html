@@ -1,0 +1,114 @@
+<html >
+<body>
+<!--<head>-->
+<!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.js"></script>-->
+<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
+<!--</head>-->
+
+<div class="panel panel-primary">
+    <div class="panel-heading">Inventario</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Codigo:</label>
+                    <div class="col-sm-7">
+                        <input autofocus="true"  class="form-control input-sm" name="codigo" class="nopadding col-sm-7" ng-model="datos.codigo"
+                           ng-blur="buscarArticulo()">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+
+                <div class="form-group margin-bottom-5">
+                    <!--<label class="col-sm-2 control-label">Descripcion:</label>-->
+                    <div class="col-sm-12">
+                        <input class="form-control input-sm" list="descripcion" name="descripcion" ng-model="datos.descripcion" class="nopadding col-sm-8"
+                               ng-blur="buscarArticulo()">
+                        <datalist id="descripcion" >
+                            <option ng-repeat="c in listaArticulos"
+                                    value="{{c.descripcion}}">{{c.descripcion}}</option>
+                            <!--<option value="Notebook Acer">-->
+                            <!--<option value="Notebook Toshiba">-->
+                            <!--<option value="Monitor">-->
+                            <!--<option value="Cagador">-->
+                            <!--<option value="Teclado">-->
+                        </datalist>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <div class="form-group margin-bottom-5">
+                        <label class="col-sm-3 control-label">Sucursal:</label>
+                        <div class="col-sm-9">
+                            <select id="taller"   class="form-control input-sm"
+                                    ng-model=datos.sucursal>
+                                <option value> --Seleccionar --</option>
+                                <option ng-repeat="c in listaTaller"
+                                        value="{{c.valor}}">{{c.valor}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-5 col-sm-10">
+                    <!--|| !datos.descripcion || !datos.dominio-->
+                    </br>
+                    <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                </div>
+            </div>
+
+            <!--<div class="col-sm-4">-->
+                <!--<div class="form-group margin-bottom-5">-->
+                    <!--<input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />-->
+                    <!--<input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>-->
+                <!--</div>-->
+            <!--</div>-->
+
+        </form>
+
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="listaInventario.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Descripcion</th>
+                <th>Cantidad</th>
+                <th>Sucursal</th>
+                <th>Minimo</th>
+                <th>Maximo</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaInventario">
+                <td>{{item.codigo}}</td>
+                <td>{{item.descripcion}}</td>
+                <td>{{item.cantidad}}</td>
+                <td>{{item.sucursal}}</td>
+                <td>{{item.minimo}}</td>
+                <td>{{item.maximo}}</td>
+                <td>
+                    <button ng-click="editar($index)" class="btn btn-info btn-xs">Editar</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+.list-group.panel > .list-group-item {
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px
+}
+.list-group-submenu {
+    margin-left:20px;
+}
+ /*ng style*/
+/*.ngGridStyle {*/
+    /*border: 2px solid green;*/
+    /*width: 500px;*/
+    /*height: 220px;*/
+/*}*/
+
+
+
+#div1 {
+    max-height: 40vh; /*El alto que necesitemos**/
+    overflow-y: auto; /**El scroll verticalmente cuando sea necesario*/
+     /*
+    overflow:scroll;
+    height:200px;
+      */
+    overflow-x:hidden;
+    border:1px solid gray;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+}
+thead{
+    background-color: #f1eee9;
+    font-size: 10px;
+    /*position: fixed !important;el thead va ser siempre estatico**/
+}
+/*#div1 table {*/
+
+    /*background-color: rgba(187, 211, 154, 0.13);*/
+/*}*/
+
+tbody{
+
+}
+th{
+    color: #ffffff;
+    background: #292929;
+    font-size: 14px !important;
+}
+th,td{
+    font-weight: normal;
+    /*margin: 0; */
+    /**max-width: 18.5vw; Ancho por celda*/
+    /**min-width: 18.5vw;Ancho por celda*/
+    word-wrap: break-word;/*Si el contenido supera el tamano, adiciona a una nueve linea**/
+    font-size: 12px;
+    height: 3vh !important;/*El mismo alto para todas las celdas**/
+    padding: 4px;
+    border-right: 2px solid #c4c0c9;
+}
+tr:nth-child(2n) {
+    background: none repeat scroll 0 0 #edebeb;
+}
+
+#img2{
+    width: 100px !important; height: 100px !important;
+}
+
+.width-10{
+    width: 10vw !important;
+}
+
+.nopadding {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.padding-minimo {
+    padding: 5 !important;
+    margin: 1 !important;
+}
+
+.panel {
+    margin-bottom: 10px !important;
+    margin-top: 10px !important;
+}
+
+input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+.margin-bottom-5 {
+    margin-bottom: 5px !important;
+}
+
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 1s;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+
+

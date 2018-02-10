@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Articulos</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Codigo</label>
+                <div class="col-sm-3">
+                    <input autofocus  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Descripcion</label>
+                <div class="col-sm-5">
+                    <input required type="text" class="form-control input-sm" ng-model="datos.descripcion " maxlength="50"/>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    <input ng-show="habilitarAgregar" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+<div class="panel panel-default" ng-show="listaArticulos.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Descripcion</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaArticulos">
+                <td>{{item.codigo}}</td>
+                <td>{{item.descripcion}}</td>
+
+                <td>
+                    <button ng-show="habilitarAgregar" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-show="!habilitarAgregar" ng-click="remove($index)" class="btn btn-primary btn-xs">Agregar</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+
+</body>
+</html>

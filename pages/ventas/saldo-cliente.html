@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Saldo Cliente</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Cliente:</label>
+                    <div class="col-sm-8">
+                        <input ng-change="changeCliente()" autofocus class="form-control input-sm" list="browsers" name="browser" ng-model="datos.nombre"  >
+                        <datalist id="browsers" >
+                            <option ng-repeat="c in listaClientes"
+                                    value="{{c.nombre}} {{c.apellido}}">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Estado:</label>
+                    <div class="col-sm-8">
+                        <select id="estado"   class="form-control input-sm"
+                                ng-model=datos.estado>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaEstados"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+
+                        </select>
+                    </div>
+                </div>
+                <div  ng-show="datos.total" class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Total:</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm" list="browsers" name="browser" ng-model="datos.total" >
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<div class="panel panel-default" ng-show="lista.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Vencimiento</th>
+                <th>Numero</th>
+                <th>Monto</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+                <td>{{item.nombre}}</td>
+                <td>{{item.estado}}</td>
+                <td>{{item.fechaVencimiento}}</td>
+                <td>{{item.numero}}</td>
+                <td>{{item.monto}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+</body>
+</html>

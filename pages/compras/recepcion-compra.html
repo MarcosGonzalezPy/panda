@@ -1,0 +1,148 @@
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Recepcion Compra</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Id:</label>
+                    <div class="col-sm-7">
+                        <input disabled  class="form-control input-sm" name="codigo" class="nopadding col-sm-7" ng-model="datos2.codigo"
+                                >
+                    </div>
+
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Cond. Compra:</label>
+                    <div class="col-sm-7">
+                        <input disabled  class="form-control input-sm" name="condicionCompra" class="nopadding col-sm-7" ng-model="datos2.condicionCompra">
+                    </div>
+
+                </div>
+
+                <!--<div class="form-group margin-bottom-5">-->
+                    <!--<label class="col-sm-5 control-label">Codigo Articulo:</label>-->
+                    <!--<div class="col-sm-7">-->
+                        <!--<input autofocus="true"  class="form-control input-sm" name="codigo" class="nopadding col-sm-7" ng-model="datos.codigo"-->
+                               <!--ng-blur="buscarArticulo()">-->
+                    <!--</div>-->
+
+                <!--</div>-->
+
+                <!--<div class="form-group margin-bottom-5">-->
+                    <!--<label class="col-sm-5 control-label">Codigo Barra:</label>-->
+                    <!--<div class="col-sm-7">-->
+                        <!--<input class="form-control input-sm" name="codigoBarra" class="nopadding col-sm-7"  ng-model="datos.codigoBarra"-->
+                               <!--ng-blur="buscarArticulo()">-->
+                    <!--</div>-->
+
+
+                <!--</div>-->
+
+
+
+            </div>
+            <div class="col-lg-8">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-2 control-label">Sucursal:</label>
+                    <div class="col-sm-4">
+                        <input disabled  class="form-control input-sm" name="sucursal" class="nopadding col-sm-7" ng-model="datos2.sucursal">
+                    </div>
+                    <label class="col-sm-2 control-label">Proveedor:</label>
+                    <div class="col-sm-4">
+                        <input disabled  class="form-control input-sm" name="proveedor" class="nopadding col-sm-7" ng-model="datos2.proveedor">
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-2 control-label">Plazos:</label>
+                    <div class="col-sm-4">
+                        <input disabled  class="form-control input-sm" name="plazo" class="nopadding col-sm-7" ng-model="datos2.plazo">
+                    </div>
+                    <label class="col-sm-2 control-label">F. Entrega:</label>
+                    <div class="col-sm-4">
+                        <input disabled  class="form-control input-sm"   primary   ng-model="datos2.fechaEntrega"/>
+                    </div>
+                </div>
+
+                <!--<div class="form-group margin-bottom-5">-->
+                    <!--<label class="col-sm-2 control-label">Descripcion:</label>-->
+                    <!--<div class="col-sm-10">-->
+                        <!--<input class="form-control input-sm" list="descripcion" name="descripcion" ng-model="datos.descripcion" class="nopadding col-sm-8"-->
+                               <!--ng-blur="buscarArticulo()">-->
+                        <!--<datalist id="descripcion" >-->
+                            <!--<option ng-repeat="c in listaArticulos"-->
+                                    <!--value="{{c.descripcion}}">{{c.descripcion}}</option>-->
+                        <!--</datalist>-->
+                    <!--</div>-->
+                <!--</div>-->
+                <!--<div class="form-group margin-bottom-5">-->
+                    <!--<div class="col-sm-4">-->
+                        <!--<div class="form-group margin-bottom-5">-->
+                            <!--<label class="col-sm-4 control-label">Cantidad:</label>-->
+                            <!--<div class="col-sm-8">-->
+                                <!--<input type="number"   maxlength="20" required   class="form-control input-sm"  ng-model="datos2.cantidad"/>-->
+                            <!--</div>-->
+
+                        <!--</div>-->
+                    <!--</div>-->
+
+                    <!--<div class="col-sm-4">-->
+                        <!--<div class="form-group margin-bottom-5">-->
+                            <!--<input  ng-disabled="!datos2.cantidad || !datos2.sucursal || inhabilitarAgregar" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />-->
+                            <!--<input ng-show="listraRegistroarticulos.length > 0" type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            </div>
+            <!--<span style="color:green;font-style:oblique;" ng-show="articuloValido">Articulo encontrado</span>-->
+        </form>
+
+    </div>
+</div>
+<!--<div class="row">-->
+<!--<div class="form-group">-->
+<!--<div class="col-sm-10">-->
+<!--<input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+
+<div class="panel panel-default" ng-show="lista.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Descripcion</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+                <td>{{item.codigoArticulo}}</td>
+                <td>{{item.descripcion}}</td>
+                <td contenteditable = "true" editable-td row="{{$index}}" field="cantidad">{{item.cantidad}}</td>
+                <td contenteditable = "true" editable-td row="{{$index}}" field="precio">{{item.precio}}</td>
+                <td>
+                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="form-group">
+    <div class="col-sm-offset-5 col-sm-10">
+        <input type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+        <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+    </div>
+</div>
+</body>
+</html>
