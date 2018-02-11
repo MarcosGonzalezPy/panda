@@ -86,6 +86,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/servicios/ingresar-equipo.html',
             controller  : 'ingresarEquipoController'
         })
+        .when('/ingresar-equipo/modificar', {
+            templateUrl : 'pages/servicios/modificar-ingresar-equipo.html',
+            controller  : 'modificarIngresarEquipoController'
+        })
         .when('/clientes', {
             templateUrl : 'pages/personas/clientes/clientes.html',
             controller  : 'clientesController'
@@ -1477,20 +1481,16 @@ app.service('ArticulosService', function($http) {
 });
 
 
-app.controller('ingresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, AccesosService, $cookies, ServiciosService) {
+app.controller('ingresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService) {
 
     $scope.datos ={};
     $scope.listaClientes ={};
     $scope.listaTaller = [];
 
-    $scope.buscarCliente= function(valor, identificador){
-        var encontrado = false;
-        var param = '';
-        var json = '{}';
-
-        
-
-        AccesosService.listarComplex(json).then(function(response){
+    $scope.buscarCliente= function(){
+        var obj = '{}';
+        var encoJson = encodeURIComponent(obj);
+        ClientesService.listarComplex(encoJson).then(function(response){
             if(response.status == 200){
                 $scope.listaClientes = response.data;
             }else{
@@ -1498,6 +1498,38 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
             }
         })
     }
+
+    $scope.changeCliente=function(){
+        var encontrado = false;
+        for(i=0;i<$scope.listaClientes.length;i++){
+            var apellido = "";
+            if(typeof $scope.listaClientes[i].apellido!= 'undefined'){
+                apellido =  $scope.listaClientes[i].apellido;
+            }
+            if(($scope.listaClientes[i].nombre+' '+apellido).trim() ==$scope.datos.clienteNombreApellido.trim()){
+                $scope.datos.cliente= $scope.listaClientes[i].codigo;
+                $scope.datos.correo= $scope.listaClientes[i].correoElectronico;
+                $scope.datos.telefono= $scope.listaClientes[i].telefono;
+                encontrado=true;
+                break;
+            }
+        }
+        if(!encontrado){
+            $scope.datos.correo= "";
+            $scope.datos.telefono= "";
+        }
+    }
+
+    $scope.changeEncargado=function(){
+        var encontrado = false;
+        for(i=0;i<$scope.listaClientes.length;i++){
+            if($scope.listaClientes[i].nombre+' '+$scope.listaClientes[i].apellido ==$scope.datos.encargadoNombreApellido){
+                $scope.datos.encargado=  $scope.listaClientes[i].codigo;
+                break;
+            }
+        }
+    }
+
 
     var formatearDiaMes = function(num){
         if(num<10){
@@ -1912,6 +1944,33 @@ app.service('ServiciosService', function($http) {
         return myResponseData;
     }
 
+    this.modificarIngresarEquipo = function(datos){
+        var obj = {
+            "secuencia":datos.secuencia,
+            "estado":'RECEPCIONADO',
+            "paso":1,
+            "lugar":datos.taller,
+            "responsable": datos.responsable,
+            "pais": datos.pais,
+            "observacion": datos.observacion,
+            "cliente": datos.cliente,
+            "correo": datos.correo,
+            "encargado": datos.encargado,
+            "telefono": datos.telefono,
+            "detalleEquipo": datos.detalleEquipo,
+            "detalleTrabajo": datos.detalleTrabajo,
+            "observacion": datos.observacion
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.put('http://localhost:8080/panda-sys/webapi/servicios/ingresar-equipo?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
 
     this.listarCircuito = function(json) {
         var jsonObj = angular.toJson(json);
@@ -2012,13 +2071,13 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
 
 app.controller('circuitoController', function($scope, $location, $rootScope, $cookies, $dialogs,ServiciosService, ValoresService) {
     $scope.datos = {};
-    $scope.listaCircuito = [];
+    $scope.lista = [];
     $scope.listaEstados = [];
 
     $scope.buscar = function() {
         ServiciosService.listarCircuito($scope.datos).then(function(response){
             if(response.status == 200){
-                $scope.listaCircuito = response.data;
+                $scope.lista = response.data;
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -2037,17 +2096,22 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
 
     $scope.limpiar = function() {
         $scope.datos = {};
-        $scope.listaCircuito = [];
+        $scope.lista = [];
     }
 
     $scope.cotizar = function(index){
-        var element = $scope.listaCircuito[index];
+        var element = $scope.lista[index];
         $rootScope.secuencia  = element.secuencia;
         $location.path( '/agregar-cotizacion');
     }
 
     $scope.ingresarEquipo = function(){
         $location.path( '/ingresar-equipo');
+    }
+
+    $scope.modificarIngresarEquipos = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/ingresar-equipo/modificar').search({param: element, other:'ok'});
     }
 
 
@@ -5015,6 +5079,76 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         $location.path( '/circuito' );
     }
 });
+
+
+app.controller('modificarIngresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService) {
+
+    $scope.datos ={};
+    $scope.listaClientes ={};
+    $scope.listaTaller = [];
+
+    $scope.buscarCliente= function(valor, identificador){
+        var obj = '{}';
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        ClientesService.listarComplex(encoJson).then(function(response){
+            if(response.status == 200){
+                $scope.listaClientes = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/circuito' );
+    }
+
+    $scope.modificar = function() {
+        ServiciosService.modificarIngresarEquipo($scope.datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true"){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Ingresar Equipo'},{key: false,back: 'static'});
+                }
+
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(urlParams.secuencia==null || typeof urlParams.secuencia == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.secuencia =  urlParams.secuencia;
+        $scope.datos.responsable =  urlParams.responsable;
+        $scope.datos.sucursal = urlParams.lugar;
+        $scope.datos.fecha =  urlParams.fecha;
+        $scope.buscarCliente();
+        $scope.listarTaller();
+    }
+
+    init();
+});
+
+
 
 
 
