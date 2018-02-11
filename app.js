@@ -122,10 +122,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/servicios/circuito.html',
             controller  : 'circuitoController'
         })
-        .when('/cotizacion', {
-            templateUrl : 'pages/servicios/cotizacion.html',
-            controller  : 'cotizacionController'
-        })
+//        .when('/cotizacion', {
+//            templateUrl : 'pages/servicios/cotizacion.html',
+//            controller  : 'cotizacionController'
+//        })
         .when('/agregar-cotizacion', {
             templateUrl : 'pages/servicios/agregar-cotizacion.html',
             controller  : 'agregarCotizacionController'
@@ -1526,8 +1526,14 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
     $scope.agregar = function() {
         ServiciosService.ingresarEquipo($scope.datos).then(function(response){
             if(response.status == 200){
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
-                $scope.cancelar();
+                var resultado = response.data;
+                if(resultado == "true"){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Ingresar Equipo'},{key: false,back: 'static'});
+                }
+
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
             }
@@ -1892,11 +1898,14 @@ app.service('ServiciosService', function($http) {
             "cliente": datos.cliente,
             "correo": datos.correo,
             "encargado": datos.encargado,
-            "telefono": datos.telefono
+            "telefono": datos.telefono,
+            "detalleEquipo": datos.detalleEquipo,
+            "detalleTrabajo": datos.detalleTrabajo,
+            "observacion": datos.observacion
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/ingresar-equipo?paramJson='+encoJson)
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/ingresar-equipo?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -2034,8 +2043,13 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
     $scope.cotizar = function(index){
         var element = $scope.listaCircuito[index];
         $rootScope.secuencia  = element.secuencia;
-        $location.path( '/cotizacion' );
+        $location.path( '/agregar-cotizacion');
     }
+
+    $scope.ingresarEquipo = function(){
+        $location.path( '/ingresar-equipo');
+    }
+
 
     var init = function () {
         $scope.listarEstados();
@@ -4991,6 +5005,15 @@ app.service('CajasMovimientosService', function($http) {
         return myResponseData;
     }
 
+});
+
+
+app.controller('agregarCotizacionController', function($scope, $location, $rootScope, $cookies, $dialogs) {
+    $scope.datos = {};
+
+    $scope.cancelar = function() {
+        $location.path( '/circuito' );
+    }
 });
 
 

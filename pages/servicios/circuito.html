@@ -30,6 +30,7 @@
                 <div class="col-sm-offset-2 col-sm-10">
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    <input type="button" ng-click="ingresarEquipo()"  class="btn btn-basic btn-sm" value="Ingresar Equipo" />
                 </div>
             </div>
         </form>
@@ -48,7 +49,7 @@
                 <th>Lugar</th>
                 <th>Responsable</th>
                 <th>Observacion</th>
-                <!--<th></th>-->
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -58,14 +59,12 @@
                 <td>{{item.lugar}}</td>
                 <td>{{item.responsable}}</td>
                 <td>{{item.observacion}}</td>
-                <!--<td>-->
+                <td>
+                    <div ng-show="item.estado == 'RECEPCIONADO' ">
+                        <button ng-click="cotizar($index)" class="btn btn-info btn-xs">Cotizar</button>
 
-                    <!--<div ng-show="item.estado == 'RECEPCIONADO' ">-->
-                        <!--<button ng-click="cotizar($index)" class="btn btn-info btn-xs">Cotizar</button>-->
-
-                    <!--</div>-->
-
-                <!--</td>-->
+                    </div>
+                </td>
             </tr>
             </tbody>
         </table>
