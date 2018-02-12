@@ -47,6 +47,8 @@
                 <th>Descripcion</th>
                 <th>Precio Unitario</th>
                 <th>Grabado</th>
+                <th>Estado</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -55,6 +57,11 @@
                 <td>{{item.descripcion}}</td>
                 <td>{{item.precioUnitario}}</td>
                 <td>{{item.grabado}}</td>
+                <td>{{item.estado}}</td>
+                <td>
+                    <button  ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <input type="button" ng-click="modificar($index)"  class="btn btn-success btn-xs" value="Modificar" />
+                </td>
             </tr>
             </tbody>
         </table>

@@ -2,17 +2,47 @@
     <div class="panel-heading">Agregar Servicios</div>
     <div class="panel-body">
         <form ng-submit="add()" class="form-horizontal">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Codigo</label>
-                <div class="col-sm-3">
-                    <input autofocus  style="text-transform:uppercase"  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Codigo</label>
+                    <div class="col-sm-6">
+                        <input autofocus  style="text-transform:uppercase"  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Descripcion</label>
+                    <div class="col-sm-8">
+                        <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.descripcion" maxlength="50"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Precio Unitario</label>
+                    <div class="col-sm-8">
+                        <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.precioUnitario" maxlength="50"/>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="col-sm-2 control-label">Descripcion</label>
-                <div class="col-sm-5">
-                    <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.descripcion" maxlength="50"/>
+            <div class="col-lg-6">
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Grabado</label>
+                    <div class="col-sm-5">
+                        <select id="grabado" class="form-control input-sm" ng-model=datos.grabado>
+                            <option value> --Seleccionar --</option> <option ng-repeat="c in listaGrabados" value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Estado</label>
+                    <div class="col-sm-5">
+                        <select id="estado" class="form-control input-sm" ng-model=datos.estado>
+                            <option value> --Seleccionar --</option> <option ng-repeat="c in listaEstados" value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="form-group">

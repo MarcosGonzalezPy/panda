@@ -122,6 +122,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/servicios/agregar-servicios.html',
             controller  : 'agregarServiciosController'
         })
+        .when('/servicios/modificar', {
+            templateUrl : 'pages/servicios/modificar-servicios.html',
+            controller  : 'modificarServiciosController'
+        })
         .when('/circuito', {
             templateUrl : 'pages/servicios/circuito.html',
             controller  : 'circuitoController'
@@ -193,6 +197,36 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/prueba.html',
             controller  : 'dialogServiceTest'
         })
+
+        //Agregados por Aurora Inicio
+
+        .when('/timbrados', {
+            templateUrl : 'pages/timbrados/timbrados.html',
+            controller  : 'timbradosController'
+        })
+        .when('/timbrados/agregar', {
+            templateUrl : 'pages/timbrados/agregar-timbrados.html',
+            controller  :  'agregarTimbradosController'
+        })
+
+        .when('/usuario-sucursal', {
+            templateUrl : 'pages/personas/usuario-sucursal/usuario-sucursal.html',
+            controller  : 'usuarioSucursalController'
+        })
+        .when('/usuario-sucursal/agregar', {
+            templateUrl : 'pages/personas/usuario-sucursal/agregar-usuario-sucursal.html',
+            controller  : 'agregarUsuarioSucursalController'
+        })
+
+        .when('/cuentas-bancarias', {
+            templateUrl : 'pages/cuentas-bancarias/cuentas-bancarias.html',
+            controller  : 'cuentasBancariasController'
+        })
+        .when('/cuentas-bancarias/agregar', {
+            templateUrl : 'pages/cuentas-bancarias/agregar-cuentas-bancarias.html',
+            controller  : 'agregarCuentasBancariasController'
+        })
+        // agregados por Aurora Fin
 
         .otherwise({
             //redirectTo: '/'
@@ -1910,6 +1944,15 @@ app.service('ServiciosService', function($http) {
         return myResponseData;
     }
 
+    this.eliminarServicioById = function(codigo){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/eliminar-id/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
     this.insertar = function(codigo, descripcion){
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/insert/'+codigo+'/'+descripcion)
             .then(function (response) {
@@ -2001,7 +2044,108 @@ app.service('ServiciosService', function($http) {
             });
         return myResponseData;
     }
+
+    this.insertarServicios = function(datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "descripcion":datos.descripcion,
+            "precioUnitario":datos.precioUnitario,
+            "grabado":datos.grabado,
+            "estado": datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/insertar-servicios?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificarServicios = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "descripcion":datos.descripcion,
+            "precioUnitario":datos.precioUnitario,
+            "grabado":datos.grabado,
+            "estado": datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
 });
+
+//app.controller('serviciosController', function($scope, $location, ServiciosService, $rootScope, $dialogs) {
+//
+//    $scope.datos ={};
+//
+//    $scope.listaServicios = [];
+//
+//    $scope.remove = function(index) {
+//        var element = $scope.listaServicios[index];
+//        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+//        dlg.result.then(function(resultado){
+//            //alert(resultado);
+//
+//            ServiciosService.eliminar(element.id).then(function(response){
+//
+//                if(response.status == 200){
+//                    var resultado = response.data;
+//                    if(resultado == "true"){
+//                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+//
+//                        $scope.limpiar();
+//                        $scope.buscar();
+//                    }else{
+//                        //alert("ELIMINACION FALLIDA");
+//                        // dlg = $dialogs.error('ELIMINACION FALLIDA');
+//                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+//
+//                        $scope.limpiar();
+//                        $scope.buscar();
+//                    }
+//                }else{
+//                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+//                }
+//            });
+//
+//        },function(){
+//            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+//        });
+//    }
+//
+//    $scope.limpiar = function() {
+//        $scope.datos = {};
+//        $scope.listaServicios = [];
+//    }
+//
+//    $scope.agregar = function() {
+//        $location.path( '/servicios/agregar' );
+//    }
+//
+//    $scope.buscar = function() {
+//        //var json = angular.toJson($scope.datos);
+//        ServiciosService.listarServicio($scope.datos).then(function(response){
+//            if(response.status == 200){
+//                $scope.listaServicios = response.data;
+//            }else{
+//                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+//            }
+//        })
+//    }
+//
+//    var init = function () {
+//
+//    }
+//
+//    init();
+//});
+
 
 app.controller('serviciosController', function($scope, $location, ServiciosService, $rootScope, $dialogs) {
 
@@ -2015,7 +2159,7 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
         dlg.result.then(function(resultado){
             //alert(resultado);
 
-            ServiciosService.eliminar(element.id).then(function(response){
+            ServiciosService.eliminarServicioById(element.codigo).then(function(response){
 
                 if(response.status == 200){
                     var resultado = response.data;
@@ -2060,6 +2204,12 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
+        $scope.limpiar();
+    }
+
+    $scope.modificar = function(index) {
+        var element = $scope.listaServicios[index];
+        $location.path( '/servicios/modificar').search({param: element, other:'ok'});
     }
 
     var init = function () {
@@ -2068,6 +2218,129 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
 
     init();
 });
+
+app.controller('agregarServiciosController', function($scope, $location, $rootScope, $dialogs, ServiciosService , ValoresService) {
+    $scope.datos = {};
+
+    $scope.listarGrabados= function(){
+        var json =angular.toJson({"dominio":"IMPUESTOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaGrabados = response.data;
+            }else{
+                alert("Error al cargar los Impuestos");
+            }
+        })
+    }
+
+    $scope.listarEstados= function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los Estados");
+            }
+        })
+    }
+    $scope.agregar = function() {
+        ServiciosService.insertarServicios($scope.datos).then(function(response){
+
+            if(response.status == 200){
+                $location.path( '/servicios' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/servicios' );
+    }
+
+    var init = function () {
+        $scope.listarEstados();
+        $scope.listarGrabados();
+    }
+
+    init();
+});
+
+app.controller('modificarServiciosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ServiciosService, $timeout) {
+
+    $scope.datos = {};
+    $scope.listarGrabados=[];
+    $scope.listarEstados=[] ;
+
+    $scope.listarGrabados= function(){
+        var json =angular.toJson({"dominio":"IMPUESTOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaGrabados = response.data;
+            }else{
+                alert("Error al cargar los Impuestos");
+            }
+        })
+    }
+
+    $scope.listarEstados= function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los Estados");
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/servicios' );
+    }
+
+    $scope.modificar = function() {
+        ServiciosService.modificarServicios($scope.datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarEstados();
+        $scope.listarGrabados();
+        $timeout( function (){
+            //$scope.datos =$rootScope.usuario;
+
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.descripcion = urlParams.descripcion;
+            $scope.datos.precioUnitario = urlParams.precioUnitario;
+            $scope.datos.grabado = urlParams.grabado;
+            $scope.datos.estado = urlParams.estado;
+            $scope.$apply();
+        }, 1000)
+
+    }
+
+    init();
+
+});
+
+
 
 app.controller('circuitoController', function($scope, $location, $rootScope, $cookies, $dialogs,ServiciosService, ValoresService) {
     $scope.datos = {};
@@ -4321,6 +4594,92 @@ app.service('SaldoClienteService', function($http) {
 
 });
 
+
+app.controller('usuarioSucursalController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuarioSucursalService) {
+    $scope.datos = {};
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.agregar = function() {
+        $location.path( '/usuario-sucursal/agregar' );
+
+    }
+
+    $scope.buscar = function() {
+        UsuarioSucursalService.listar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+    $scope.lista = [];
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            UsuarioSucursalService.eliminarById(element.usuario).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+
+
+        //$scope.listaDominios.splice(index, 1);
+    }
+
+    var init = function () {
+
+    }
+
+    init();
+});
+
+app.controller('agregarUsuarioSucursalController', function($scope, $location,UsuarioSucursalService , $rootScope, $dialogs) {
+    $scope.datos = {};
+
+    $scope.agregar = function() {
+        UsuarioSucursalService.insertar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
+
+            if(response.status == 200){
+                $location.path( '/usuario-sucursal' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/usuario-sucursal' );
+    }
+});
+
 app.service('UsuarioSucursalService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -4337,7 +4696,39 @@ app.service('UsuarioSucursalService', function($http) {
         return myResponseData;
     }
 
+    this.listar = function(datos) {
+        var obj={
+            "usuario":datos.usuario,
+            "sucursal":datos.sucursal
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarById = function(usuario){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/eliminar-id/'+usuario)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.insertar = function(usuario, sucursal){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/insertar/'+usuario+'/'+sucursal)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
 });
+
 
 app.controller('pagarFacturaController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, VentasService) {
     $scope.datos = {};
@@ -5147,6 +5538,318 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
 
     init();
 });
+
+
+app.controller('timbradosController', function($scope, $location, $rootScope, $cookies, $dialogs, TimbradosService, ValoresService) {
+    $scope.datos = {};
+    $scope.remove = function(index) {
+        var element = $scope.listaDominios[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            TimbradosService.eliminar(element.id).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+    }
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.agregar = function() {
+        $location.path( '/timbrados/agregar' );
+
+    }
+
+    $scope.buscar = function() {
+        TimbradosService.listar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.lista = [];
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            TimbradosService.eliminarById(element.codigo).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+    }
+
+    var init = function () {
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+
+app.controller('agregarTimbradosController', function($scope, $location, TimbradosService , ValoresService, $rootScope, $dialogs) {
+    $scope.datos = {};
+
+    $scope.agregar = function() {
+        TimbradosService.insertar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $location.path( '/timbrados' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }})
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/timbrados' );
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function () {
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+
+
+app.service('TimbradosService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listar = function(datos) {
+        var obj={
+            "codigo":datos.codigo,
+            "estado":datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/timbrados/listar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.insertar = function(datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "inicioVigencia":datos.inicioVigencia,
+            "finVigencia":datos.finVigencia,
+            "estado":datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/timbrados/insertar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarById = function(codigo){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/timbrados/eliminar-id/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
+});
+
+app.controller('cuentasBancariasController', function($scope, $location, $rootScope, $cookies, $dialogs, CuentasBancariasService, ValoresService) {
+    $scope.datos = {};
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.listaEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADO_CUENT_BANC"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.agregar = function() {
+        $location.path( '/cuentas-bancarias/agregar' );
+
+    }
+
+    $scope.buscar = function() {
+        CuentasBancariasService.listar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+
+        $scope.limpiar();
+    }
+    $scope.lista = [];
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            UsuarioSucursalService.eliminarById(element.usuario).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+
+
+        //$scope.listaDominios.splice(index, 1);
+    }
+
+    var init = function () {
+
+    }
+
+    init();
+});
+app.controller('agregarCuentasBancariasController', function($scope, $location,CuentasBancariasService , $rootScope, $dialogs) {
+    $scope.datos = {};
+
+    $scope.agregar = function() {
+        CuentasBancarias.insertar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
+
+            if(response.status == 200){
+                $location.path( '/cuentas-bancarias' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cuentas-bancarias' );
+    }
+});
+
+
+app.service('CuentasBancariasService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listar = function(datos) {
+        var obj={
+            "codigo":datos.codigo,
+            "banco":datos.banco,
+            "numero":datos.numero,
+            "estado":datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+});
+
+
+
+
+
+
+
 
 
 

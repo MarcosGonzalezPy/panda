@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Usuarios Sucursal</div>
+    <div class="panel-body" >
+        <form ng-submit="buscar()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Usuario Sucursal</label>
+                <div class="col-sm-3">
+                    <input autofocus  maxlength="20"  primary type="text" class="form-control input-sm" ng-model="datos.usuario"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Sucursal</label>
+                <div class="col-sm-5">
+                    <input  type="text" class="form-control input-sm" ng-model="datos.sucursal " maxlength="20"/>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!--listaDominios.length > 0-->
+<div class="panel panel-default" ng-show="lista.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Usuarios</th>
+                <th>Sucursales</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+                <td>{{item.usuario}}</td>
+                <td>{{item.sucursal}}</td>
+
+                <td>
+                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+
+</body>
+</html>

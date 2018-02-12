@@ -7,23 +7,27 @@
 <!--</head>-->
 
 <div class="panel panel-primary">
-    <div class="panel-heading">Proveedores</div>
+    <div class="panel-heading">Timbrados</div>
     <div class="panel-body" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="form-group">
-                <label class="col-sm-2 control-label">Codigo</label>
+                <label class="col-sm-2 control-label">C&oacute;digo</label>
                 <div class="col-sm-3">
                     <input autofocus  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="col-sm-2 control-label">Descripcion</label>
-                <div class="col-sm-5">
-                    <input required type="text" class="form-control input-sm" ng-model="datos.descripcion " maxlength="50"/>
+                <label class="col-sm-2 control-label">Estado</label>
+                <div class="col-sm-4">
+                    <select id="estado"   class="form-control input-sm"
+                            ng-model=datos.estado>
+                        <option value> --Seleccionar --</option>
+                        <option ng-repeat="c in listaEstados"
+                                value="{{c.valor}}">{{c.valor}}</option>
+                    </select>
                 </div>
             </div>
-
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -44,22 +48,25 @@
     <!--</div>-->
 <!--</div>-->
 
-
-<!--listaDominios.length > 0-->
-<div class="panel panel-default" ng-show="listaDominios.length > 0">
+<div class="panel panel-default" ng-show="lista.length > 0">
     <div  id="div1">
         <table class="table" >
             <thead>
             <tr>
                 <th>Codigo</th>
-                <th>Descripcion</th>
+                <th>Estado</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+
                 <th></th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="item in listaDominios">
+            <tr ng-repeat="item in lista">
                 <td>{{item.codigo}}</td>
-                <td>{{item.descripcion}}</td>
+                <td>{{item.estado}}</td>
+                <td>{{item.inicioVigencia}}</td>
+                <td>{{item.finVigencia}}</td>
 
                 <td>
                     <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
@@ -69,8 +76,8 @@
         </table>
     </div>
 </div>
-</body>
-</html>
+
+
 
 </body>
 </html>
