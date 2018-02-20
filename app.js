@@ -208,6 +208,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/timbrados/agregar-timbrados.html',
             controller  :  'agregarTimbradosController'
         })
+        .when('/timbrados/modificar', {
+            templateUrl : 'pages/timbrados/modificar-timbrados.html',
+            controller  :  'modificarTimbradosController'
+        })
 
         .when('/usuario-sucursal', {
             templateUrl : 'pages/personas/usuario-sucursal/usuario-sucursal.html',
@@ -225,6 +229,10 @@ app.config(function($routeProvider) {
         .when('/cuentas-bancarias/agregar', {
             templateUrl : 'pages/cuentas-bancarias/agregar-cuentas-bancarias.html',
             controller  : 'agregarCuentasBancariasController'
+        })
+        .when('/cuentas-bancarias/modificar', {
+            templateUrl : 'pages/cuentas-bancarias/modificar-cuentas-bancarias.html',
+            controller  : 'modificarCuentasBancariasController'
         })
         // agregados por Aurora Fin
 
@@ -2247,8 +2255,13 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
         ServiciosService.insertarServicios($scope.datos).then(function(response){
 
             if(response.status == 200){
-                $location.path( '/servicios' );
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                var resultado = response.data;
+                if(resultado == "true"){
+                    $location.path( '/servicios' );
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
             }
@@ -4659,8 +4672,32 @@ app.controller('usuarioSucursalController', function($scope, $location, $rootSco
     init();
 });
 
-app.controller('agregarUsuarioSucursalController', function($scope, $location,UsuarioSucursalService , $rootScope, $dialogs) {
+app.controller('agregarUsuarioSucursalController', function($scope, $location,UsuarioSucursalService , ValoresService, UsuariosService, $rootScope, $dialogs) {
     $scope.datos = {};
+    $scope.listaTaller=[];
+    $scope.listaUsuarios=[];
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+    $scope.listarUsuarios= function(){
+        var json = angular.toJson({});
+        UsuariosService.listarComplex(json).then(function(response){
+            if(response.status == 200){
+                $scope.listaUsuarios = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
 
     $scope.agregar = function() {
         UsuarioSucursalService.insertar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
@@ -4678,6 +4715,13 @@ app.controller('agregarUsuarioSucursalController', function($scope, $location,Us
     $scope.cancelar = function(){
         $location.path( '/usuario-sucursal' );
     }
+
+    var init = function () {
+        $scope.listarTaller();
+        $scope.listarUsuarios();
+    }
+
+    init();
 });
 
 app.service('UsuarioSucursalService', function($http) {
@@ -5579,6 +5623,11 @@ app.controller('timbradosController', function($scope, $location, $rootScope, $c
 
     }
 
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/timbrados/modificar').search({param: element, other:'ok'});
+    }
+
     $scope.buscar = function() {
         TimbradosService.listar($scope.datos).then(function(response){
             if(response.status == 200){
@@ -5675,6 +5724,69 @@ app.controller('agregarTimbradosController', function($scope, $location, Timbrad
     init();
 });
 
+app.controller('modificarTimbradosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, TimbradosService, $timeout) {
+
+    $scope.datos = {};
+    $scope.listarEstados=[] ;
+
+    $scope.listarEstados= function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los Timbrados");
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/timbrados' );
+    }
+
+    $scope.modificar = function() {
+        TimbradosService.modificar($scope.datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        function datetoISODate(fechaHora) {
+            if (fechaHora)
+                return new Date(fechaHora).toString("yyyy-MM-dd HH:mm:ss");
+        }
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.inicioVigencia = datetoISODate(urlParams.inicioVigencia);
+            $scope.datos.finVigencia = datetoISODate(urlParams.finVigencia);
+            $scope.datos.estado = urlParams.estado;
+
+            $scope.$apply();
+        }, 1000)
+
+    }
+
+    init();
+
+});
+
 
 
 app.service('TimbradosService', function($http) {
@@ -5718,19 +5830,31 @@ app.service('TimbradosService', function($http) {
         return myResponseData;
     }
 
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "inicioVigencia":datos.inicioVigencia,
+            "finVigencia":datos.finVigencia,
+            "estado": datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 });
 
 app.controller('cuentasBancariasController', function($scope, $location, $rootScope, $cookies, $dialogs, CuentasBancariasService, ValoresService) {
     $scope.datos = {};
+    $scope.lista = [];
 
-    $scope.limpiar = function() {
-        $scope.datos = {};
-        $scope.lista = [];
-    }
-
-    $scope.listaEstados = function(){
-        var json =angular.toJson({"dominio":"ESTADO_CUENT_BANC"});
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
@@ -5739,6 +5863,7 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
             }
         })
     }
+
     $scope.limpiar = function() {
         $scope.datos = {};
         $scope.lista = [];
@@ -5746,7 +5871,11 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
 
     $scope.agregar = function() {
         $location.path( '/cuentas-bancarias/agregar' );
+    }
 
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/cuentas-bancarias/modificar').search({param: element, other:'ok'});
     }
 
     $scope.buscar = function() {
@@ -5760,14 +5889,13 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
 
         $scope.limpiar();
     }
-    $scope.lista = [];
 
     $scope.remove = function(index) {
         var element = $scope.lista[index];
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
             {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
-            UsuarioSucursalService.eliminarById(element.usuario).then(function(response){
+            CuentasBancariasService.eliminarById(element.codigo).then(function(response){
 
                 if(response.status == 200){
                     var resultado = response.data;
@@ -5796,16 +5924,29 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
     }
 
     var init = function () {
-
+        $scope.listarEstados();
     }
 
     init();
+
 });
-app.controller('agregarCuentasBancariasController', function($scope, $location,CuentasBancariasService , $rootScope, $dialogs) {
+app.controller('agregarCuentasBancariasController', function($scope, $location, CuentasBancariasService, ValoresService,  $cookies, $rootScope, $dialogs) {
     $scope.datos = {};
 
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     $scope.agregar = function() {
-        CuentasBancarias.insertar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
+        $scope.datos.usuario  =$cookies.usuario;
+        CuentasBancariasService.insertar($scope.datos).then(function(response){
 
             if(response.status == 200){
                 $location.path( '/cuentas-bancarias' );
@@ -5820,22 +5961,121 @@ app.controller('agregarCuentasBancariasController', function($scope, $location,C
     $scope.cancelar = function(){
         $location.path( '/cuentas-bancarias' );
     }
+
+    var init = function () {
+        $scope.listarEstados();
+    }
+
+    init();
 });
+
+app.controller('modificarCuentasBancariasController', function($scope, $location, CuentasBancariasService, ValoresService,  $cookies, $rootScope, $dialogs,  $timeout) {
+    $scope.datos = {};
+    $scope.listarEstados=[] ;
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.modificar = function() {
+        $scope.datos.usuario  =$cookies.usuario;
+        CuentasBancariasService.modificar($scope.datos).then(function(response){
+
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cuentas-bancarias' );
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.banco = urlParams.banco;
+            $scope.datos.numero = urlParams.numero;
+            $scope.datos.estado = urlParams.estado;
+
+            $scope.$apply();
+        }, 1000)
+
+    }
+
+    init();
+});
+
 
 
 app.service('CuentasBancariasService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
     this.listar = function(datos) {
-        var obj={
-            "codigo":datos.codigo,
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+    this.insertar = function(datos){
+        var obj = {
             "banco":datos.banco,
             "numero":datos.numero,
-            "estado":datos.estado
+            "estado": datos.estado,
+            "usuario": datos.usuario
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias?paramJson='+encoJson)
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/insertar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "banco":datos.banco,
+            "numero":datos.numero,
+            "estado": datos.estado
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarById = function(codigo){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/eliminar-id/'+codigo)
             .then(function (response) {
                 return response;
             });
