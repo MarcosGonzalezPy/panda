@@ -114,6 +114,14 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/personas/proveedores/proveedores.html',
             controller  : 'proveedoresController'
         })
+        .when('/proveedores/agregar', {
+            templateUrl : 'pages/personas/proveedores/agregar-proveedores.html',
+            controller  : 'agregarProveedoresController'
+        })
+        .when('/proveedores/modificar', {
+            templateUrl : 'pages/personas/proveedores/modificar-proveedores.html',
+            controller  : 'modificarProveedoresController'
+        })
         .when('/servicios', {
             templateUrl : 'pages/servicios/servicios.html',
             controller  : 'serviciosController'
@@ -3477,22 +3485,6 @@ app.service('UtilService', function($http) {
 //    }
 });
 
-
-
-app.service('ProveedoresService', function($http) {
-    delete $http.defaults.headers.common['X-Requested-With'];
-
-    this.listarComplex = function(obj) {
-        var json = angular.toJson(obj);
-        var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/proveedores/complex?paramJson='+encoJson)
-            .then(function (response) {
-                return response;
-            });
-        return myResponseData;
-    }
-});
-
 app.service('ComprasService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -6081,8 +6073,278 @@ app.service('CuentasBancariasService', function($http) {
             });
         return myResponseData;
     }
-
 });
+
+
+    app.controller('proveedoresController', function($scope, $location, ProveedoresService, $rootScope, $dialogs) {
+
+        $scope.datos ={};
+
+        $scope.limpiar = function() {
+            $scope.datos = {};
+            $scope.lista = [];
+        }
+
+        $scope.agregar = function() {
+            $location.path( '/proveedores/agregar' );
+        }
+
+        $scope.buscar = function() {
+            ProveedoresService.listarComplex($scope.datos).then(function(response){
+                if(response.status == 200){
+                  $scope.lista = response.data;
+               }else{
+                     dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+              }
+        })
+            $scope.limpiar();
+        }
+
+        $scope.modificar = function(index) {
+            var element = $scope.lista[index];
+            $location.path( '/proveedores/modificar').search({param: element, other:'ok'});
+        }
+
+        $scope.remove = function(index) {
+            var element = $scope.lista[index];
+            dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+            dlg.result.then(function(resultado){
+                //alert(resultado);
+
+                ProveedoresService.eliminarById(element.codigo).then(function(response){
+
+                    if(response.status == 200){
+                        var resultado = response.data;
+                        if(resultado == "true"){
+                            dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                            $scope.limpiar();
+                            $scope.buscar();
+                        }else{
+                            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                            $scope.limpiar();
+                            $scope.buscar();
+                        }
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                    }
+                });
+
+            },function(){
+                //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+            });
+        }
+
+
+        var init = function () {
+
+        }
+
+        init();
+    });
+
+app.controller('agregarProveedoresController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, RolesService, ProveedoresService,  $timeout) {
+    $scope.datos = {};
+    $scope.listaPaises= [];
+    $scope.listaCiudades= [];
+    $scope.listaBarrios= [];
+    $scope.listaSexos= [];
+    $scope.listaNacionalidades =[];
+    $scope.listaRoles = [];
+    $scope.listaPersonas ={};
+
+    function nvl(valor1, valor2){
+        if(valor1!=null && typeof valor1 != 'undefined' && valor1!='' && valor1!= 'null')
+            return valor1;
+        return valor2
+    }
+
+    $scope.buscarPersonas= function(){
+        var obj = {
+            ruc: $scope.datos.ruc,
+            cedula: $scope.datos.cedula
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        ProveedoresService.listarPersonas(encoJson).then(function(response){
+            if(response.status == 200){
+                if(response.data.length>1){
+                    $scope.listaPersonas = response.data;
+                }else if(response.data.length==1){
+                    $scope.datos.nombre = response.data[0].nombre +" "+ response.data[0].apellido;
+                    $scope.datos.ruc =  nvl(response.data[0].ruc, response.data[0].cedula);
+                    $scope.datos.telefono = nvl( response.data[0].telefono, response.data[0].celular1);
+                    $scope.datos.codigoPersona = response.data[0].codigo;
+
+                    $scope.datos.fechaNacimiento = response.data[0].fechaNacimiento;
+                    $scope.datos.nacionalidad = response.data[0].nacionalidad;
+                    $scope.datos.pais = response.data[0].pais;
+                    $scope.datos.ciudad = response.data[0].ciudad;
+                    $scope.datos.barrio = response.data[0].barrio;
+                    $scope.datos.direccion = response.data[0].direccion;
+                    $scope.datos.correoElectronico = response.data[0].correoElectronico;
+                    $scope.datos.sexo = response.data[0].sexo;
+                }
+
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarPaises = function(){
+        var json = angular.toJson({"dominio":"PAISES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status == 200){
+                $scope.listaPaises = response.data;
+            }else{
+                alert("Error al cargar los paises");
+            }
+        })
+    }
+
+    $scope.listarCiudades = function(){
+        var json =angular.toJson({"dominio":"CIUDADES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaCiudades = response.data;
+            }else{
+                alert("Error al cargar los paises");
+            }
+        })
+    }
+
+    $scope.listarBarrios = function(){
+        var json =angular.toJson({"dominio":"BARRIOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBarrios = response.data;
+            }else{
+                alert("Error al cargar los barrios");
+            }
+        })
+    }
+
+    $scope.listarSexos = function(){
+        var json =angular.toJson({"dominio":"SEXO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaSexos = response.data;
+            }else{
+                alert("Error al cargar los sexos");
+            }
+        })
+    }
+
+    $scope.listarNacionalidades = function(){
+        var json =angular.toJson({"dominio":"NACIONALIDAD"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaNacionalidades = response.data;
+            }else{
+                alert("Error al cargar las Nacionalidades");
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/proveedores' );
+    }
+
+    $scope.agregar = function() {
+        ProveedoresService.insertar($scope.datos).then(function(response){
+            if(response.status == 200){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarRoles = function(){
+        RolesService.listarDistinct().then(function(response){
+            if(response.status ==200){
+                $scope.listaRoles = response.data;
+            }else{
+                alert("Error al cargar los barrios");
+            }
+        })
+    }
+
+    var init = function(){
+        $timeout( function (){
+            //$scope.datos =$rootScope.usuario;
+            $scope.listarPaises();
+            $scope.listarCiudades();
+            $scope.listarBarrios();
+            $scope.listarSexos();
+            $scope.listarNacionalidades();
+            $scope.listarRoles();
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
+
+
+    app.service('ProveedoresService', function($http) {
+        delete $http.defaults.headers.common['X-Requested-With'];
+
+        this.listarComplex = function(datos) {
+            var jsonObj = angular.toJson(datos);
+            var encoJson = encodeURIComponent(jsonObj);
+            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/proveedores/complex?paramJson='+encoJson)
+                .then(function (response) {
+                    return response;
+                });
+            return myResponseData;
+        }
+        this.insertar = function(datos){
+            var obj = {
+                "banco":datos.banco,
+                "numero":datos.numero,
+                "estado": datos.estado,
+                "usuario": datos.usuario
+            }
+            var json = angular.toJson(obj);
+            var encoJson = encodeURIComponent(json);
+            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/insertar?paramJson='+encoJson)
+                .then(function (response) {
+                    return response;
+                });
+            return myResponseData;
+        }
+
+        this.modificar = function (datos){
+            var obj = {
+                "codigo":datos.codigo,
+                "banco":datos.banco,
+                "numero":datos.numero,
+                "estado": datos.estado
+            }
+            var json = angular.toJson(obj);
+            var encoJson = encodeURIComponent(json);
+            var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/modificar?paramJson='+encoJson)
+                .then(function (response) {
+                    return response;
+                });
+            return myResponseData;
+        }
+
+        this.eliminarById = function(codigo){
+            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/eliminar-id/'+codigo)
+                .then(function (response) {
+                    return response;
+                });
+            return myResponseData;
+        }
+
+    });
+
+
 
 
 
