@@ -31,17 +31,16 @@
                     </div>
                 </div>
 
+
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Estado</label>
                     <div class="col-sm-8">
-                        <!-- <select id="estado"   class="form-control input-sm"
-                                 ng-model=datos.estado>
-                             <option value> --Seleccionar --</option>
-                             <option ng-repeat="c in listaEstados"
-                                     value="{{c.valor}}">{{c.valor}}</option>
-                         </select>    -->
+                        <select id="estado" class="form-control input-sm" ng-model=datos.estado>
+                            <option value> --Seleccionar --</option> <option ng-repeat="c in listaEstados" value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
                     </div>
                 </div>
+
             </div>
 
 
@@ -82,6 +81,7 @@
 
                 <td>
                     <button  ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <input type="button" ng-click="modificar($index)"  class="btn btn-success btn-xs" value="Modificar" />
                 </td>
             </tr>
             </tbody>

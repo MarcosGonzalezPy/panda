@@ -4,12 +4,7 @@
         <form ng-submit="add()" class="form-horizontal">
 
             <div class="col-lg-6">
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Codigo</label>
-                    <div class="col-sm-6">
-                        <input autofocus  style="text-transform:uppercase"  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
-                    </div>
-                </div>
+
 
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Descripcion</label>
@@ -21,7 +16,7 @@
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Precio Unitario</label>
                     <div class="col-sm-8">
-                        <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.precioUnitario" maxlength="50"/>
+                        <input required  style="text-transform:uppercase" type="number" class="form-control input-sm" ng-model="datos.precioUnitario" maxlength="50"/>
                     </div>
                 </div>
             </div>
@@ -48,7 +43,7 @@
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <!--|| !datos.descripcion || !datos.dominio-->
-                    <input ng-disabled="!datos.codigo || !datos.descripcion" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input ng-disabled=" !datos.descripcion" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
                     <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
                     <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
                 </div>
