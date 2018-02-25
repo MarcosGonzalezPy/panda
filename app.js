@@ -1553,6 +1553,7 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
         if(!encontrado){
             $scope.datos.correo= "";
             $scope.datos.telefono= "";
+            delete $scope.datos.codigoPersona;
         }
     }
 
@@ -5685,6 +5686,29 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         })
     }
 
+    //lol
+    $scope.changeCliente=function(){
+        var encontrado = false;
+        for(i=0;i<$scope.listaClientes.length;i++){
+            var apellido = "";
+            if(typeof $scope.listaClientes[i].apellido!= 'undefined'){
+                apellido =  $scope.listaClientes[i].apellido;
+            }
+            if(($scope.listaClientes[i].nombre+' '+apellido).trim() ==$scope.datos.cliente.trim()){
+                $scope.datos.codigoPersona= $scope.listaClientes[i].codigo;
+                $scope.datos.correo= $scope.listaClientes[i].correoElectronico;
+                $scope.datos.telefono= $scope.listaClientes[i].telefono;
+                encontrado=true;
+                break;
+            }
+        }
+        if(!encontrado){
+            $scope.datos.correo= "";
+            $scope.datos.telefono= "";
+            delete $scope.datos.codigoPersona;
+        }
+    }
+
     $scope.cancelar = function(){
         $location.path( '/circuito' );
     }
@@ -5741,16 +5765,17 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         }
         $scope.datos.secuencia =  urlParams.secuencia;
         $scope.datos.responsable =  urlParams.responsable;
-        $scope.datos.sucursal = urlParams.lugar;
+        //$scope.datos.sucursal = urlParams.lugar;
         $scope.datos.fecha =  urlParams.fecha;
         $scope.datos.observacion =  urlParams.observacion;
         //$scope.buscarCliente();
-        $scope.listarTaller();
+        //$scope.listarTaller();
         $scope.cargarDatos($scope.datos.secuencia);
-        $timeout( function (){
+        $scope.datos.sucursal = urlParams.lugar;
+/*        $timeout( function (){
             $scope.datos.sucursal = urlParams.lugar;   //lol
             $scope.$apply();
-        }, 5000)
+        }, 5000)*/
     }
 
     init();
