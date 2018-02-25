@@ -63,7 +63,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Fecha:</label>
                     <div class="col-sm-4">
-                        <input  class="form-control input-sm"  maxlength="20" required primary type="date"
+                        <input disabled class="form-control input-sm"  maxlength="20" required primary type="date"
                                ng-model="datos.fecha"/>
                     </div>
                 </div>
@@ -78,8 +78,8 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Taller:</label>
                     <div class="col-sm-8">
-                        <select id="taller"   class="form-control input-sm"
-                                ng-model=datos.taller>
+                        <select id="sucursal"   class="form-control input-sm"
+                                ng-model=datos.sucursal>
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaTaller"
                                     value="{{c.valor}}">{{c.valor}}</option>

@@ -2073,6 +2073,15 @@ app.service('ServiciosService', function($http) {
             });
         return myResponseData;
     }
+
+
+    this.obtenerCircuitoServicioIngreso = function(secuencia) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/ingreso/'+secuencia)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
 });
 
 //app.controller('serviciosController', function($scope, $location, ServiciosService, $rootScope, $dialogs) {
@@ -5613,7 +5622,7 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
 });
 
 
-app.controller('modificarIngresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService) {
+app.controller('modificarIngresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService, $timeout) {
 
     $scope.datos ={};
     $scope.listaClientes ={};
@@ -5664,6 +5673,23 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         })
     }
 
+
+    $scope.cargarDatos = function(secuencia){
+        ServiciosService.obtenerCircuitoServicioIngreso(secuencia).then(function(response){
+            if(response.status ==200){
+                $scope.datos.cliente = response.data.cliente;
+                $scope.datos.encargado = response.data.encargado;
+                $scope.datos.correo = response.data.correo;
+                $scope.datos.telefono = response.data.telefono;
+                $scope.datos.detalleEquipo = response.data.detalleEquipo;
+                $scope.datos.detalleTrabajo = response.data.detalleTrabajo;
+                $scope.datos.codigoPersona = response.data.codigoPersona;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function () {
         var urlParams = $location.search().param;
         if(urlParams.secuencia==null || typeof urlParams.secuencia == 'undefined'){
@@ -5673,8 +5699,14 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         $scope.datos.responsable =  urlParams.responsable;
         $scope.datos.sucursal = urlParams.lugar;
         $scope.datos.fecha =  urlParams.fecha;
+        $scope.datos.observacion =  urlParams.observacion;
         //$scope.buscarCliente();
         $scope.listarTaller();
+        $scope.cargarDatos($scope.datos.secuencia);
+        $timeout( function (){
+            $scope.datos.sucursal = urlParams.lugar;   //lol
+            $scope.$apply();
+        }, 5000)
     }
 
     init();
