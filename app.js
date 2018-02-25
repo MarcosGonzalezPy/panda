@@ -1253,14 +1253,8 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
             telefono: $scope.datos.telefono,
             sucursal: $scope.datos.sucursal,
             caja:$scope.datos.nroCaja,
-            usuario:$cookies.usuario
-            //condicionCompra
-            //medioPago
-            //condicionPago
-            //cuotas
-            //fecha
-            //estado
-            //cajero
+            usuario:$cookies.usuario,
+            estado:'BORRADOR'
         }
         for(i=0;i<lista.length;i++){
            delete lista[i].descripcion
@@ -1556,8 +1550,8 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
             if(typeof $scope.listaClientes[i].apellido!= 'undefined'){
                 apellido =  $scope.listaClientes[i].apellido;
             }
-            if(($scope.listaClientes[i].nombre+' '+apellido).trim() ==$scope.datos.clienteNombreApellido.trim()){
-                $scope.datos.cliente= $scope.listaClientes[i].codigo;
+            if(($scope.listaClientes[i].nombre+' '+apellido).trim() ==$scope.datos.cliente.trim()){
+                $scope.datos.codigoPersona= $scope.listaClientes[i].codigo;
                 $scope.datos.correo= $scope.listaClientes[i].correoElectronico;
                 $scope.datos.telefono= $scope.listaClientes[i].telefono;
                 encontrado=true;
@@ -1570,15 +1564,15 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
         }
     }
 
-    $scope.changeEncargado=function(){
-        var encontrado = false;
-        for(i=0;i<$scope.listaClientes.length;i++){
-            if($scope.listaClientes[i].nombre+' '+$scope.listaClientes[i].apellido ==$scope.datos.encargadoNombreApellido){
-                $scope.datos.encargado=  $scope.listaClientes[i].codigo;
-                break;
-            }
-        }
-    }
+//    $scope.changeEncargado=function(){
+//        var encontrado = false;
+//        for(i=0;i<$scope.listaClientes.length;i++){
+//            if($scope.listaClientes[i].nombre+' '+$scope.listaClientes[i].apellido ==$scope.datos.encargadoNombreApellido){
+//                $scope.datos.encargado=  $scope.listaClientes[i].codigo;
+//                break;
+//            }
+//        }
+//    }
 
 
     var formatearDiaMes = function(num){
@@ -1992,7 +1986,8 @@ app.service('ServiciosService', function($http) {
             "telefono": datos.telefono,
             "detalleEquipo": datos.detalleEquipo,
             "detalleTrabajo": datos.detalleTrabajo,
-            "observacion": datos.observacion
+            "observacion": datos.observacion,
+            "codigoPersona": datos.codigoPersona
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -2089,6 +2084,15 @@ app.service('ServiciosService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
+    this.obtenerCircuitoServicioIngreso = function(secuencia) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/ingreso/'+secuencia)
             .then(function (response) {
                 return response;
             });
@@ -2395,8 +2399,7 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
 
     $scope.cotizar = function(index){
         var element = $scope.lista[index];
-        $rootScope.secuencia  = element.secuencia;
-        $location.path( '/agregar-cotizacion');
+        $location.path( '/agregar-cotizacion').search({param: element, other:'ok'});
     }
 
     $scope.ingresarEquipo = function(){
@@ -2447,9 +2450,8 @@ app.controller('cotizacionController', function($scope, $location, $rootScope, $
     }
 
     $scope.cotizar = function(index){
-        var element = $scope.listaCircuito[index];
-        $rootScope.secuencia  = element.secuencia;
-        $location.path( '/agregar-cotizacion' );
+        var element = $scope.lista[index];
+        $location.path( '/agregar-cotizacion').search({param: element, other:'ok'});
     }
 
     var init = function () {
@@ -2622,8 +2624,6 @@ app.controller('rolesController', function($scope, $location, $rootScope, $cooki
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar, se eliminaran todos los permisos de este Rol?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
             RolesService.eliminarById(dato).then(function(response){
-
-                //marcos
                 if(response.status == 200){
                     var resultado = response.data;
                     if(resultado == "true"){
@@ -5499,23 +5499,173 @@ app.service('CajasMovimientosService', function($http) {
 });
 
 
-app.controller('agregarCotizacionController', function($scope, $location, $rootScope, $cookies, $dialogs) {
-    $scope.datos = {};
+app.controller('agregarCotizacionController', function($scope, $location, $rootScope, $cookies, $dialogs, VentasService, UtilService) {
 
     $scope.cancelar = function() {
         $location.path( '/circuito' );
     }
+
+
+    $scope.producto = {};
+    $scope.datos = {};
+    $scope.lista = [] ;
+    $scope.inhabilitarAgregar =true;
+    $scope.inhabilitarCBarra = false;
+    $scope.listaArticulos=[];
+
+    $scope.remove = function(index) {
+        $scope.lista.splice(index, 1);
+    }
+
+    $scope.limpiar = function(){
+        $scope.inhabilitarAgregar =true;
+        $scope.inhabilitarCBarra = false;
+    }
+
+    $scope.changeCantidad = function(){
+        if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
+            if($scope.datos.cantidad>0){
+                $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
+                $scope.inhabilitarAgregar =false;
+            }else{
+                $scope.datos.cantidad=1;
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Cantidad invalida'},{key: false,back: 'static'});
+            }
+
+        }else{
+            $scope.inhabilitarAgregar =true;
+        }
+
+    }
+
+    $scope.buscarArticuloExistente = function(){
+        $scope.producto.sucursal = 'MATRIZ'
+        VentasService.listarStockPorSucursal($scope.producto).then(function(response){
+            if(response.status == 200){
+                if(response.data.length == 1){
+                    $scope.articulo =   response.data[0];
+                    $scope.producto.codigo = $scope.articulo.codigo;
+                    if($scope.producto.codigoBarra ==null || typeof $scope.producto.codigoBarra == 'undefined'){
+                        $scope.inhabilitarCBarra = true;
+                    }else{
+                        $scope.inhabilitarCBarra = false;
+                    }
+                    $scope.producto.codigoBarra = $scope.articulo.codigoBarra;
+                    $scope.producto.descripcion = $scope.articulo.descripcion;
+                    $scope.datos.precio = $scope.articulo.precioUnitario;
+                    $scope.datos.grabado = $scope.articulo.grabado;
+                    if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
+                        $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
+                        $scope.inhabilitarAgregar =false;
+                    }
+                    $scope.articuloValido  = true;
+
+                }else{
+                    $scope.articuloValido  = false;
+                    $scope.inhabilitarAgregar =true;
+                    $scope.listaArticulos =   response.data;
+                }
+
+            }else{
+                $scope.articuloValido  = false;
+                $scope.inhabilitarAgregar =true;
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.agregar = function(){
+        var impuesto =  $scope.datos.total* $scope.datos.grabado/100 ;
+        var obj= {
+            codigoArticulo: $scope.producto.codigo,
+            descripcion: $scope.producto.descripcion,
+            cantidad: $scope.datos.cantidad,
+            precio: $scope.datos.precio,
+            iva: $scope.datos.grabado,
+            impuesto: impuesto,
+            total: $scope.datos.total,
+            tipo:$scope.articulo.tipo
+        }
+        $scope.lista.push(obj);
+        $scope.limpiarSimple();
+    }
+
+    $scope.limpiarSimple = function(){
+        $scope.producto = {};
+        $scope.datos.cantidad = null;
+        $scope.datos.precio = null;
+        $scope.datos.total = null;
+        $scope.inhabilitarAgregar =true;
+        $scope.inhabilitarCBarra = false;
+    }
+
+    $scope.secuencia = function(){
+        UtilService.secuencia("factura_seq").then(function(response){
+            if(response.status == 200){
+                var aux  = response.data;
+                $scope.datos.numeroFactura =  aux; //pad(aux, 8);
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
+    $scope.guardar = function(){
+        var lista = angular.copy($scope.lista);
+        var cabecera = {
+            numeroFactura: $scope.datos.numeroFactura,
+            codigoPersona: $scope.datos.codigoPersona,
+            cliente: $scope.datos.nombre,
+            ruc: $scope.datos.ruc,
+            telefono: $scope.datos.telefono,
+            sucursal: $scope.datos.sucursal,
+            usuario:$cookies.usuario,
+            estado: 'SERV_PEND_APRO'
+        }
+        for(i=0;i<lista.length;i++){
+            delete lista[i].descripcion
+        }
+
+        var param = {
+            cabecera: cabecera,
+            detalle: lista
+        }
+        VentasService.registrarVenta(param).then(function(response){
+            if(response.status == 200 && response.data =="true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.secuencia == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.secuencia =  urlParams.secuencia;
+        $scope.datos.responsable =  urlParams.responsable;
+        $scope.datos.estado =  urlParams.estado;
+        $scope.datos.usuario =  $cookies.usuario;
+        $scope.datos.sucursal =  $cookies.taller;
+        $scope.buscarArticuloExistente();
+        $scope.secuencia();
+    }
+
+    init();
 });
 
 
-app.controller('modificarIngresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService) {
+app.controller('modificarIngresarEquipoController', function($scope, $location, ValoresService, $rootScope, $dialogs, ClientesService, $cookies, ServiciosService, $timeout) {
 
     $scope.datos ={};
     $scope.listaClientes ={};
     $scope.listaTaller = [];
 
     $scope.buscarCliente= function(valor, identificador){
-        var obj = '{}';
+        var obj = '';
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         ClientesService.listarComplex(encoJson).then(function(response){
@@ -5559,6 +5709,23 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         })
     }
 
+
+    $scope.cargarDatos = function(secuencia){
+        ServiciosService.obtenerCircuitoServicioIngreso(secuencia).then(function(response){
+            if(response.status ==200){
+                $scope.datos.cliente = response.data.cliente;
+                $scope.datos.encargado = response.data.encargado;
+                $scope.datos.correo = response.data.correo;
+                $scope.datos.telefono = response.data.telefono;
+                $scope.datos.detalleEquipo = response.data.detalleEquipo;
+                $scope.datos.detalleTrabajo = response.data.detalleTrabajo;
+                $scope.datos.codigoPersona = response.data.codigoPersona;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function () {
         var urlParams = $location.search().param;
         if(urlParams.secuencia==null || typeof urlParams.secuencia == 'undefined'){
@@ -5568,8 +5735,14 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         $scope.datos.responsable =  urlParams.responsable;
         $scope.datos.sucursal = urlParams.lugar;
         $scope.datos.fecha =  urlParams.fecha;
-        $scope.buscarCliente();
+        $scope.datos.observacion =  urlParams.observacion;
+        //$scope.buscarCliente();
         $scope.listarTaller();
+        $scope.cargarDatos($scope.datos.secuencia);
+        $timeout( function (){
+            $scope.datos.sucursal = urlParams.lugar;   //lol
+            $scope.$apply();
+        }, 5000)
     }
 
     init();
