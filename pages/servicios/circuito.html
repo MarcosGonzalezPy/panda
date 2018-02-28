@@ -64,8 +64,27 @@
                         <button ng-click="cotizar($index)" class="btn btn-info btn-xs">Cotizar</button>
                         <button ng-click="modificarIngresarEquipos($index)" class="btn btn-success btn-xs">Editar</button>
 
+
                     </div>
+                    <div ng-show="item.estado == 'COTIZADO' ">
+                        <button ng-click="aprobar($index)" class="btn btn-primary btn-xs">Aprobar</button>
+                        <button ng-click="rechazar($index)" class="btn btn-verde-oscuro btn-xs">Rechazar</button>
+                    </div>
+
+                    <div ng-show="item.estado == 'APROBADO' ">
+                        <button ng-click="reparar($index)" class="btn-color1 btn btn-xs">Reparar</button>
+                        <button ng-click="cancelar($index)" class="btn btn-negro btn-xs">Cancelar</button>
+                    </div>
+                    <div ng-show="(item.estado == 'RETIRADO' || item.estado == 'RECHAZADO')">
+                        <button ng-click="historial($index)" class="btn btn-warning btn-xs">Historial</button>
+                    </div>
+
+                    <div ng-show="item.estado == 'REPARADO' ">
+                        <button ng-click="aprobar($index)" class="btn btn-color2 btn-xs">Facturar</button>
+                    </div>
+
                 </td>
+
             </tr>
             </tbody>
         </table>

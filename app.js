@@ -138,6 +138,11 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/servicios/circuito.html',
             controller  : 'circuitoController'
         })
+
+        .when('/reparar', {
+            templateUrl : 'pages/servicios/reparar.html',
+            controller  : 'repararController'
+        })
 //        .when('/cotizacion', {
 //            templateUrl : 'pages/servicios/cotizacion.html',
 //            controller  : 'cotizacionController'
@@ -1190,7 +1195,7 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
 
 
     $scope.secuencia = function(){
-        UtilService.secuencia("factura_seq").then(function(response){
+            UtilService.secuencia("factura_seq").then(function(response){
             if(response.status == 200){
                 var aux  = response.data;
                 $scope.datos.numeroFactura =  aux; //pad(aux, 8);
@@ -2099,6 +2104,47 @@ app.service('ServiciosService', function($http) {
             });
         return myResponseData;
     }
+
+    this.crearCotizacion = function(obj){
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/crear-cotizacion?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.aprobar = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/aprobar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.reparar = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/reparar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.rechazar = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/rechazar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 //app.controller('serviciosController', function($scope, $location, ServiciosService, $rootScope, $dialogs) {
@@ -2403,6 +2449,11 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
         $location.path( '/agregar-cotizacion').search({param: element, other:'ok'});
     }
 
+    $scope.reparar = function(index){
+        var element = $scope.lista[index];
+        $location.path( '/reparar').search({param: element, other:'ok'});
+    }
+
     $scope.ingresarEquipo = function(){
         $location.path( '/ingresar-equipo');
     }
@@ -2412,9 +2463,51 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
         $location.path( '/ingresar-equipo/modificar').search({param: element, other:'ok'});
     }
 
+    $scope.aprobar = function(index) {
+        var datos = {
+            secuencia: $scope.lista[index].secuencia,
+            lugar: $scope.lista[index].lugar,
+            responsable: $cookies.usuario
+        }
+        ServiciosService.aprobar(datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Aprobacion existosa'},{key: false,back: 'static'});
+                    $scope.buscar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Aprobar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Aprobar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.rechazar = function(index) {
+        var datos = {
+            secuencia: $scope.lista[index].secuencia,
+            lugar: $scope.lista[index].lugar,
+            responsable: $cookies.usuario
+        }
+        ServiciosService.rechazar(datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Rechazo existoso'},{key: false,back: 'static'});
+                    $scope.buscar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Rechazar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Rechazar'},{key: false,back: 'static'});
+            }
+        })
+    }
 
     var init = function () {
         $scope.listarEstados();
+        $scope.buscar();
     }
 
     init();
@@ -2450,10 +2543,10 @@ app.controller('cotizacionController', function($scope, $location, $rootScope, $
         $scope.listaCircuito = [];
     }
 
-    $scope.cotizar = function(index){
+/*    $scope.cotizar = function(index){
         var element = $scope.lista[index];
         $location.path( '/agregar-cotizacion').search({param: element, other:'ok'});
-    }
+    }*/
 
     var init = function () {
         $scope.listarEstados();
@@ -4544,7 +4637,7 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
     $scope.buscar= function(){
         var obj = {
             estado: $scope.datos.estado,
-            cliente: $scope.datos.codigo
+            cliente: $scope.datos.nombre
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -5500,7 +5593,7 @@ app.service('CajasMovimientosService', function($http) {
 });
 
 
-app.controller('agregarCotizacionController', function($scope, $location, $rootScope, $cookies, $dialogs, VentasService, UtilService) {
+app.controller('agregarCotizacionController', function($scope, $location, $rootScope, $cookies, $dialogs, VentasService, UtilService, ServiciosService) {
 
     $scope.cancelar = function() {
         $location.path( '/circuito' );
@@ -5611,27 +5704,25 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         })
     };
 
-    $scope.guardar = function(){
+    $scope.guardar = function(){//LOL
         var lista = angular.copy($scope.lista);
-        var cabecera = {
-            numeroFactura: $scope.datos.numeroFactura,
-            codigoPersona: $scope.datos.codigoPersona,
-            cliente: $scope.datos.nombre,
-            ruc: $scope.datos.ruc,
-            telefono: $scope.datos.telefono,
-            sucursal: $scope.datos.sucursal,
-            usuario:$cookies.usuario,
-            estado: 'SERV_PEND_APRO'
+        var circuitoServicio = {
+            secuencia: $scope.datos.secuencia,
+            estado: 'SERV_PEND_APRO',
+            lugar: $scope.datos.sucursal,
+            observacion:$scope.datos.observacion,
+            responsable:$cookies.usuario
+
         }
         for(i=0;i<lista.length;i++){
             delete lista[i].descripcion
         }
 
         var param = {
-            cabecera: cabecera,
-            detalle: lista
+            circuitoServicio: circuitoServicio,
+            listaDetalle: lista
         }
-        VentasService.registrarVenta(param).then(function(response){
+        ServiciosService.crearCotizacion(param).then(function(response){
             if(response.status == 200 && response.data =="true"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
@@ -5650,7 +5741,7 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         $scope.datos.responsable =  urlParams.responsable;
         $scope.datos.estado =  urlParams.estado;
         $scope.datos.usuario =  $cookies.usuario;
-        $scope.datos.sucursal =  $cookies.taller;
+        $scope.datos.sucursal =  urlParams.lugar;
         $scope.buscarArticuloExistente();
         $scope.secuencia();
     }
@@ -6543,7 +6634,60 @@ app.controller('agregarProveedoresController', function($scope, $location, $root
     });
 
 
+app.directive('uppercase', function() {
+    return {
+        restrict: "A",
+        require: "?ngModel",
+        link: function(scope, element, attrs, ngModel) {
 
+            //This part of the code manipulates the model
+            ngModel.$parsers.push(function(input) {
+                return input ? input.toUpperCase() : "";
+            });
+
+            //This part of the code manipulates the viewvalue of the element
+            element.css("text-transform","uppercase");
+        }
+    };
+});
+
+app.controller('repararController', function($scope, $location, $rootScope, $cookies, $dialogs, ServiciosService) {
+    $scope.datos = {};
+
+    $scope.cancelar = function(){
+        $location.path( '/circuito' );
+    }
+
+    $scope.guardar = function(index) {
+        ServiciosService.reparar($scope.datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Reparacion existosa'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Reparar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Reparar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.secuencia == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.secuencia = urlParams.secuencia;
+        $scope.datos.responsable = urlParams.responsable;
+        $scope.datos.paso = urlParams.paso;
+        $scope.datos.lugar = urlParams.lugar;
+    }
+
+    init();
+});
 
 
 
