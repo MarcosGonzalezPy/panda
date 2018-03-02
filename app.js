@@ -6817,6 +6817,64 @@ app.service('PersonasService', function($http) {
 
 
 
+app.directive('uppercase', function() {
+    return {
+        restrict: "A",
+        require: "?ngModel",
+        link: function(scope, element, attrs, ngModel) {
+
+            //This part of the code manipulates the model
+            ngModel.$parsers.push(function(input) {
+                return input ? input.toUpperCase() : "";
+            });
+
+            //This part of the code manipulates the viewvalue of the element
+            element.css("text-transform","uppercase");
+        }
+    };
+});
+
+app.controller('repararController', function($scope, $location, $rootScope, $cookies, $dialogs, ServiciosService) {
+    $scope.datos = {};
+
+    $scope.cancelar = function(){
+        $location.path( '/circuito' );
+    }
+
+    $scope.guardar = function(index) {
+        ServiciosService.reparar($scope.datos).then(function(response){
+            if(response.status == 200){
+                var resultado = response.data;
+                if(resultado == "true" ){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Reparacion existosa'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Reparar'},{key: false,back: 'static'});
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Reparar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.secuencia == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.secuencia = urlParams.secuencia;
+        $scope.datos.responsable = urlParams.responsable;
+        $scope.datos.paso = urlParams.paso;
+        $scope.datos.lugar = urlParams.lugar;
+    }
+
+    init();
+});
+
+
+
+
 
 
 
