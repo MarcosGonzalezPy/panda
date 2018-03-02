@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Servicio</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Secuencia</label>
+                    <div class="col-sm-8">
+                        <input disabled ng-model="datos.secuencia" class="form-control input-sm" list="browsers"
+                               name="browser" class="nopadding col-sm-8">
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Responsable</label>
+                    <div class="col-sm-8">
+                        <input disabled ng-model="datos.responsable"  list="browsers" name="browser"
+                               class="form-control input-sm">
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Paso:</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm"   type="text"  ng-model="datos.paso"/>
+                    </div>
+
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Lugar</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm"   type="text"
+                               ng-model="datos.lugar"/>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">Reparar</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+
+            <div class="col-lg-12">
+                <div class="form-group margin-bottom-5">
+                    <div class="col-sm-6">
+                        Observacion
+                    </div>
+                    <div>
+                        <textarea rows="2" cols="135" ng-model="datos.observacion">
+
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-5 col-sm-10">
+                    <!--|| !datos.descripcion || !datos.dominio-->
+                    </br>
+                    <input  type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                </div>
+            </div>
+
+
+
+        </form>
+    </div>
+</div>
+
+
+
+</body>
+</html>
+</body>
+</html>
