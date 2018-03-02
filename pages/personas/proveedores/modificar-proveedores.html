@@ -7,14 +7,14 @@
 <!--</head>-->
 
 <div class="panel panel-primary">
-    <div class="panel-heading">Agregar Proveedor</div>
+    <div class="panel-heading">Actualizar Proveedor</div>
     <div class="panel-body padding-minimo" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-6">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Codigo</label>
                     <div class="col-sm-6">
-                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.codigo"/>
+                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text" disabled ng-model="datos.codigo"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
@@ -29,24 +29,24 @@
                         <input maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.paginaWeb"/>
                     </div>
                 </div>
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Observacion</label>
+                    <div class="col-sm-6">
+                        <input maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.obs"/>
+                    </div>
+                </div>
             </div>
             <div class="col-lg-6">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Representante Telefono</label>
                     <div class="col-sm-6">
-                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="number"  ng-model="datos.representanteTelefono"/>
+                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.representanteTelefono"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Representante Celular</label>
                     <div class="col-sm-6">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="number"  ng-model="datos.representanteCelular"/>
-                    </div>
-                </div>
-                <div class="form-group margin-bottom-5">
-                    <label class="col-sm-5 control-label">Observacion</label>
-                    <div class="col-sm-6">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.obs"/>
+                        <input maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.representanteCelular"/>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             <div class="form-group">
                 <div class="col-sm-offset-5 col-sm-10">
                     </br>
-                    <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input  type="button" ng-click="guardar()"  class="btn btn-primary btn-sm" value="Guardar" />
 
                     <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
                 </div>
