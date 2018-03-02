@@ -1207,7 +1207,7 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
 
 
     $scope.secuencia = function(){
-
+        UtilService.secuencia("factura_seq").then(function(response){
             if(response.status == 200){
                 var aux  = response.data;
                 $scope.datos.numeroFactura =  aux; //pad(aux, 8);
