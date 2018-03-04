@@ -63,24 +63,29 @@
                     <div ng-show="item.estado == 'RECEPCIONADO' ">
                         <button ng-click="cotizar($index)" class="btn btn-info btn-xs">Cotizar</button>
                         <button ng-click="modificarIngresarEquipos($index)" class="btn btn-success btn-xs">Editar</button>
-
-
+                        <button ng-click="anular($index)" class="btn btn-default btn-xs">Anular</button>
                     </div>
                     <div ng-show="item.estado == 'COTIZADO' ">
                         <button ng-click="aprobar($index)" class="btn btn-primary btn-xs">Aprobar</button>
                         <button ng-click="rechazar($index)" class="btn btn-verde-oscuro btn-xs">Rechazar</button>
+                        <button ng-click="anular($index)" class="btn btn-default btn-xs">Anular</button>
                     </div>
 
                     <div ng-show="item.estado == 'APROBADO' ">
                         <button ng-click="reparar($index)" class="btn-color1 btn btn-xs">Reparar</button>
-                        <button ng-click="cancelar($index)" class="btn btn-negro btn-xs">Cancelar</button>
+                        <!--<button ng-click="cancelar($index)" class="btn btn btn-xs">Cancelar</button>-->
+                        <button ng-click="anular($index)" class="btn btn-default btn-xs">Anular</button>
                     </div>
                     <div ng-show="(item.estado == 'RETIRADO' || item.estado == 'RECHAZADO')">
                         <button ng-click="historial($index)" class="btn btn-warning btn-xs">Historial</button>
                     </div>
 
                     <div ng-show="item.estado == 'REPARADO' ">
-                        <button ng-click="aprobar($index)" class="btn btn-color2 btn-xs">Facturar</button>
+                        <button ng-click="facturar($index)" class="btn btn-color2 btn-xs">Facturar</button>
+                        <button ng-click="anular($index)" class="btn btn-default btn-xs">Anular</button>
+                    </div>
+                    <div ng-show="item.estado == 'ANULADO' ">
+                        <button ng-click="historial($index)" class="btn btn-warning btn-xs">Historial</button>
                     </div>
 
                 </td>

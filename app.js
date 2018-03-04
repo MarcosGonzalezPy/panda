@@ -151,6 +151,11 @@ app.config(function($routeProvider) {
             controller  : 'circuitoController'
         })
 
+        .when('/historial', {
+            templateUrl : 'pages/servicios/historial.html',
+            controller  : 'historialController'
+        })
+
         .when('/reparar', {
             templateUrl : 'pages/servicios/reparar.html',
             controller  : 'repararController'
@@ -1547,6 +1552,43 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
     $scope.datos ={};
     $scope.listaClientes ={};
     $scope.listaTaller = [];
+    $scope.listaModelos=[];
+    $scope.listaTipos = [];
+    $scope.listaMarcas = [];
+
+    $scope.listarModelos = function(){
+        var json =angular.toJson({"dominio":"MODELOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaModelos = response.data;
+            }else{
+                alert("Error al cargar los modelos");
+            }
+        })
+    }
+
+    $scope.listarTipos = function(){
+        var json =angular.toJson({"dominio":"TIPOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarMarcas= function(){
+        var json =angular.toJson({"dominio":"MARCAS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaMarcas = response.data;
+            }else{
+                alert("Error al cargar las Marcas");
+            }
+        })
+    }
+
 
     $scope.buscarCliente= function(){
         var obj = '{}';
@@ -1655,6 +1697,9 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
         $scope.datos.fecha = a+ '/'+ b +'/'+ c;
         $scope.secuencia();
         $scope.listarTaller();
+        $scope.listarModelos();
+        $scope.listarTipos();
+        $scope.listarMarcas();
     }
 
      init();
@@ -1990,7 +2035,10 @@ app.service('ServiciosService', function($http) {
             "detalleEquipo": datos.detalleEquipo,
             "detalleTrabajo": datos.detalleTrabajo,
             "observacion": datos.observacion,
-            "codigoPersona": datos.codigoPersona
+            "codigoPersona": datos.codigoPersona,
+            "tipo": datos.tipo,
+            "marca": datos.marca,
+            "modelo": datos.modelo
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -2136,6 +2184,24 @@ app.service('ServiciosService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/rechazar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.anular = function(json) {
+        var jsonObj = angular.toJson(json);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/anular-circuito?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.listarCircuitoHistorico = function(secuencia) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/servicios/circuito-historico/'+secuencia)
             .then(function (response) {
                 return response;
             });
@@ -2446,10 +2512,16 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
         $location.path( '/agregar-cotizacion').search({param: element, other:'ok'});
     }
 
+    $scope.historial = function(index){
+        var element = $scope.lista[index];
+        $location.path( '/historial').search({param: element, other:'ok'});
+    }
+
     $scope.reparar = function(index){
         var element = $scope.lista[index];
         $location.path( '/reparar').search({param: element, other:'ok'});
     }
+
 
     $scope.ingresarEquipo = function(){
         $location.path( '/ingresar-equipo');
@@ -2498,6 +2570,22 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
                 }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Rechazar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.anular = function(index){
+        var datos = {
+            secuencia: $scope.lista[index].secuencia,
+            lugar: $scope.lista[index].lugar,
+            responsable: $cookies.usuario
+        }
+        ServiciosService.anular(datos).then(function(response){
+            if(response.status == 200 &&  response.data == "true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion existosa'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Anular'},{key: false,back: 'static'});
             }
         })
     }
@@ -3786,7 +3874,7 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
         }else{
             $scope.datos2.plazo = $scope.datos2.plazos;
         }
-                              //TO DO
+                              //TODO
         var fecha =  new Date();
         var fechaformateada =  formatMesDia(fecha.getDate())+'/'+formatMesDia(fecha.getMonth())+'/'+fecha.getFullYear();
         $scope.datos2.fechaEntrega =  fechaformateada;
@@ -5752,6 +5840,43 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
     $scope.datos ={};
     $scope.listaClientes ={};
     $scope.listaTaller = [];
+    $scope.listaModelos=[];
+    $scope.listaTipos = [];
+    $scope.listaMarcas = [];
+
+
+    $scope.listarModelos = function(){
+        var json =angular.toJson({"dominio":"MODELOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaModelos = response.data;
+            }else{
+                alert("Error al cargar los modelos");
+            }
+        })
+    }
+
+    $scope.listarTipos = function(){
+        var json =angular.toJson({"dominio":"TIPOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarMarcas= function(){
+        var json =angular.toJson({"dominio":"MARCAS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaMarcas = response.data;
+            }else{
+                alert("Error al cargar las Marcas");
+            }
+        })
+    }
 
     $scope.buscarCliente= function(valor, identificador){
         var obj = '';
@@ -5832,6 +5957,9 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
                 $scope.datos.detalleEquipo = response.data.detalleEquipo;
                 $scope.datos.detalleTrabajo = response.data.detalleTrabajo;
                 $scope.datos.codigoPersona = response.data.codigoPersona;
+                $scope.datos.tipo = response.data.tipo.trim();
+                $scope.datos.marca = response.data.marca.trim();
+                $scope.datos.modelo = response.data.modelo.trim();
             }else{
                 alert("Error al cargar los tipos");
             }
@@ -5839,6 +5967,9 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
     }
 
     var init = function () {
+        $scope.listarModelos();
+        $scope.listarTipos();
+        $scope.listarMarcas();
         var urlParams = $location.search().param;
         if(urlParams.secuencia==null || typeof urlParams.secuencia == 'undefined'){
             $scope.cancelar();
@@ -5850,12 +5981,13 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         $scope.datos.observacion =  urlParams.observacion;
         //$scope.buscarCliente();
         //$scope.listarTaller();
-        $scope.cargarDatos($scope.datos.secuencia);
-        $scope.datos.sucursal = urlParams.lugar;
-/*        $timeout( function (){
-            $scope.datos.sucursal = urlParams.lugar;   //lol
+
+        //$scope.datos.sucursal = urlParams.lugar;
+        $timeout( function (){
+            $scope.datos.sucursal = urlParams.lugar.trim();   //lol
+            $scope.cargarDatos($scope.datos.secuencia);
             $scope.$apply();
-        }, 5000)*/
+        }, 1000)
     }
 
     init();
@@ -7141,15 +7273,74 @@ app.controller('repararController', function($scope, $location, $rootScope, $coo
     init();
 });
 
+app.directive('format-number', function() {
+    return {
+        restrict: "A",
+        require: "?ngModel",
+        link: function(scope, element, attrs, ngModel) {
+
+            ngModel.$parsers.push(function(input) {
+                var cadena= input;
+                cadena = cadena.replace(/[^0-9.]+/g,'');
+                var x = cadena.length;
+                var newCadena= "";
+                contador = 1;
+                while (x>=0) {
+                    x--;
+                    newCadena += cadena.charAt(x);
+                    if(contador ==3){
+                        contador = 0
+                        newCadena+='.';
+                    }
+                    contador++;
+                }
+                var cadena2='';
+                x = newCadena.length;
+                while (x>=0) {
+                    cadena2 +=newCadena.charAt(x);
+                    x--;
+                }
+                if( cadena2.charAt(0)=='.'){
+                    cadena2= cadena2.substring(1, cadena2.length);
+                }
+                console.log(cadena2);
+                input  =cadena2
+                return input;
+            });
+
+        }
+    };
+});
+
+app.controller('historialController', function($scope, $location, $rootScope, $cookies, $dialogs,ServiciosService) {
+    $scope.datos = {};
+
+    $scope.listarCircuitoHistorico = function(secuencia){
+        ServiciosService.listarCircuitoHistorico(secuencia).then(function(response){
+            if(response.status ==200){
+                $scope.lista = response.data;
+            }else{
+                alert("Error al cargar los datos");
+            }
+        })
+    }
 
 
+    $scope.cancelar = function(){
+        $location.path( '/circuito' );
+    }
 
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.secuencia == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.secuencia = urlParams.secuencia;
+        $scope.listarCircuitoHistorico($scope.datos.secuencia);
+    }
 
-
-
-
-
-
+    init();
+});
 
 
 
