@@ -23,7 +23,6 @@ app.controller('proveedoresController', function($scope, $location, ProveedoresS
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
-        $scope.limpiar();
     }
 
     $scope.modificar = function(index) {
@@ -73,6 +72,7 @@ app.controller('proveedoresController', function($scope, $location, ProveedoresS
 app.controller('agregarProveedoresController', function($scope, $location, $rootScope, $cookies, $dialogs, ProveedoresService ) {
 
     $scope.datos = {};
+    $scope.existeEnProveedor = false;
 
     $scope.cancelar = function(){
         $location.path( '/proveedores' );
@@ -89,7 +89,55 @@ app.controller('agregarProveedoresController', function($scope, $location, $root
         })
     }
 
+    $scope.buscarExisteProveedor= function(){
+        var obj = {codigo: $scope.datos.codigo}
+        ProveedoresService.listarComplex(obj).then(function(response){
+            if(response.status == 200){
+                if(response.data.length>1){
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }else if(response.data.length==1){
+                    $scope.existeEnProveedor = true;
+                    $scope.datos.codigo = response.data[0].codigo;
+                    $scope.datos.representanteNombre = response.data[0].representanteNombre;
+                    $scope.datos.representanteTelefono = response.data[0].representanteTelefono;
+                    $scope.datos.representanteCelular = response.data[0].representanteCelular;
+                    $scope.datos.paginaWeb = response.data[0].paginaWeb;
+                    $scope.datos.obs = response.data[0].obs;
+                }
+                else{
+                    $scope.existeEnProveedor = false;
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+            if($scope.existeEnProveedor==true){
+                $scope.bloquearCamposSecundarios=true;
+            }
+            else{
+                $scope.bloquearCamposSecundarios=false;
+            }
+        })
+    }
+
+    $scope.habilitarCamposSecundarios= function(){
+        if( $scope.datos.codigo ){
+            $scope.buscarExisteProveedor();
+
+        }else{
+            $scope.bloquearCamposSecundarios=false;
+        }
+    }
+
     var init = function(){
+        $scope.bloquearCamposSecundarios=true;
+
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.codigo= urlParams.codigo;
+        $scope.buscarExisteProveedor();
+
     }
 
     init();

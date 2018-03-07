@@ -119,8 +119,8 @@ app.config(function($routeProvider) {
             controller  : 'proveedoresController'
         })
         .when('/proveedores/agregar', {
-            templateUrl : 'pages/personas/personas/agregar-personas.html',
-            controller  : 'agregarPersonasController'
+            templateUrl : 'pages/personas/proveedores/agregar-proveedores.html',
+            controller  : 'agregarProveedoresController'
         })
         .when('/proveedores/modificar', {
             templateUrl : 'pages/personas/proveedores/modificar-proveedores.html',
@@ -6230,8 +6230,6 @@ app.controller('personasController', function($scope, $location, PersonasService
     }
 
     $scope.buscar = function() {
-        $scope.datos.nombre = $scope.datos.nombre;
-        $scope.datos.ruc =  $scope.datos.cedula;
         PersonasService.listarComplex($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.lista = response.data;
@@ -6239,7 +6237,6 @@ app.controller('personasController', function($scope, $location, PersonasService
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
-        $scope.limpiar();
     }
 
     $scope.modificar = function(index) {
@@ -6322,9 +6319,9 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
                 if(response.data.length>1){
                     dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
                 }else if(response.data.length==1){
-
                     $scope.existeEnPersonas = true;
-
+                    $scope.datos.codigo = response.data[0].codigo;
+                    $scope.datosAux.codigo =  $scope.datos.codigo;
                     $scope.datos.nombre = response.data[0].nombre;
                     $scope.datos.apellido = response.data[0].apellido;
                     $scope.datos.ruc = response.data[0].ruc;
@@ -6420,23 +6417,11 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         }
     }
 
-    $scope.secuencia = function(){
-        UtilService.secuencia("personas_codigo_seq").then(function(response){
-            if(response.status == 200){
-                var aux  = response.data;
-                $scope.datosAux.secuencia =  aux;
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-            }
-        })
-    };
-
     $scope.asignarProveedor = function(){
-            $location.path( '/proveedores/agregar').search({param: $scope.datos.secuencia, other:'ok'});
+            $location.path( '/proveedores/agregar').search({param: $scope.datosAux, other:'ok'});
     }
 
     $scope.agregar = function() {
-        $scope.datos.secuencia =$scope.datosAux.secuencia;
         PersonasService.insertar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
@@ -6463,7 +6448,6 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
             $scope.listarBarrios();
             $scope.listarSexos();
             $scope.listarNacionalidades();
-            $scope.secuencia();
 
         var urlParams = $location.search().param;
         if(  urlParams == 'proveedor'){
@@ -6592,7 +6576,12 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
         $scope.listarEstados();
         $timeout( function (){
             $scope.datos.sexo = urlParams.sexo.trim();
-            var fecha =   new Date( urlParams.fechaNacimiento);
+            /*var parametroFecha= urlParams.fechaNacimiento;
+            var day = parseInt(parametroFecha.substr(4,6));
+            var month = parseInt(parametroFecha.substr(0,3));
+            var year = parseInt(parametroFecha.substr(7,10));*/
+            var fecha =   new Date(urlParams.fechaNacimiento);
+            //var fecha =   new Date('year,month,day');
             var fechaformateada = fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth())+'-'+formatMesDia(fecha.getDate());
             //$scope.datos =$rootScope.usuario;
             $scope.datos.codigo = urlParams.codigo;
@@ -6603,7 +6592,7 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
             $scope.datos.telefono = urlParams.telefono;
             $scope.datos.celularPrincipal = urlParams.celularPrincipal;
             $scope.datos.celularSecundario = urlParams.celularSecundario;
-            $scope.datos.fechaNacimiento = fechaformateada;
+           // $scope.datos.fechaNacimiento = fechaformateada;
             $scope.datos.nacionalidad = urlParams.nacionalidad;
             $scope.datos.pais = urlParams.pais;
             $scope.datos.ciudad = urlParams.ciudad;
@@ -6642,7 +6631,6 @@ app.service('PersonasService', function($http) {
 
     this.insertar = function(datos){
         var obj = {
-            "codigo": datos.secuencia,
             "cedula": datos.cedula,
             "nombre": datos.nombre,
             "apellido": datos.apellido,
@@ -6684,7 +6672,6 @@ app.service('PersonasService', function($http) {
             "cedula": datos.cedula,
             "nombre": datos.nombre,
             "apellido": datos.apellido,
-            "fechaNacimiento": datos.fechaNacimiento,
             "nacionalidad": datos.nacionalidad,
             "pais": datos.pais,
             "ciudad": datos.ciudad,
