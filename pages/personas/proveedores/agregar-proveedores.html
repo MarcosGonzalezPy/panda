@@ -38,14 +38,14 @@
                     <label class="col-sm-5 control-label">Representante Telefono</label>
                     <div class="col-sm-6">
                         <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary
-                               type="number"  ng-model="datos.representanteTelefono" ng-disabled="bloquearCamposSecundarios"/>
+                               type="text"  ng-model="datos.representanteTelefono" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Representante Celular</label>
                     <div class="col-sm-6">
                         <input maxlength="50" class="form-control input-sm"  required primary
-                               type="number"  ng-model="datos.representanteCelular" ng-disabled="bloquearCamposSecundarios"/>
+                               type="text"  ng-model="datos.representanteCelular" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
@@ -62,9 +62,9 @@
                 <div class="col-sm-offset-5 col-sm-10">
                     </br>
                     <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"
-                            ng-disabled = "!datos.codigo || !datos.representanteNombre
+                            ng-disabled = "(!datos.codigo || !datos.representanteNombre
                                         || !datos.representanteTelefono || !datos.representanteCelular
-                                        || !datos.paginaWeb || !datos.obs " />
+                                        || !datos.paginaWeb || !datos.obs) || habilitarAgregar"/>
 
                     <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
                 </div>

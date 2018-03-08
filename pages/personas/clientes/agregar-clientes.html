@@ -14,31 +14,36 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Nombre:</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.nombre"/>
+                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"
+                               ng-model="datos.nombre" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Apellido:</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.apellido"/>
+                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"
+                               ng-model="datos.apellido" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Cedula:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="number"  ng-model="datos.cedula"/>
+                        <input maxlength="50" class="form-control input-sm"  required primary type="number"
+                               ng-model="datos.cedula" />
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Ruc:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.ruc"/>
+                        <input maxlength="50" class="form-control input-sm"  required primary type="text"
+                               ng-model="datos.ruc" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Fecha Nac.:</label>
                     <div class="col-sm-6">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="date"  ng-model="datos.fechaNacimiento"/>
+                        <input maxlength="50" class="form-control input-sm"  required primary type="date"
+                               ng-model="datos.fechaNacimiento" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
             </div>
@@ -48,7 +53,7 @@
                     <label class="col-sm-4 control-label">Nacionalidad:</label>
                     <div class="col-sm-8">
                         <select id="pacionalidad"  class="form-control input-sm"
-                                ng-model=datos.nacionalidad>
+                                ng-model=datos.nacionalidad ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaNacionalidades"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -60,7 +65,7 @@
                     <label class="col-sm-4 control-label">Pais:</label>
                     <div class="col-sm-8">
                         <select id="pais" class="form-control input-sm"
-                                ng-model=datos.pais>
+                                ng-model=datos.pais ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaPaises"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -72,7 +77,7 @@
                     <label class="col-sm-4 control-label">Ciudad:</label>
                     <div class="col-sm-8">
                         <select id="ciudad"  class="form-control input-sm"
-                                ng-model=datos.ciudad>
+                                ng-model=datos.ciudad ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaCiudades"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -84,7 +89,7 @@
                     <label class="col-sm-4 control-label">Barrio:</label>
                     <div class="col-sm-8">
                         <select id="barrio"  class="form-control input-sm"
-                                ng-model=datos.barrio>
+                                ng-model=datos.barrio ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaBarrios"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -95,7 +100,8 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Direccion:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.direccion"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"
+                               ng-model="datos.direccion" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
 
                 </div>
@@ -106,7 +112,7 @@
                     <label class="col-sm-4 control-label">Sexo:</label>
                     <div class="col-sm-6">
                         <select id="sexo"   class="form-control input-sm"
-                                ng-model=datos.sexo>
+                                ng-model=datos.sexo ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaSexos"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -117,26 +123,28 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">E-mail:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.correoElectronico"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"
+                               ng-model="datos.correoElectronico" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Telefono:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.telefono"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"
+                               ng-model="datos.telefono" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Celular:</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.celular"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"
+                               ng-model="datos.celular" ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="col-sm-offset-5 col-sm-10">
-                    <!--|| !datos.descripcion || !datos.dominio-->
                     </br>
                     <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
 
@@ -148,13 +156,6 @@
 
     </div>
 </div>
-<!--<div class="row">-->
-    <!--<div class="form-group">-->
-        <!--<div class="col-sm-10">-->
-            <!--<input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />-->
-        <!--</div>-->
-    <!--</div>-->
-<!--</div>-->
 
 </body>
 </html>

@@ -73,6 +73,9 @@ app.controller('agregarProveedoresController', function($scope, $location, $root
 
     $scope.datos = {};
     $scope.existeEnProveedor = false;
+    $scope.habilitarAgregar = true;
+
+
 
     $scope.cancelar = function(){
         $location.path( '/proveedores' );
@@ -99,10 +102,19 @@ app.controller('agregarProveedoresController', function($scope, $location, $root
                     $scope.existeEnProveedor = true;
                     $scope.datos.codigo = response.data[0].codigo;
                     $scope.datos.representanteNombre = response.data[0].representanteNombre;
+                    $scope.datos.paginaWeb = response.data[0].paginaWeb;
                     $scope.datos.representanteTelefono = response.data[0].representanteTelefono;
                     $scope.datos.representanteCelular = response.data[0].representanteCelular;
-                    $scope.datos.paginaWeb = response.data[0].paginaWeb;
                     $scope.datos.obs = response.data[0].obs;
+
+                    if((!$scope.datos.codigo || !$scope.datos.representanteNombre
+                        || !$scope.datos.representanteTelefono || !$scope.datos.representanteCelular
+                        || !$scope.datos.paginaWeb || !$scope.datos.obs) || $scope.habilitarAgregar){
+                          alert("soy true");
+
+                    }else{
+                        alert("soy false")
+                    }
                 }
                 else{
                     $scope.existeEnProveedor = false;
@@ -256,15 +268,8 @@ app.controller('clientesController', function($scope, $location, $rootScope, $co
         $scope.listaClientes = [];
     }
 
-
-    $scope.buscar= function(){
-        var obj  = {
-            "ruc": $scope.datos.ruc,
-            "nombre": $scope.datos.nombre
-        };
-        var json = angular.toJson(obj);
-        //var encoJson = encodeURIComponent(json)
-        ClientesService.listar(json).then(function(response){
+    $scope.buscar = function() {
+        ClientesService.listar($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.listaClientes = response.data;
             }else{
@@ -374,9 +379,9 @@ app.controller('agregarClientesController', function($scope, $location, $rootSco
 app.service('ClientesService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
-    this.listar= function(datos) {
-        //var jsonObj = angular.toJson(datos);
-        var encoJson = encodeURIComponent(datos);
+    this.listar = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/clientes/listar?paramJson='+encoJson)
             .then(function (response) {
                 return response;

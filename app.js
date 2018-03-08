@@ -250,6 +250,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/personas/usuario-sucursal/agregar-usuario-sucursal.html',
             controller  : 'agregarUsuarioSucursalController'
         })
+        .when('/usuario-sucursal/modificar', {
+            templateUrl : 'pages/personas/usuario-sucursal/modificar-usuario-sucursal.html',
+            controller  : 'modificarUsuarioSucursalController'
+        })
 
         .when('/cuentas-bancarias', {
             templateUrl : 'pages/cuentas-bancarias/cuentas-bancarias.html',
@@ -4632,6 +4636,68 @@ app.controller('agregarUsuarioSucursalController', function($scope, $location,Us
     init();
 });
 
+app.controller('modificarUsuarioSucursalController', function($scope, $location,UsuarioSucursalService , ValoresService, UsuariosService, $rootScope, $dialogs, $timeout) {
+    $scope.datos = {};
+    $scope.listaTaller=[];
+    $scope.listaUsuarios=[];
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+    $scope.listarUsuarios= function(){
+        var json = angular.toJson({});
+        UsuariosService.listarComplex(json).then(function(response){
+            if(response.status == 200){
+                $scope.listaUsuarios = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+
+    $scope.guardar = function() {
+        UsuarioSucursalService.modificar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
+
+            if(response.status == 200){
+                $location.path( '/usuario-sucursal' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/usuario-sucursal' );
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+
+            $scope.$apply();
+        }, 1000)
+        $scope.listarTaller();
+        $scope.listarUsuarios();
+    }
+
+    init();
+});
+
 app.service('UsuarioSucursalService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -6327,15 +6393,17 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
                     $scope.datos.ruc = response.data[0].ruc;
                     $scope.datos.cedula = response.data[0].cedula;
                     $scope.datos.telefono = response.data[0].telefono;
-                    $scope.datos.celularPrimario = response.data[0].celularPrimario;
-                    $scope.datos.fechaNacimiento = response.data[0].fechaNacimiento;
+                    $scope.datos.celularPrincipal = response.data[0].celularPrincipal;
+                    $scope.datos.celularSecundario = response.data[0].celularSecundario;
+                    var fecha  = new Date(response.data[0].fechaNacimiento);
+                    $scope.datos.fechaNacimiento = fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth())+'-'+formatMesDia(fecha.getDate());
                     $scope.datos.nacionalidad = response.data[0].nacionalidad;
                     $scope.datos.pais = response.data[0].pais;
                     $scope.datos.ciudad = response.data[0].ciudad;
                     $scope.datos.barrio = response.data[0].barrio;
                     $scope.datos.direccion = response.data[0].direccion;
                     $scope.datos.correoElectronico = response.data[0].correoElectronico;
-                    $scope.datos.sexo = response.data[0].sexo;
+                    $scope.datos.sexo = response.data[0].sexo.trim();
                 }
                 else{
                     $scope.existeEnPersonas = false;
@@ -6352,6 +6420,14 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
                 $scope.bloquearCamposSecundarios=false;
             }
         })
+    }
+
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
     }
 
     $scope.listarPaises = function(){
