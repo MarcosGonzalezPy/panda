@@ -146,13 +146,13 @@
         <div class="form-group">
             <div class="col-sm-offset-5 col-sm-10">
                 </br>
+                <input  type="button" ng-click="asignarClientes()"  class="btn btn-info btn-sm" value="Asignar Cliente"
+                        ng-disabled = "!existeEnPersonas" ng-show="mostrarClientes"/>
                 <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"
                         ng-disabled = "!datos.cedula || !datos.ruc || !datos.nombre || !datos.apellido || !datos.fechaNacimiento || !datos.nacionalidad || !datos.pais
                                         || !datos.ciudad || !datos.barrio || !datos.direccion || !datos.correoElectronico  || !datos.sexo
                                         || !datos.telefono || !datos.celularPrincipal || !datos.celularSecundario" />
-
                 <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
-
                 <input  type="button" ng-click="asignarProveedor()"  class="btn btn-info btn-sm" value="Asignar Proveedor"
                         ng-disabled = "!existeEnPersonas" ng-show="mostrarProveedor"/>
             </div>

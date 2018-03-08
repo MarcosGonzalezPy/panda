@@ -6488,6 +6488,9 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
     $scope.cancelar = function(){
         if($scope.mostrarProveedor==true){
             $location.path( '/proveedores' );
+        }
+        if($scope.mostrarClientes==true){
+            $location.path( '/clientes' );
         }else{
             $location.path( '/personas' );
         }
@@ -6495,6 +6498,10 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
 
     $scope.asignarProveedor = function(){
             $location.path( '/proveedores/agregar').search({param: $scope.datosAux, other:'ok'});
+    }
+
+    $scope.asignarClientes = function(){
+        $location.path( '/clientes/agregar').search({param: $scope.datosAux, other:'ok'});
     }
 
     $scope.agregar = function() {
@@ -6529,6 +6536,11 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         if(  urlParams == 'proveedor'){
             $scope.mostrarProveedor=true
             $scope.titulo = "Proveedor";
+
+        }
+        if(  urlParams == 'clientes'){
+            $scope.mostrarClientes=true
+            $scope.titulo = "Clientes";
 
         }
         else if(  urlParams == 'usuario'){
