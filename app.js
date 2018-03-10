@@ -1691,10 +1691,11 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
         $scope.buscarCliente();
         $scope.datos.responsable = $cookies.usuario;
         var fecha= new Date();
-        var a = formatearDiaMes(fecha.getDay());
-        var b = formatearDiaMes(fecha.getMonth());
+        var a = formatearDiaMes(fecha.getDate());
+        var b = formatearDiaMes(fecha.getMonth()+1);
         var c = fecha.getFullYear();
-        $scope.datos.fecha = a+ '/'+ b +'/'+ c;
+        $scope.datos.fecha = c+ '/'+ b +'/'+ a  +' 00:00:00';
+        //$scope.datos.fecha = new Date();
         $scope.secuencia();
         $scope.listarTaller();
         $scope.listarModelos();
@@ -5827,8 +5828,15 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         $scope.datos.estado =  urlParams.estado;
         $scope.datos.usuario =  $cookies.usuario;
         $scope.datos.sucursal =  urlParams.lugar;
+        $scope.datos.paso =  urlParams.paso;
         $scope.buscarArticuloExistente();
-        $scope.secuencia();
+        if($scope.datos.paso ==1){
+            $scope.secuencia();//PARA CARGAR LA SECUENCIA DE LA FACTURA
+        }else{
+            //buscarCotizacion
+            alert("Buscar cotizacion");
+        }
+
     }
 
     init();
@@ -5977,6 +5985,7 @@ app.controller('modificarIngresarEquipoController', function($scope, $location, 
         $scope.datos.secuencia =  urlParams.secuencia;
         $scope.datos.responsable =  urlParams.responsable;
         //$scope.datos.sucursal = urlParams.lugar;
+        var fechaFormateada = new Date(urlParams.fecha);
         $scope.datos.fecha =  urlParams.fecha;
         $scope.datos.observacion =  urlParams.observacion;
         //$scope.buscarCliente();
@@ -7016,6 +7025,14 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
     $scope.listaRoles = [];
     $scope.listaPersonas ={};
 
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
+    }
+
     $scope.listarEstados = function(){
         var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
         ValoresService.listarJson(json).then(function(response){
@@ -7118,7 +7135,11 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
             $scope.datos.telefono = urlParams.telefono;
             $scope.datos.celularPrincipal = urlParams.celularPrincipal;
             $scope.datos.celularSecundario = urlParams.celularSecundario;
-            $scope.datos.fechaNacimiento = urlParams.fechaNacimiento;
+            var fecha =  new Date(urlParams.fechaNacimiento);
+            var mes =   formatMesDia(fecha.getMonth());
+            var fechaformateada =  fecha.getFullYear() +'-'+mes+'-'+formatMesDia(fecha.getDate());
+            //$scope.datos2.fechaEntrega =  fechaformateada;
+            $scope.datos.fechaNacimiento = fechaformateada;//'15-01-1980';//fecha;
             $scope.datos.nacionalidad = urlParams.nacionalidad;
             $scope.datos.pais = urlParams.pais;
             $scope.datos.ciudad = urlParams.ciudad;
