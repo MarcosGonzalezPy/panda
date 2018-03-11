@@ -133,7 +133,9 @@
                         <td>{{item.impuesto}}</td>
                         <td>{{item.total}}</td>
                         <td>
-                            <input type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />
+                            <div ng-show="item.recuperado != 'S'">
+                                <input type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />
+                            </div>
                         </td>
                     </tr>
                     </tbody>

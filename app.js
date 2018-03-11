@@ -227,6 +227,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/prueba.html',
             controller  : 'dialogServiceTest'
         })
+        .when('/reportes', {
+            templateUrl : 'pages/reportes/reporte.html',
+            controller  : 'reporte'
+        })
 
         //Agregados por Aurora Inicio
 
@@ -4432,6 +4436,16 @@ app.service('VentasService', function($http) {
         return myResponseData;
     }
 
+    this.listarDetalleAprovadoReparacion = function(secuencia) {
+
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/listar-detalle-aprovado-reparacion/'+secuencia)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
 });
 
 
@@ -5792,6 +5806,11 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
 
     $scope.guardar = function(){//LOL
         var lista = angular.copy($scope.lista);
+        for(var j = lista.length; j--;){
+            if(lista[j].recuperado == 'S'){
+                lista.splice(j,1);
+            }
+        }
         var circuitoServicio = {
             secuencia: $scope.datos.secuencia,
             estado: 'SERV_PEND_APRO',
@@ -5818,6 +5837,19 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         })
     }
 
+    $scope.listarDetalleAprovadoReparacion = function(){
+        VentasService.listarDetalleAprovadoReparacion($scope.datos.secuencia).then(function(response){
+            if(response.status ==200){
+                $scope.lista = response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].recuperado = 'S';
+                }
+            }else{
+                alert("Error al cargar los modelos");
+            }
+        })
+    }
+
     var init = function(){
         var urlParams = $location.search().param;
         if(typeof urlParams.secuencia == 'undefined'){
@@ -5835,6 +5867,7 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         }else{
             //buscarCotizacion
             alert("Buscar cotizacion");
+            $scope.listarDetalleAprovadoReparacion();
         }
 
     }
@@ -7256,6 +7289,27 @@ app.directive('uppercase', function() {
     };
 });
 
+app.directive('format-prueba', ['$filter', function ($filter) {
+        return {
+            require: '?ngModel',
+            link: function (scope, elem, attrs, ctrl) {
+                if (!ctrl) return;
+
+                var symbol = "°"; // dummy usage
+
+                ctrl.$formatters.unshift(function (a) {
+                    return $filter(attrs.format)(ctrl.$modelValue) +  symbol;
+                });
+
+                ctrl.$parsers.unshift(function (viewValue) {
+                    var plainNumber = viewValue.replace(/[^\d|\-+|\.+]/g, '');
+                    elem.val($filter('number')(plainNumber) + symbol);
+                    return plainNumber;
+                });
+            }
+        };
+}]);
+
 app.controller('repararController', function($scope, $location, $rootScope, $cookies, $dialogs, ServiciosService) {
     $scope.datos = {};
 
@@ -7362,6 +7416,71 @@ app.controller('historialController', function($scope, $location, $rootScope, $c
 
     init();
 });
+
+
+app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, $window, ValoresService) {
+    $scope.datos = {};
+
+
+    $scope.listarModulos = function(){
+        var json =angular.toJson({"dominio":"MODULOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaModelos = response.data;
+            }else{
+                alert("Error al cargar los modelos");
+            }
+        })
+    }
+
+    $scope.listarReportes = function(){
+        if($scope.datos.modulo){
+
+        }
+    }
+
+
+    $scope.reportePrueba = function(){
+         $window.open('http://localhost:8081/jasperserver/rest_v2/reports/reports/prueba2.pdf', '_blank');
+    }
+
+    $scope.openTab= function(url){
+        $window.open(url);
+    }
+
+    var init= function(){
+
+    }
+
+    init();
+
+});
+
+app.service('ReportesService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listarComplex = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/complex/' +encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarById = function(cedula){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/eliminar-id/'+cedula)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
+});
+
+
 
 
 

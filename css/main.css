@@ -413,5 +413,51 @@ fieldset[disabled] .btn-blanco.active {
     background-color: #000000;
 }
 
+.btn-lila {
+    color: #ffffff;
+    background-color: #611BBD;
+    border-color: #130269;
+}
+
+.btn-lila:hover,
+.btn-lila:focus,
+.btn-lila:active,
+.btn-lila.active,
+.open .dropdown-toggle.btn-lila {
+    color: #ffffff;
+    background-color: #49247A;
+    border-color: #130269;
+}
+
+.btn-lila:active,
+.btn-lila.active,
+.open .dropdown-toggle.btn-lila {
+    background-image: none;
+}
+
+.btn-lila.disabled,
+.btn-lila[disabled],
+fieldset[disabled] .btn-lila,
+.btn-lila.disabled:hover,
+.btn-lila[disabled]:hover,
+fieldset[disabled] .btn-lila:hover,
+.btn-lila.disabled:focus,
+.btn-lila[disabled]:focus,
+fieldset[disabled] .btn-lila:focus,
+.btn-lila.disabled:active,
+.btn-lila[disabled]:active,
+fieldset[disabled] .btn-lila:active,
+.btn-lila.disabled.active,
+.btn-lila[disabled].active,
+fieldset[disabled] .btn-lila.active {
+    background-color: #611BBD;
+    border-color: #130269;
+}
+
+.btn-lila .badge {
+    color: #611BBD;
+    background-color: #ffffff;
+}
+
 
 
