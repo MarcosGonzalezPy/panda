@@ -5,23 +5,21 @@
     <div class="panel-heading">Usuarios Sucursal</div>
     <div class="panel-body" >
         <form ng-submit="buscar()" class="form-horizontal">
-            <div class="col-sm-6">
+            <div class="col-sm-4">
             <div class="form-group">
-                <label class="col-sm-4 control-label">Usuario Sucursal</label>
-                <div class="col-sm-4">
+                <label class="col-sm-6 control-label">Usuario Sucursal</label>
+                <div class="col-sm-6">
                     <input autofocus  maxlength="20"  primary type="text" class="form-control input-sm" ng-model="datos.usuario"/>
                 </div>
             </div>
             </div>
+            <div class="col-sm-4">
             <div class="form-group">
-                <label class="col-sm-2 control-label">Sucursal</label>
-                <div class="col-sm-3">
-                    <select class="col-sm-2 form-control" ng-model=datos.sucursal>
-                        <option value> --Seleccionar --</option>
-                        <option ng-repeat="c in listaTaller"
-                                value="{{c.valor}}">{{c.valor}}</option>
-                    </select>
+                <label class="col-sm-4 control-label">Sucursal</label>
+                <div class="col-sm-6">
+                    <input autofocus  maxlength="20"  primary type="text" class="form-control input-sm" ng-model="datos.sucursal"/>
                 </div>
+            </div>
             </div>
 
             <div class="form-group">

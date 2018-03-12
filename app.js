@@ -4520,7 +4520,7 @@ app.service('SaldoClienteService', function($http) {
 });
 
 
-app.controller('usuarioSucursalController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuarioSucursalService) {
+app.controller('usuarioSucursalController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuarioSucursalService, ValoresService) {
     $scope.datos = {};
 
     $scope.limpiar = function() {
@@ -4577,8 +4577,12 @@ app.controller('usuarioSucursalController', function($scope, $location, $rootSco
         //$scope.listaDominios.splice(index, 1);
     }
 
-    var init = function () {
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/usuario-sucursal/modificar').search({param: element, other:'ok'});
+    }
 
+    var init = function () {
     }
 
     init();
@@ -4662,17 +4666,15 @@ app.controller('modificarUsuarioSucursalController', function($scope, $location,
         })
     }
 
-
     $scope.guardar = function() {
-        UsuarioSucursalService.modificar($scope.datos.usuario, $scope.datos.sucursal).then(function(response){
+        UsuarioSucursalService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data == "true"){
 
-            if(response.status == 200){
-                $location.path( '/usuario-sucursal' );
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
             }
-
         })
     }
 
@@ -4682,20 +4684,24 @@ app.controller('modificarUsuarioSucursalController', function($scope, $location,
 
     var init = function(){
         var urlParams = $location.search().param;
-        if(typeof urlParams.codigo == 'undefined'){
+        if(typeof urlParams.usuario == 'undefined'){
             $scope.cancelar();
         }
 
-        $timeout( function (){
-            $scope.datos.codigo = urlParams.codigo;
+    $scope.listarTaller();
+    $scope.listarUsuarios();
 
-            $scope.$apply();
-        }, 1000)
-        $scope.listarTaller();
-        $scope.listarUsuarios();
+    $timeout( function (){
+        $scope.datos.usuario = urlParams.usuario.trim();
+        $scope.datos.sucursal = urlParams.sucursal.trim();
+
+        $scope.$apply();
+    }, 1000)
     }
 
     init();
+
+
 });
 
 app.service('UsuarioSucursalService', function($http) {
@@ -4715,11 +4721,7 @@ app.service('UsuarioSucursalService', function($http) {
     }
 
     this.listar = function(datos) {
-        var obj={
-            "usuario":datos.usuario,
-            "sucursal":datos.sucursal
-        }
-        var json = angular.toJson(obj);
+        var json = angular.toJson(datos);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal?paramJson='+encoJson)
             .then(function (response) {
@@ -4738,6 +4740,20 @@ app.service('UsuarioSucursalService', function($http) {
 
     this.insertar = function(usuario, sucursal){
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/insertar/'+usuario+'/'+sucursal)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificar = function (datos){
+        var obj = {
+            "usuario":datos.usuario,
+            "sucursal":datos.sucursal
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/modificar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });

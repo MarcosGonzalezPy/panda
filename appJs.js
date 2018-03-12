@@ -72,7 +72,7 @@ app.controller('agregarProveedoresController', function($scope, $location, $root
 
     $scope.datos = {};
     $scope.existeEnProveedor = false;
-    $scope.habilitarAgregar = true;
+    //$scope.habilitarAgregar = true;
 
 
 
@@ -387,6 +387,8 @@ app.controller('agregarClientesController', function($scope, $location, $rootSco
         }
         $scope.datos.codigo= urlParams.codigo;
         $scope.buscarExisteClientes();
+        $scope.datos.sucursal;
+        $scope.datos.usuario;
     }
 
     init();
