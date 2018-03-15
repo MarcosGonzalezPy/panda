@@ -41,12 +41,12 @@
                         <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.apellido"/>
                     </div>
                 </div>
-                <div class="form-group margin-bottom-5">
+              <!--  <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Fecha Nac.</label>
                     <div class="col-sm-6">
                         <input maxlength="50" class="form-control input-sm"  required primary type="date"  ng-model="datos.fechaNacimiento"/>
                     </div>
-                </div>
+                </div>-->
             </div>
 
             <div class="col-lg-4">
@@ -153,7 +153,7 @@
             <div class="col-sm-offset-5 col-sm-10">
                 <!--|| !datos.descripcion || !datos.dominio-->
                 </br>
-                <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                <input  type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
 
                 <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
             </div>

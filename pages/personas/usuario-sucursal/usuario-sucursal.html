@@ -5,20 +5,22 @@
     <div class="panel-heading">Usuarios Sucursal</div>
     <div class="panel-body" >
         <form ng-submit="buscar()" class="form-horizontal">
+            <div class="col-sm-4">
             <div class="form-group">
-                <label class="col-sm-2 control-label">Usuario Sucursal</label>
-                <div class="col-sm-3">
+                <label class="col-sm-6 control-label">Usuario Sucursal</label>
+                <div class="col-sm-6">
                     <input autofocus  maxlength="20"  primary type="text" class="form-control input-sm" ng-model="datos.usuario"/>
                 </div>
             </div>
-
+            </div>
+            <div class="col-sm-4">
             <div class="form-group">
-                <label class="col-sm-2 control-label">Sucursal</label>
-                <div class="col-sm-5">
-                    <input  type="text" class="form-control input-sm" ng-model="datos.sucursal " maxlength="20"/>
+                <label class="col-sm-4 control-label">Sucursal</label>
+                <div class="col-sm-6">
+                    <input autofocus  maxlength="20"  primary type="text" class="form-control input-sm" ng-model="datos.sucursal"/>
                 </div>
             </div>
-
+            </div>
 
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
@@ -50,6 +52,7 @@
 
                 <td>
                     <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
                 </td>
 
             </tr>

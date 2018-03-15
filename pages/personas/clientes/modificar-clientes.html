@@ -7,7 +7,7 @@
 <!--</head>-->
 
 <div class="panel panel-primary">
-    <div class="panel-heading">Agregar Clientes</div>
+    <div class="panel-heading">Actualizar Clientes</div>
     <div class="panel-body padding-minimo" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-4">
@@ -41,8 +41,8 @@
             <div class="form-group">
                 <div class="col-sm-offset-5 col-sm-10">
                     </br>
-                    <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"
-                            ng-disabled = " !datos.codigo || !datos.razonSocial || !datos.limiteCredito"/>
+                    <input  type="button" ng-click="guardar()"  class="btn btn-primary btn-sm" value="Guardar"
+                            ng-disabled = "!datos.razonSocial || !datos.limiteCredito"/>
 
                     <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
                 </div>

@@ -7,38 +7,42 @@
 <!--</head>-->
 
 <div class="panel panel-primary">
-    <div class="panel-heading">Agregar Personas</div>
+    <div class="panel-heading">Agregar Personas {{titulo}}</div>
     <div class="panel-body padding-minimo" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-4">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Cedula</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.cedula"/>
+                        <input  class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.cedula"
+                               ng-blur= "habilitarCamposSecundarios()"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">RUC</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.ruc"/>
+                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.ruc"
+                               ng-disabled="bloquearCamposSecundarios" />
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Nombre</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.nombre"/>
+                        <input style="text-transform:uppercase" class="form-control input-sm" maxlength="50" required primary type="text"  ng-model="datos.nombre"
+                               ng-disabled="bloquearCamposSecundarios" />
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Apellido</label>
                     <div class="col-sm-8">
-                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.apellido"/>
+                        <input style="text-transform:uppercase" maxlength="50" class="form-control input-sm"  required primary type="text"  ng-model="datos.apellido"
+                               ng-disabled="bloquearCamposSecundarios" />
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Fecha Nac.</label>
                     <div class="col-sm-6">
-                        <input maxlength="50" class="form-control input-sm"  required primary type="date"  ng-model="datos.fechaNacimiento"/>
+                        <input maxlength="50" ng-disabled="bloquearCamposSecundarios" class="form-control input-sm"  required primary type="date"  ng-model="datos.fechaNacimiento"/>
                     </div>
                 </div>
             </div>
@@ -47,32 +51,36 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">E-mail</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.correoElectronico"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.correoElectronico"
+                               ng-disabled="bloquearCamposSecundarios" />
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Telefono</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.telefono"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.telefono"
+                               ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Celular</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.celularPrincipal"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.celularPrincipal"
+                               ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Celular Sec.</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.celularSecundario"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.celularSecundario"
+                               ng-disabled="bloquearCamposSecundarios"/>
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Sexo</label>
                     <div class="col-sm-6">
                         <select id="sexo"   class="form-control input-sm"
-                                ng-model=datos.sexo>
+                                ng-model="datos.sexo" ng-disabled="bloquearCamposSecundarios">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaSexos"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -86,7 +94,7 @@
                     <label class="col-sm-4 control-label">Nacionalidad</label>
                     <div class="col-sm-8">
                         <select id="pacionalidad"  class="form-control input-sm"
-                                ng-model=datos.nacionalidad>
+                                ng-model=datos.nacionalidad ng-disabled="bloquearCamposSecundarios" >
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaNacionalidades"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -97,7 +105,7 @@
                     <label class="col-sm-4 control-label">Pais</label>
                     <div class="col-sm-8">
                         <select id="pais" class="form-control input-sm"
-                                ng-model=datos.pais>
+                                ng-model=datos.pais ng-disabled="bloquearCamposSecundarios" >
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaPaises"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -108,7 +116,7 @@
                     <label class="col-sm-4 control-label">Ciudad</label>
                     <div class="col-sm-8">
                         <select id="ciudad"  class="form-control input-sm"
-                                ng-model=datos.ciudad>
+                                ng-model=datos.ciudad ng-disabled="bloquearCamposSecundarios" >
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaCiudades"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -119,7 +127,7 @@
                     <label class="col-sm-4 control-label">Barrio</label>
                     <div class="col-sm-8">
                         <select id="barrio"  class="form-control input-sm"
-                                ng-model=datos.barrio>
+                                ng-model=datos.barrio ng-disabled="bloquearCamposSecundarios" >
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaBarrios"
                                     value="{{c.valor}}">{{c.valor}}</option>
@@ -129,7 +137,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Direccion</label>
                     <div class="col-sm-8">
-                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.direccion"/>
+                        <input maxlength="50" class="form-control input-sm" required primary type="text"  ng-model="datos.direccion" ng-disabled="bloquearCamposSecundarios" />
                     </div>
                 </div>
             </div>
@@ -137,11 +145,18 @@
 
         <div class="form-group">
             <div class="col-sm-offset-5 col-sm-10">
-                <!--|| !datos.descripcion || !datos.dominio-->
                 </br>
-                <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
-
+                <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"
+                        ng-disabled = "!datos.cedula || !datos.ruc || !datos.nombre || !datos.apellido || !datos.fechaNacimiento || !datos.nacionalidad || !datos.pais
+                                        || !datos.ciudad || !datos.barrio || !datos.direccion || !datos.correoElectronico  || !datos.sexo
+                                        || !datos.telefono || !datos.celularPrincipal || !datos.celularSecundario" />
                 <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                <input  type="button" ng-click="asignarProveedor()"  class="btn btn-info btn-sm" value="Asignar Proveedor"
+                        ng-disabled = "!existeEnPersonas" ng-show="mostrarProveedor"/>
+                <input  type="button" ng-click="asignarClientes()"  class="btn btn-info btn-sm" value="Asignar Cliente"
+                        ng-disabled = "!existeEnPersonas" ng-show="mostrarClientes"/>
+                <input  type="button" ng-click="asignarUsuarios()"  class="btn btn-info btn-sm" value="Asignar Usuarios"
+                        ng-disabled = "!existeEnPersonas" ng-show="mostrarUsuarios"/>
             </div>
         </div>
 

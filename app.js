@@ -98,6 +98,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/personas/clientes/agregar-clientes.html',
             controller  : 'agregarClientesController'
         })
+        .when('/clientes/modificar', {
+            templateUrl : 'pages/personas/clientes/modificar-clientes.html',
+            controller  :  'modificarClientesController'
+        })
         .when('/usuarios', {
             templateUrl : 'pages/personas/usuarios/usuarios.html',
             controller  : 'usuariosController'
@@ -254,6 +258,10 @@ app.config(function($routeProvider) {
         .when('/usuario-sucursal/agregar', {
             templateUrl : 'pages/personas/usuario-sucursal/agregar-usuario-sucursal.html',
             controller  : 'agregarUsuarioSucursalController'
+        })
+        .when('/usuario-sucursal/modificar', {
+            templateUrl : 'pages/personas/usuario-sucursal/modificar-usuario-sucursal.html',
+            controller  : 'modificarUsuarioSucursalController'
         })
 
         .when('/cuentas-bancarias', {
@@ -1710,98 +1718,6 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
      init();
 });
 
-
-app.controller('agregarClientesController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, PersonasService) {
-    $scope.datos = {};
-    $scope.listaPaises= [];
-    $scope.listaCiudades= [];
-    $scope.listaBarrios= [];
-    $scope.listaSexos= [];
-    $scope.listaNacionalidades =[];
-
-    $scope.listarPaises = function(){
-        var json = angular.toJson({"dominio":"PAISES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status == 200){
-                 $scope.listaPaises = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarCiudades = function(){
-        var json =angular.toJson({"dominio":"CIUDADES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaCiudades = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarBarrios = function(){
-        var json =angular.toJson({"dominio":"BARRIOS"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaBarrios = response.data;
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    $scope.listarSexos = function(){
-        var json =angular.toJson({"dominio":"SEXO"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaSexos = response.data;
-            }else{
-                alert("Error al cargar los sexos");
-            }
-        })
-    }
-
-    $scope.listarNacionalidades = function(){
-        var json =angular.toJson({"dominio":"NACIONALIDAD"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaNacionalidades = response.data;
-            }else{
-                alert("Error al cargar las Nacionalidades");
-            }
-        })
-    }
-
-    $scope.cancelar = function(){
-        $location.path( '/clientes' );
-    }
-
-    $scope.agregar = function() {
-        ClientesService.insertar($scope.datos).then(function(response){
-            if(response.status == 200){
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
-                $scope.cancelar();
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
-            }
-        })
-    }
-
-
-
-    var init = function(){
-        $scope.listarPaises();
-        $scope.listarCiudades();
-        $scope.listarBarrios();
-        $scope.listarSexos();
-        $scope.listarNacionalidades();
-    }
-
-    init();
-});
-
 app.controller('agregarArticulosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ArticulosService) {
     $scope.datos = {};
     $scope.listaModelos=[];
@@ -1891,93 +1807,6 @@ app.controller('agregarArticulosController', function($scope, $location, $rootSc
     }
 
     init();
-});
-
-app.controller('clientesController', function($scope, $location, $rootScope, $cookies, $dialogs, PersonasService) {
-    $scope.datos = {};
-    $scope.listaClientes=[];
-
-    $scope.agregar = function() {
-        $location.path( '/clientes/agregar' );
-
-    }
-
-    $scope.limpiar = function() {
-        $scope.datos = {};
-        $scope.listaClientes = [];
-    }
-
-
-    $scope.buscar= function(){
-        var obj  = {
-            "ruc": $scope.datos.ruc,
-            "nombre": $scope.datos.nombre
-        };
-        var json = angular.toJson(obj);
-        //var encoJson = encodeURIComponent(json)
-        PersonasService.listarComplex(json).then(function(response){
-            if(response.status == 200){
-                $scope.listaClientes = response.data;
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-            }
-        })
-    }
-
-    var init = function () {
-
-    }
-
-    init();
-});
-
-app.service('ClientesService', function($http) {
-    delete $http.defaults.headers.common['X-Requested-With'];
-
-    this.listarComplex = function(json) {
-        //var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/dominios/{"codigo":"PAISES"}')
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/clientes/complex?paramJson='+json)
-            .then(function (response) {
-                return response;
-            });
-        return myResponseData;
-    }
-
-    this.eliminar = function(id){
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/clientes/delete/'+id)
-            .then(function (response) {
-                return response;
-            });
-        return myResponseData;
-    }
-
-    this.insertar = function(datos){
-        var obj = {
-            "nombre":datos.nombre,
-            "apellido":datos.apellido,
-            "cedula":datos.cedula,
-            "fechaNacimiento":datos.fechaNacimiento,
-            "nacionalidad": datos.nacionalidad,
-            "pais": datos.pais,
-            "ciudad": datos.ciudad,
-            "barrio": datos.barrio,
-            "direccion": datos.direccion,
-            "correoElectronico": datos.correoElectronico,
-            "ruc": datos.ruc,
-            "sexo": datos.sexo,
-            "telefono": datos.telefono,
-            "celular1": datos.celular
-        }
-        var json = angular.toJson(obj);
-        var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/clientes/insertar?paramJson='+encoJson)
-            .then(function (response) {
-                return response;
-            });
-        return myResponseData;
-    }
-
-
 });
 
 app.service('ServiciosService', function($http) {
@@ -3233,17 +3062,6 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
     $scope.datos = {};
     $scope.listaUsuarios=[];
 
-    $scope.agregar = function() {
-        $location.path( '/usuarios/agregar' );
-
-    }
-
-    $scope.modificar = function(index) {
-        $rootScope.usuario = $scope.listaUsuarios[index];
-        $location.path( '/usuarios/modificar' );
-
-    }
-
     $scope.limpiar = function() {
         $scope.datos = {};
         $scope.listaUsuarios = [];
@@ -3263,6 +3081,49 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
+    }
+
+
+    $scope.agregar = function() {
+        $location.path( '/personas/agregar').search({param:'usuarios'});
+
+    }
+
+    $scope.modificar = function(index) {
+        $rootScope.usuario = $scope.listaUsuarios[index];
+        $location.path( '/usuarios/modificar' );
+
+    }
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            //alert(resultado);
+
+            ProveedoresService.eliminarById(element.codigo).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
     }
 
     var init = function () {
@@ -3328,72 +3189,65 @@ app.service('UsuariosService', function($http) {
         return myResponseData;
     }
 
+    this.listarPorCodigo = function(datos) {
+        var obj = {  "codigo": datos.codigo                     }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/listarCodigo/'+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
 
 });
 
 
-app.controller('agregarUsuariosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, UsuariosService, RolesService) {
+app.controller('agregarUsuariosController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, RolesService, $timeout) {
     $scope.datos = {};
-    $scope.listaPaises= [];
-    $scope.listaCiudades= [];
-    $scope.listaBarrios= [];
-    $scope.listaSexos= [];
-    $scope.listaNacionalidades =[];
+    $scope.datosAux = {};
     $scope.listaRoles = [];
+    $scope.existeEnUsuarios = false;
+    $scope.habilitarAgregar = true;
 
-    $scope.listarPaises = function(){
-        var json = angular.toJson({"dominio":"PAISES"});
-        ValoresService.listarJson(json).then(function(response){
+    $scope.buscarExisteUsuarios= function(){
+        $scope.datosAux;
+        UsuariosService.listarPorCodigo($scope.datosAux).then(function(response){
             if(response.status == 200){
-                $scope.listaPaises = response.data;
+                if(response.data.length>1){
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }else if(response.data.length==1){
+                    $scope.existeEnUsuarios = true;
+                    $scope.datos.codigo = response.data[0].codigo;
+                    $scope.datos.usuario = response.data[0].usuario;
+                    $scope.datos.contrasenha = response.data[0].contrasenha;
+                    $scope.datos.rol = response.data[0].rol;
+                    $scope.datos.resetear = response.data[0].resetear;
+                }
+                else{
+                    $scope.existeEnUsuarios = false;
+                }
             }else{
-                alert("Error al cargar los paises");
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+            if($scope.existeEnUsuarios==true){
+                $scope.bloquearCamposSecundarios=true;
+            }
+            else{
+                $scope.bloquearCamposSecundarios=false;
             }
         })
     }
 
-    $scope.listarCiudades = function(){
-        var json =angular.toJson({"dominio":"CIUDADES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaCiudades = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
+    $scope.habilitarCamposSecundarios= function(){
+        if( $scope.datos.codigo ){
+            $scope.buscarExisteUsuarios();
 
-    $scope.listarBarrios = function(){
-        var json =angular.toJson({"dominio":"BARRIOS"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaBarrios = response.data;
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    $scope.listarSexos = function(){
-        var json =angular.toJson({"dominio":"SEXO"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaSexos = response.data;
-            }else{
-                alert("Error al cargar los sexos");
-            }
-        })
-    }
-
-    $scope.listarNacionalidades = function(){
-        var json =angular.toJson({"dominio":"NACIONALIDAD"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaNacionalidades = response.data;
-            }else{
-                alert("Error al cargar las Nacionalidades");
-            }
-        })
+        }else{
+            $scope.bloquearCamposSecundarios=false;
+        }
     }
 
     $scope.cancelar = function(){
@@ -3422,12 +3276,19 @@ app.controller('agregarUsuariosController', function($scope, $location, $rootSco
     }
 
     var init = function(){
-        $scope.listarPaises();
-        $scope.listarCiudades();
-        $scope.listarBarrios();
-        $scope.listarSexos();
-        $scope.listarNacionalidades();
+        $scope.bloquearCamposSecundarios=true;
         $scope.listarRoles();
+
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $timeout( function (){
+        $scope.datos.codigo= urlParams.codigo;
+        $scope.datosAux.codigo= urlParams.codigo;
+        $scope.buscarExisteUsuarios();
+            $scope.$apply();
+        }, 1000)
     }
 
     init();
@@ -4821,7 +4682,7 @@ app.service('SaldoClienteService', function($http) {
 });
 
 
-app.controller('usuarioSucursalController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuarioSucursalService) {
+app.controller('usuarioSucursalController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuarioSucursalService, ValoresService) {
     $scope.datos = {};
 
     $scope.limpiar = function() {
@@ -4878,8 +4739,12 @@ app.controller('usuarioSucursalController', function($scope, $location, $rootSco
         //$scope.listaDominios.splice(index, 1);
     }
 
-    var init = function () {
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/usuario-sucursal/modificar').search({param: element, other:'ok'});
+    }
 
+    var init = function () {
     }
 
     init();
@@ -4937,6 +4802,70 @@ app.controller('agregarUsuarioSucursalController', function($scope, $location,Us
     init();
 });
 
+app.controller('modificarUsuarioSucursalController', function($scope, $location,UsuarioSucursalService , ValoresService, UsuariosService, $rootScope, $dialogs, $timeout) {
+    $scope.datos = {};
+    $scope.listaTaller=[];
+    $scope.listaUsuarios=[];
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+    $scope.listarUsuarios= function(){
+        var json = angular.toJson({});
+        UsuariosService.listarComplex(json).then(function(response){
+            if(response.status == 200){
+                $scope.listaUsuarios = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.guardar = function() {
+        UsuarioSucursalService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data == "true"){
+
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/usuario-sucursal' );
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.usuario == 'undefined'){
+            $scope.cancelar();
+        }
+
+    $scope.listarTaller();
+    $scope.listarUsuarios();
+
+    $timeout( function (){
+        $scope.datos.usuario = urlParams.usuario.trim();
+        $scope.datos.sucursal = urlParams.sucursal.trim();
+
+        $scope.$apply();
+    }, 1000)
+    }
+
+    init();
+
+
+});
+
 app.service('UsuarioSucursalService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -4954,11 +4883,7 @@ app.service('UsuarioSucursalService', function($http) {
     }
 
     this.listar = function(datos) {
-        var obj={
-            "usuario":datos.usuario,
-            "sucursal":datos.sucursal
-        }
-        var json = angular.toJson(obj);
+        var json = angular.toJson(datos);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal?paramJson='+encoJson)
             .then(function (response) {
@@ -4977,6 +4902,20 @@ app.service('UsuarioSucursalService', function($http) {
 
     this.insertar = function(usuario, sucursal){
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/insertar/'+usuario+'/'+sucursal)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificar = function (datos){
+        var obj = {
+            "usuario":datos.usuario,
+            "sucursal":datos.sucursal
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/modificar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -6528,10 +6467,7 @@ app.controller('modificarCuentasBancariasController', function($scope, $location
     }
 
     var init = function () {
-        var urlParams = $location.search().param;
-        if(typeof urlParams.codigo == 'undefined'){
-            $scope.cancelar();
-        }
+
         $scope.listarEstados();
         $scope.listarBancos();
 
@@ -6604,276 +6540,6 @@ app.service('CuentasBancariasService', function($http) {
     }
 });
 
-    app.controller('proveedoresController', function($scope, $location, ProveedoresService, $rootScope, $dialogs) {
-
-        $scope.datos ={};
-
-        $scope.limpiar = function() {
-            $scope.datos = {};
-            $scope.lista = [];
-        }
-
-        $scope.agregar = function() {
-            $location.path( '/proveedores/agregar' );
-        }
-
-        $scope.buscar = function() {
-            ProveedoresService.listarComplex($scope.datos).then(function(response){
-                if(response.status == 200){
-                  $scope.lista = response.data;
-               }else{
-                     dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-              }
-        })
-            $scope.limpiar();
-        }
-
-        $scope.modificar = function(index) {
-            var element = $scope.lista[index];
-            $location.path( '/proveedores/modificar').search({param: element, other:'ok'});
-        }
-
-        $scope.remove = function(index) {
-            var element = $scope.lista[index];
-            dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
-            dlg.result.then(function(resultado){
-                //alert(resultado);
-
-                ProveedoresService.eliminarById(element.codigo).then(function(response){
-
-                    if(response.status == 200){
-                        var resultado = response.data;
-                        if(resultado == "true"){
-                            dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
-
-                            $scope.limpiar();
-                            $scope.buscar();
-                        }else{
-                            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
-
-                            $scope.limpiar();
-                            $scope.buscar();
-                        }
-                    }else{
-                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-                    }
-                });
-
-            },function(){
-                //$scope.name = 'You decided not to enter in your name, that makes me sad.';
-            });
-        }
-
-
-        var init = function () {
-
-        }
-
-        init();
-    });
-
-app.controller('agregarProveedoresController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, RolesService, ProveedoresService,  $timeout) {
-    $scope.datos = {};
-    $scope.listaPaises= [];
-    $scope.listaCiudades= [];
-    $scope.listaBarrios= [];
-    $scope.listaSexos= [];
-    $scope.listaNacionalidades =[];
-    $scope.listaRoles = [];
-    $scope.listaPersonas ={};
-
-    function nvl(valor1, valor2){
-        if(valor1!=null && typeof valor1 != 'undefined' && valor1!='' && valor1!= 'null')
-            return valor1;
-        return valor2
-    }
-
-    $scope.buscarPersonas= function(){
-        var obj = {
-            ruc: $scope.datos.ruc,
-            cedula: $scope.datos.cedula
-        }
-        var json = angular.toJson(obj);
-        var encoJson = encodeURIComponent(json);
-        ProveedoresService.listarPersonas(encoJson).then(function(response){
-            if(response.status == 200){
-                if(response.data.length>1){
-                    $scope.listaPersonas = response.data;
-                }else if(response.data.length==1){
-                    $scope.datos.nombre = response.data[0].nombre +" "+ response.data[0].apellido;
-                    $scope.datos.ruc =  nvl(response.data[0].ruc, response.data[0].cedula);
-                    $scope.datos.telefono = nvl( response.data[0].telefono, response.data[0].celular1);
-                    $scope.datos.codigoPersona = response.data[0].codigo;
-
-                    $scope.datos.fechaNacimiento = response.data[0].fechaNacimiento;
-                    $scope.datos.nacionalidad = response.data[0].nacionalidad;
-                    $scope.datos.pais = response.data[0].pais;
-                    $scope.datos.ciudad = response.data[0].ciudad;
-                    $scope.datos.barrio = response.data[0].barrio;
-                    $scope.datos.direccion = response.data[0].direccion;
-                    $scope.datos.correoElectronico = response.data[0].correoElectronico;
-                    $scope.datos.sexo = response.data[0].sexo;
-                }
-
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-            }
-        })
-    }
-
-    $scope.listarPaises = function(){
-        var json = angular.toJson({"dominio":"PAISES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status == 200){
-                $scope.listaPaises = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarCiudades = function(){
-        var json =angular.toJson({"dominio":"CIUDADES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaCiudades = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarBarrios = function(){
-        var json =angular.toJson({"dominio":"BARRIOS"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaBarrios = response.data;
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    $scope.listarSexos = function(){
-        var json =angular.toJson({"dominio":"SEXO"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaSexos = response.data;
-            }else{
-                alert("Error al cargar los sexos");
-            }
-        })
-    }
-
-    $scope.listarNacionalidades = function(){
-        var json =angular.toJson({"dominio":"NACIONALIDAD"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaNacionalidades = response.data;
-            }else{
-                alert("Error al cargar las Nacionalidades");
-            }
-        })
-    }
-
-    $scope.cancelar = function(){
-        $location.path( '/proveedores' );
-    }
-
-    $scope.agregar = function() {
-        ProveedoresService.insertar($scope.datos).then(function(response){
-            if(response.status == 200){
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
-                $scope.cancelar();
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
-            }
-        })
-    }
-
-    $scope.listarRoles = function(){
-        RolesService.listarDistinct().then(function(response){
-            if(response.status ==200){
-                $scope.listaRoles = response.data;
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    var init = function(){
-        $timeout( function (){
-            //$scope.datos =$rootScope.usuario;
-            $scope.listarPaises();
-            $scope.listarCiudades();
-            $scope.listarBarrios();
-            $scope.listarSexos();
-            $scope.listarNacionalidades();
-            $scope.listarRoles();
-            $scope.$apply();
-        }, 1000)
-    }
-
-    init();
-});
-
-
-    app.service('ProveedoresService', function($http) {
-        delete $http.defaults.headers.common['X-Requested-With'];
-
-        this.listarComplex = function(datos) {
-            var jsonObj = angular.toJson(datos);
-            var encoJson = encodeURIComponent(jsonObj);
-            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/proveedores/complex?paramJson='+encoJson)
-                .then(function (response) {
-                    return response;
-                });
-            return myResponseData;
-        }
-        this.insertar = function(datos){
-            var obj = {
-                "banco":datos.banco,
-                "numero":datos.numero,
-                "estado": datos.estado,
-                "usuario": datos.usuario
-            }
-            var json = angular.toJson(obj);
-            var encoJson = encodeURIComponent(json);
-            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/insertar?paramJson='+encoJson)
-                .then(function (response) {
-                    return response;
-                });
-            return myResponseData;
-        }
-
-        this.modificar = function (datos){
-            var obj = {
-                "codigo":datos.codigo,
-                "banco":datos.banco,
-                "numero":datos.numero,
-                "estado": datos.estado
-            }
-            var json = angular.toJson(obj);
-            var encoJson = encodeURIComponent(json);
-            var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/modificar?paramJson='+encoJson)
-                .then(function (response) {
-                    return response;
-                });
-            return myResponseData;
-        }
-
-        this.eliminarById = function(codigo){
-            var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/cuentas-bancarias/eliminar-id/'+codigo)
-                .then(function (response) {
-                    return response;
-                });
-            return myResponseData;
-        }
-
-    });
-
-
-
 
 app.controller('personasController', function($scope, $location, PersonasService, $rootScope, $dialogs) {
 
@@ -6885,8 +6551,6 @@ app.controller('personasController', function($scope, $location, PersonasService
     }
 
     $scope.buscar = function() {
-        $scope.datos.nombre = $scope.datos.nombre;
-        $scope.datos.ruc =  $scope.datos.cedula;
         PersonasService.listarComplex($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.lista = response.data;
@@ -6894,7 +6558,6 @@ app.controller('personasController', function($scope, $location, PersonasService
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
-        $scope.limpiar();
     }
 
     $scope.modificar = function(index) {
@@ -6946,8 +6609,9 @@ app.controller('personasController', function($scope, $location, PersonasService
     init();
 });
 
-app.controller('agregarPersonasController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, RolesService, PersonasService,  $timeout) {
+app.controller('agregarPersonasController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, RolesService, PersonasService,  $timeout, UtilService) {
     $scope.datos = {};
+    $scope.datosAux = {};
     $scope.listaPaises= [];
     $scope.listaCiudades= [];
     $scope.listaBarrios= [];
@@ -6955,6 +6619,7 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
     $scope.listaNacionalidades =[];
     $scope.listaRoles = [];
     $scope.listaPersonas ={};
+    $scope.existeEnPersonas = false;
 
     function nvl(valor1, valor2){
         if(valor1!=null && typeof valor1 != 'undefined' && valor1!='' && valor1!= 'null')
@@ -6962,38 +6627,62 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         return valor2
     }
 
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
     $scope.buscarExistePersonas= function(){
-        var obj = {
-            ruc: $scope.datos.ruc,
-            cedula: $scope.datos.cedula
-        }
-        var json = angular.toJson(obj);
-        var encoJson = encodeURIComponent(json);
-        PersonasService.listarPersonas(encoJson).then(function(response){
+        var obj = {cedula: $scope.datos.cedula}
+        $scope.datosAux.cedula = $scope.datos.cedula;
+        PersonasService.listar(obj).then(function(response){
             if(response.status == 200){
                 if(response.data.length>1){
-                    $scope.listaPersonas = response.data;
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
                 }else if(response.data.length==1){
+                    $scope.existeEnPersonas = true;
+                    $scope.datos.codigo = response.data[0].codigo;
+                    $scope.datosAux.codigo =  $scope.datos.codigo;
                     $scope.datos.nombre = response.data[0].nombre;
                     $scope.datos.apellido = response.data[0].apellido;
                     $scope.datos.ruc = response.data[0].ruc;
                     $scope.datos.cedula = response.data[0].cedula;
                     $scope.datos.telefono = response.data[0].telefono;
-                    $scope.datos.celularPrimario = response.data[0].celularPrimario;
-                    $scope.datos.fechaNacimiento = response.data[0].fechaNacimiento;
+                    $scope.datos.celularPrincipal = response.data[0].celularPrincipal;
+                    $scope.datos.celularSecundario = response.data[0].celularSecundario;
+                    var fecha  = new Date(response.data[0].fechaNacimiento);
+                    $scope.datos.fechaNacimiento = fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth())+'-'+formatMesDia(fecha.getDate());
                     $scope.datos.nacionalidad = response.data[0].nacionalidad;
                     $scope.datos.pais = response.data[0].pais;
                     $scope.datos.ciudad = response.data[0].ciudad;
                     $scope.datos.barrio = response.data[0].barrio;
                     $scope.datos.direccion = response.data[0].direccion;
                     $scope.datos.correoElectronico = response.data[0].correoElectronico;
-                    $scope.datos.sexo = response.data[0].sexo;
+                    $scope.datos.sexo = response.data[0].sexo.trim();
                 }
-
+                else{
+                    $scope.existeEnPersonas = false;
+                    $scope.limpiar();
+                    $scope.datos.cedula = $scope.datosAux.cedula;
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
+            if($scope.existeEnPersonas==true){
+                $scope.bloquearCamposSecundarios=true;
+            }
+            else{
+                $scope.bloquearCamposSecundarios=false;
+            }
         })
+    }
+
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
     }
 
     $scope.listarPaises = function(){
@@ -7052,12 +6741,34 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
     }
 
     $scope.cancelar = function(){
-        $location.path( '/personas' );
+        if($scope.mostrarProveedor==true){
+            $location.path( '/proveedores' );
+        }
+        if($scope.mostrarClientes==true){
+            $location.path( '/clientes' );
+        }
+        if($scope.mostrarUsuarios==true){
+            $location.path( '/usuarios' );
+        }else{
+            $location.path( '/personas' );
+        }
+    }
+
+    $scope.asignarProveedor = function(){
+            $location.path( '/proveedores/agregar').search({param: $scope.datosAux, other:'ok'});
+    }
+
+    $scope.asignarClientes = function(){
+        $location.path( '/clientes/agregar').search({param: $scope.datosAux, other:'ok'});
+    }
+
+    $scope.asignarUsuarios = function(){
+        $location.path( '/usuarios/agregar').search({param: $scope.datosAux, other:'ok'});
     }
 
     $scope.agregar = function() {
         PersonasService.insertar($scope.datos).then(function(response){
-            if(response.status == 200){
+            if(response.status == 200 && response.data=="true"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
@@ -7066,16 +6777,36 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         })
     }
 
+    $scope.habilitarCamposSecundarios= function(){
+        if( $scope.datos.cedula ){
+            $scope.buscarExistePersonas();
+
+        }else{
+            $scope.bloquearCamposSecundarios=false;
+        }
+    }
+
     var init = function(){
-        $timeout( function (){
-            //$scope.datos =$rootScope.usuario;
+            $scope.bloquearCamposSecundarios=true;
             $scope.listarPaises();
             $scope.listarCiudades();
             $scope.listarBarrios();
             $scope.listarSexos();
             $scope.listarNacionalidades();
-            $scope.$apply();
-        }, 1000)
+
+        var urlParams = $location.search().param;
+        if(  urlParams == 'proveedor'){
+            $scope.mostrarProveedor=true
+            $scope.titulo = "Proveedor";
+        }
+        if(  urlParams == 'clientes'){
+            $scope.mostrarClientes=true
+            $scope.titulo = "Clientes";
+        }
+        else if(  urlParams == 'usuarios'){
+            $scope.mostrarUsuarios=true
+
+        }
     }
 
     init();
@@ -7169,15 +6900,23 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
         $location.path( '/personas' );
     }
 
-    $scope.agregar = function() {
-        PersonasService.insertar($scope.datos).then(function(response){
-            if(response.status == 200){
+    $scope.guardar = function() {
+        PersonasService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data == "true"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
             }
         })
+    }
+
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
     }
 
     var init = function(){
@@ -7192,6 +6931,14 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
         $scope.listarNacionalidades();
         $scope.listarEstados();
         $timeout( function (){
+            $scope.datos.sexo = urlParams.sexo.trim();
+            /*var parametroFecha= urlParams.fechaNacimiento;
+            var day = parseInt(parametroFecha.substr(4,6));
+            var month = parseInt(parametroFecha.substr(0,3));
+            var year = parseInt(parametroFecha.substr(7,10));*/
+            var fecha =   new Date(urlParams.fechaNacimiento);
+            //var fecha =   new Date('year,month,day');
+            var fechaformateada = fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth())+'-'+formatMesDia(fecha.getDate());
             //$scope.datos =$rootScope.usuario;
             $scope.datos.codigo = urlParams.codigo;
             $scope.datos.nombre = urlParams.nombre;
@@ -7212,8 +6959,7 @@ app.controller('modificarPersonasController', function($scope, $location, $rootS
             $scope.datos.barrio = urlParams.barrio;
             $scope.datos.direccion = urlParams.direccion;
             $scope.datos.correoElectronico = urlParams.correoElectronico;
-            $scope.datos.sexo = urlParams.sexo;
-            $scope.datos.estado = urlParams.estado;
+            $scope.datos.estado = urlParams.estado.trim();
             $scope.$apply();
         }, 1000)
     }
@@ -7228,6 +6974,15 @@ app.service('PersonasService', function($http) {
         var jsonObj = angular.toJson(datos);
         var encoJson = encodeURIComponent(jsonObj);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/complex/' +encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+    this.listar = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/listar/' +encoJson)
             .then(function (response) {
                 return response;
             });
@@ -7277,7 +7032,6 @@ app.service('PersonasService', function($http) {
             "cedula": datos.cedula,
             "nombre": datos.nombre,
             "apellido": datos.apellido,
-            "fechaNacimiento": datos.fechaNacimiento,
             "nacionalidad": datos.nacionalidad,
             "pais": datos.pais,
             "ciudad": datos.ciudad,
@@ -7293,7 +7047,7 @@ app.service('PersonasService', function($http) {
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/ingresar-equipo?paramJson='+encoJson)
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/personas/modificar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
