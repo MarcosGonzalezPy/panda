@@ -2942,17 +2942,6 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
     $scope.datos = {};
     $scope.listaUsuarios=[];
 
-    $scope.agregar = function() {
-        $location.path( '/usuarios/agregar' );
-
-    }
-
-    $scope.modificar = function(index) {
-        $rootScope.usuario = $scope.listaUsuarios[index];
-        $location.path( '/usuarios/modificar' );
-
-    }
-
     $scope.limpiar = function() {
         $scope.datos = {};
         $scope.listaUsuarios = [];
@@ -2972,6 +2961,49 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
+    }
+
+
+    $scope.agregar = function() {
+        $location.path( '/personas/agregar').search({param:'usuarios'});
+
+    }
+
+    $scope.modificar = function(index) {
+        $rootScope.usuario = $scope.listaUsuarios[index];
+        $location.path( '/usuarios/modificar' );
+
+    }
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            //alert(resultado);
+
+            ProveedoresService.eliminarById(element.codigo).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
     }
 
     var init = function () {
@@ -3037,72 +3069,65 @@ app.service('UsuariosService', function($http) {
         return myResponseData;
     }
 
+    this.listarPorCodigo = function(datos) {
+        var obj = {  "codigo": datos.codigo                     }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/listarCodigo/'+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
 
 });
 
 
-app.controller('agregarUsuariosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, UsuariosService, RolesService) {
+app.controller('agregarUsuariosController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, RolesService, $timeout) {
     $scope.datos = {};
-    $scope.listaPaises= [];
-    $scope.listaCiudades= [];
-    $scope.listaBarrios= [];
-    $scope.listaSexos= [];
-    $scope.listaNacionalidades =[];
+    $scope.datosAux = {};
     $scope.listaRoles = [];
+    $scope.existeEnUsuarios = false;
+    $scope.habilitarAgregar = true;
 
-    $scope.listarPaises = function(){
-        var json = angular.toJson({"dominio":"PAISES"});
-        ValoresService.listarJson(json).then(function(response){
+    $scope.buscarExisteUsuarios= function(){
+        $scope.datosAux;
+        UsuariosService.listarPorCodigo($scope.datosAux).then(function(response){
             if(response.status == 200){
-                $scope.listaPaises = response.data;
+                if(response.data.length>1){
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }else if(response.data.length==1){
+                    $scope.existeEnUsuarios = true;
+                    $scope.datos.codigo = response.data[0].codigo;
+                    $scope.datos.usuario = response.data[0].usuario;
+                    $scope.datos.contrasenha = response.data[0].contrasenha;
+                    $scope.datos.rol = response.data[0].rol;
+                    $scope.datos.resetear = response.data[0].resetear;
+                }
+                else{
+                    $scope.existeEnUsuarios = false;
+                }
             }else{
-                alert("Error al cargar los paises");
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+            if($scope.existeEnUsuarios==true){
+                $scope.bloquearCamposSecundarios=true;
+            }
+            else{
+                $scope.bloquearCamposSecundarios=false;
             }
         })
     }
 
-    $scope.listarCiudades = function(){
-        var json =angular.toJson({"dominio":"CIUDADES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaCiudades = response.data;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
+    $scope.habilitarCamposSecundarios= function(){
+        if( $scope.datos.codigo ){
+            $scope.buscarExisteUsuarios();
 
-    $scope.listarBarrios = function(){
-        var json =angular.toJson({"dominio":"BARRIOS"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaBarrios = response.data;
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    $scope.listarSexos = function(){
-        var json =angular.toJson({"dominio":"SEXO"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaSexos = response.data;
-            }else{
-                alert("Error al cargar los sexos");
-            }
-        })
-    }
-
-    $scope.listarNacionalidades = function(){
-        var json =angular.toJson({"dominio":"NACIONALIDAD"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaNacionalidades = response.data;
-            }else{
-                alert("Error al cargar las Nacionalidades");
-            }
-        })
+        }else{
+            $scope.bloquearCamposSecundarios=false;
+        }
     }
 
     $scope.cancelar = function(){
@@ -3131,12 +3156,19 @@ app.controller('agregarUsuariosController', function($scope, $location, $rootSco
     }
 
     var init = function(){
-        $scope.listarPaises();
-        $scope.listarCiudades();
-        $scope.listarBarrios();
-        $scope.listarSexos();
-        $scope.listarNacionalidades();
+        $scope.bloquearCamposSecundarios=true;
         $scope.listarRoles();
+
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $timeout( function (){
+        $scope.datos.codigo= urlParams.codigo;
+        $scope.datosAux.codigo= urlParams.codigo;
+        $scope.buscarExisteUsuarios();
+            $scope.$apply();
+        }, 1000)
     }
 
     init();
@@ -6507,6 +6539,9 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         }
         if($scope.mostrarClientes==true){
             $location.path( '/clientes' );
+        }
+        if($scope.mostrarUsuarios==true){
+            $location.path( '/usuarios' );
         }else{
             $location.path( '/personas' );
         }
@@ -6518,6 +6553,10 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
 
     $scope.asignarClientes = function(){
         $location.path( '/clientes/agregar').search({param: $scope.datosAux, other:'ok'});
+    }
+
+    $scope.asignarUsuarios = function(){
+        $location.path( '/usuarios/agregar').search({param: $scope.datosAux, other:'ok'});
     }
 
     $scope.agregar = function() {
@@ -6552,15 +6591,13 @@ app.controller('agregarPersonasController', function($scope, $location, $rootSco
         if(  urlParams == 'proveedor'){
             $scope.mostrarProveedor=true
             $scope.titulo = "Proveedor";
-
         }
         if(  urlParams == 'clientes'){
             $scope.mostrarClientes=true
             $scope.titulo = "Clientes";
-
         }
-        else if(  urlParams == 'usuario'){
-            $scope.mostrarUsuario=true
+        else if(  urlParams == 'usuarios'){
+            $scope.mostrarUsuarios=true
 
         }
     }
