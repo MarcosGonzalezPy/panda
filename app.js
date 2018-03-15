@@ -271,7 +271,7 @@ app.config(function($routeProvider) {
         // agregados por Aurora Fin
 
         .otherwise({
-            //redirectTo: '/'
+            redirectTo: '/' ,
             templateUrl : 'pages/404.html',
             controller  : 'ejemploController'
         });
@@ -2213,6 +2213,17 @@ app.service('ServiciosService', function($http) {
         return myResponseData;
     }
 
+    //aprobar
+    this.transpasoFacturacion = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/transpaso-facturacion?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 //app.controller('serviciosController', function($scope, $location, ServiciosService, $rootScope, $dialogs) {
@@ -2591,6 +2602,22 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
                 $scope.buscar();
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Anular'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.transpasoFacturacion = function(index){
+        var datos = {
+            secuencia: $scope.lista[index].secuencia,
+            lugar: $scope.lista[index].lugar,
+            responsable: $cookies.usuario
+        }
+        ServiciosService.transpasoFacturacion(datos).then(function(response){
+            if(response.status == 200 &&  response.data == "true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Paso a Facturacion existoso'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al pasar a Facturacion'},{key: false,back: 'static'});
             }
         })
     }
@@ -5094,10 +5121,10 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
             if(response.status == 200){
                 var resultado = response.data.respuesta;
                 if(resultado == "ok"){
-                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Regostro Exitoso'},{key: false,back: 'static'});
                     $scope.cancelar();
                 }else{
-                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar'},{key: false,back: 'static'});
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Registrar'},{key: false,back: 'static'});
                 }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
@@ -5303,6 +5330,12 @@ app.controller('editarVentaController', function($scope, $location, $rootScope, 
             caja:$scope.datos.nroCaja,
             usuario:$cookies.usuario
         }
+        for(var j = lista.length; j--;){
+            if(lista[j].estado=="REPARADO"){
+                lista.splice(j,1);
+            }
+        }
+
         for(i=0;i<lista.length;i++){
             delete lista[i].descripcion
         }
@@ -7280,7 +7313,9 @@ app.directive('uppercase', function() {
 
             //This part of the code manipulates the model
             ngModel.$parsers.push(function(input) {
-                return input ? input.toUpperCase() : "";
+                //return input ? input.toUpperCase() : "";
+                input = parseInt(input);
+                return input ? input.toLocaleString() : "";
             });
 
             //This part of the code manipulates the viewvalue of the element
@@ -7289,26 +7324,25 @@ app.directive('uppercase', function() {
     };
 });
 
-app.directive('format-prueba', ['$filter', function ($filter) {
-        return {
-            require: '?ngModel',
-            link: function (scope, elem, attrs, ctrl) {
-                if (!ctrl) return;
 
-                var symbol = "°"; // dummy usage
+app.directive('kaka', function() {
+    return {
+        restrict: "A",
+        require: "?ngModel",
+        link: function(scope, element, attrs, ngModel) {
 
-                ctrl.$formatters.unshift(function (a) {
-                    return $filter(attrs.format)(ctrl.$modelValue) +  symbol;
-                });
+            //This part of the code manipulates the model
+            ngModel.$parsers.push(function(input) {
+                input ='aaa';
+                ngModel= 'aaa';
+                return input;
+            });
 
-                ctrl.$parsers.unshift(function (viewValue) {
-                    var plainNumber = viewValue.replace(/[^\d|\-+|\.+]/g, '');
-                    elem.val($filter('number')(plainNumber) + symbol);
-                    return plainNumber;
-                });
-            }
-        };
-}]);
+        }
+    };
+});
+
+
 
 app.controller('repararController', function($scope, $location, $rootScope, $cookies, $dialogs, ServiciosService) {
     $scope.datos = {};
@@ -7426,30 +7460,57 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
         var json =angular.toJson({"dominio":"MODULOS"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
-                $scope.listaModelos = response.data;
+                $scope.listaModulos = response.data;
             }else{
-                alert("Error al cargar los modelos");
+                alert("Error al cargar los Modulos");
             }
         })
     }
 
     $scope.listarReportes = function(){
+        $scope.datos.nombre=null;
+        $scope.limpiar();
         if($scope.datos.modulo){
-
+            ReportesService.listar($scope.datos.modulo).then(function(response){
+                if(response.status ==200){
+                    $scope.listaReportes = response.data;
+                }else{
+                    alert("Error al cargar los Reportes");
+                }
+           })
         }
     }
 
+    $scope.changeReporte= function(){
+        $scope.limpiar();
+        for(j=0;j<$scope.listaReportes.length;j++){
+            if($scope.listaReportes[j].nombre==$scope.datos.nombre){
+                $scope.datos.descripcion =  $scope.listaReportes[j].descripcion;
+                $scope.datos.path =  $scope.listaReportes[j].path;
+            }
+        }
+    }
+
+    $scope.limpiar= function(){
+        $scope.datos.descripcion = null;
+        $scope.datos.path = null;
+    }
 
     $scope.reportePrueba = function(){
          $window.open('http://localhost:8081/jasperserver/rest_v2/reports/reports/prueba2.pdf', '_blank');
     }
 
-    $scope.openTab= function(url){
-        $window.open(url);
+    $scope.openTab= function(){
+        $window.open('http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf');
+    }
+
+    $scope.separadorDeMiles = function() {
+        var cadena = $scope.datos.telefono.replace(/[^0-9]+/g,'');
+        $scope.datos.telefono=  Number(cadena).toLocaleString();
     }
 
     var init= function(){
-
+        $scope.listarModulos();
     }
 
     init();
@@ -7459,34 +7520,15 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
 app.service('ReportesService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
-    this.listarComplex = function(datos) {
-        var jsonObj = angular.toJson(datos);
-        var encoJson = encodeURIComponent(jsonObj);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/complex/' +encoJson)
+    this.listar = function(modulo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/listar/' +modulo)
             .then(function (response) {
                 return response;
             });
         return myResponseData;
     }
-
-    this.eliminarById = function(cedula){
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/personas/eliminar-id/'+cedula)
-            .then(function (response) {
-                return response;
-            });
-        return myResponseData;
-    }
-
 
 });
-
-
-
-
-
-
-
-
 
 
 

@@ -1,45 +1,61 @@
 <div class="panel panel-primary">
-    <div class="panel-heading">Agregar Dominios</div>
+    <div class="panel-heading">Reportes</div>
     <div class="panel-body">
         <form ng-submit="add()" class="form-horizontal">
             <div class="form-group">
                 <label class="col-sm-2 control-label">Modulo</label>
                 <div class="col-sm-3">
-                    <select class="col-sm-2 form-control" id="opciones" ng-change=cambioDominios();
+                    <select class="col-sm-2 form-control" id="opciones" ng-change=listarReportes();
                             ng-model=datos.modulo>
                         <option value> --Seleccionar --</option>
-                        <option ng-repeat="c in listaDominios"
-                                value="{{c.codigo}}">{{c.codigo}}</option>
+                        <option ng-repeat="c in listaModulos"
+                                value="{{c.valor}}">{{c.valor}}</option>
 
                     </select>
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="col-sm-2 control-label">Descripcion</label>
+                <label class="col-sm-2 control-label">Reportes</label>
                 <div class="col-sm-5">
-                    <input required  style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.descripcion" maxlength="100"/>
+                    <select class="col-sm-2 form-control" id="reportes"  ng-disabled = "!datos.modulo" ng-change="changeReporte()"
+                            ng-model=datos.nombre>
+                        <option value> --Seleccionar --</option>
+                        <option ng-repeat="c in listaReportes"
+                                value="{{c.nombre}}">{{c.nombre}}</option>
+
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Path</label>
+                <div class="col-sm-4">
+                    <input disabled type="text" class="form-control input-sm" ng-model="datos.path" maxlength="100"/>
+                </div>
+                <div class="col-sm-6">
+                    <input disabled type="text" class="form-control input-sm" ng-model="datos.descripcion" maxlength="100"/>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
                     <!--|| !datos.descripcion || !datos.dominio-->
-                    <input ng-disabled="!datos.codigo || !datos.descripcion" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
-                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
-                    <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+                    <input ng-disabled="!datos.nombre" type="button" ng-click="openTab()"  class="btn btn-success btn-sm" value="Descargar" />
                 </div>
             </div>
 
-            <div class="form-group margin-bottom-5">
-                <div class="col-sm-2">
-                    Input Con separador de miles
-                </div>
-                <div class="col-sm-6">
-                    <input ui-mask="9:99" ng-pattern="/[\u0030-\u0039]+/g"   class="form-control input-sm"  maxlength="20" required primary type="text"  ng-model="datos.telefo"/>
-                </div>
+            <div class="form-group">
+                <div class="form-group margin-bottom-5">
+                    <div class="col-sm-2">
+                        Telefono
+                    </div>
+                    <div class="col-sm-6">
+                        <input class="form-control input-sm"  maxlength="20" required primary type="text"  ng-model="datos.telefono" ng-change="separadorDeMiles()" />
+                    </div>
 
+                </div>
             </div>
-            <button ng-click="reportePrueba()" class="btn btn-default btn-xs">Reporte</button>
+
         </form>
 
     </div>

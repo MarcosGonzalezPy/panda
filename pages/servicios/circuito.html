@@ -83,12 +83,16 @@
                     </div>
 
                     <div ng-show="item.estado == 'REPARADO' ">
-                        <button ng-click="facturar($index)" class="btn btn-lila btn-xs">Facturar</button>
+                        <button ng-click="transpasoFacturacion($index)" class="btn btn-lila btn-xs">Facturar</button>
                         <button ng-click="cotizar($index)" class="btn btn-info btn-xs">Cotizar</button>
                         <button ng-click="anular($index)" class="btn btn-default btn-xs">Anular</button>
                     </div>
                     <div ng-show="item.estado == 'ANULADO' ">
                         <button ng-click="historial($index)" class="btn btn-warning btn-xs">Historial</button>
+                    </div>
+
+                    <div ng-show="item.estado == 'PAGADO' ">
+                        <button ng-click="entregar($index)" class="btn btn-lila btn-xs">Entregar</button>
                     </div>
 
                 </td>
