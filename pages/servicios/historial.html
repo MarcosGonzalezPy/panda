@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Historial</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Secuencia:</label>
+                <div class="col-sm-4">
+                    <input ng-model="datos.secuencia" disabled
+                           class="form-control input-sm">
+                </div>
+            </div>
+
+            </form>
+
+    </div>
+</div>
+
+<!--listaDominios.length > 0-->
+<div class="panel panel-default" ng-show="lista.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Secuencia</th>
+                <th>paso</th>
+                <th>Estado</th>
+                <th>Lugar</th>
+                <th>Responsable</th>
+                <th>Observacion</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+                <td>{{item.secuencia}}</td>
+                <td>{{item.paso}}</td>
+                <td>{{item.estado}}</td>
+                <td>{{item.lugar}}</td>
+                <td>{{item.responsable}}</td>
+                <td>{{item.observacion}}</td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="form-group">
+<div class="col-sm-offset-5 col-sm-10">
+    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+</div>
+</div>
+
+</body>
+</html>
