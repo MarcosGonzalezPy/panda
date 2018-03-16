@@ -7002,9 +7002,9 @@ app.directive('uppercase', function() {
 
             //This part of the code manipulates the model
             ngModel.$parsers.push(function(input) {
-                //return input ? input.toUpperCase() : "";
-                input = parseInt(input);
-                return input ? input.toLocaleString() : "";
+                return input ? input.toUpperCase() : "";
+
+                //return input ? input.toLocaleString() : "";
             });
 
             //This part of the code manipulates the viewvalue of the element
