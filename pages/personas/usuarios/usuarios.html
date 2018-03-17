@@ -15,7 +15,7 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">Nombre Apellido</label>
                 <div class="col-sm-5">
-                    <input  uppercase type="text" class="form-control input-sm" ng-model="datos.nombre " maxlength="50"/>
+                    <input  uppercase type="text" class="form-control input-sm" ng-model="datos.nombre" maxlength="50"/>
                 </div>
             </div>
 
@@ -47,8 +47,10 @@
             <tr>
                 <th>Codigo</th>
                 <th>Cedula</th>
+                <th>Usuario</th>
                 <th>Nombre</th>
                 <th>Apellido</th>
+                <th>Rol</th>
                 <th></th>
             </tr>
             </thead>
@@ -56,8 +58,10 @@
             <tr ng-repeat="item in listaUsuarios">
                 <td>{{item.codigo}}</td>
                 <td>{{item.cedula}}</td>
+                <td>{{item.usuario}}</td>
                 <td>{{item.nombre}}</td>
                 <td>{{item.apellido}}</td>
+                <td>{{item.rol}}</td>
 
                 <td>
                     <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>

@@ -3100,6 +3100,7 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
 
 
     $scope.buscar= function(){
+        $scope.datos.nombre;
         var obj  = {
             "ruc": $scope.datos.ruc,
             "nombre": $scope.datos.nombre
@@ -3127,12 +3128,12 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
     }
 
     $scope.remove = function(index) {
-        var element = $scope.lista[index];
+        var element = $scope.listaUsuarios[index];
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
             //alert(resultado);
 
-            ProveedoresService.eliminarById(element.codigo).then(function(response){
+            UsuariosService.eliminarById(element.codigo).then(function(response){
 
                 if(response.status == 200){
                     var resultado = response.data;
@@ -3183,29 +3184,25 @@ app.service('UsuariosService', function($http) {
         return myResponseData;
     }
 
+    this.eliminarById = function(codigo){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/eliminar/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
     this.insertar = function(datos){
         var obj = {
-            "nombre":datos.nombre,
-            "apellido":datos.apellido,
-            "cedula":datos.cedula,
-            "fechaNacimiento":datos.fechaNacimiento,
-            "nacionalidad": datos.nacionalidad,
-            "pais": datos.pais,
-            "ciudad": datos.ciudad,
-            "barrio": datos.barrio,
-            "direccion": datos.direccion,
-            "correoElectronico": datos.correoElectronico,
-            "ruc": datos.ruc,
-            "sexo": datos.sexo,
-            "telefono": datos.telefono,
-            "celular1": datos.celular,
-            //Propio de usuario
+            "codigo":datos.codigo,
             "usuario": datos.usuario,
-            "rol": datos.rol
+            "contrasenha": datos.usuario,
+            "rol": datos.rol,
+            "resetear": 'RESETEAR'
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/insertar?paramJson='+encoJson)
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/usuarios/insertar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -3231,6 +3228,21 @@ app.service('UsuariosService', function($http) {
         return myResponseData;
     }
 
+    this.modificar = function(datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "usuario": datos.usuario,
+            "rol": datos.rol
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/usuarios/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 
 });
@@ -3244,7 +3256,6 @@ app.controller('agregarUsuariosController', function($scope, $location, $rootSco
     $scope.habilitarAgregar = true;
 
     $scope.buscarExisteUsuarios= function(){
-        $scope.datosAux;
         UsuariosService.listarPorCodigo($scope.datosAux).then(function(response){
             if(response.status == 200){
                 if(response.data.length>1){
@@ -3327,76 +3338,7 @@ app.controller('agregarUsuariosController', function($scope, $location, $rootSco
 
 app.controller('modificarUsuariosController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, UsuariosService, RolesService, $timeout) {
     $scope.datos = {};
-
-    $scope.listaCiudades= [];
-    $scope.listaBarrios= [];
-    $scope.listaSexos= [];
-    $scope.listaNacionalidades =[];
     $scope.listaRoles = [];
-    $scope.usuario= {};
-
-    $scope.listarPaises = function(){
-        var json = angular.toJson({"dominio":"PAISES"});
-        ValoresService.listarJson(json).then(function(response){
-
-            if(response.status == 200){
-                //$scope.listaPaises= [];
-                $scope.listaPaises = response.data;
-                //$rootScope.usuario
-
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarCiudades = function(){
-        var json =angular.toJson({"dominio":"CIUDADES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaCiudades = response.data;
-                //$scope.datos.ciudad =$rootScope.usuario.ciudad;
-            }else{
-                alert("Error al cargar los paises");
-            }
-        })
-    }
-
-    $scope.listarBarrios = function(){
-        var json =angular.toJson({"dominio":"BARRIOS"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaBarrios = response.data;
-                //$scope.datos.barrio =$rootScope.usuario.barrio
-            }else{
-                alert("Error al cargar los barrios");
-            }
-        })
-    }
-
-    $scope.listarSexos = function(){
-        var json =angular.toJson({"dominio":"SEXO"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaSexos = response.data;
-               // $scope.datos.sexo =$rootScope.usuario.sexo;
-            }else{
-                alert("Error al cargar los sexos");
-            }
-        })
-    }
-
-    $scope.listarNacionalidades = function(){
-        var json =angular.toJson({"dominio":"NACIONALIDAD"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaNacionalidades = response.data;
-               // $scope.datos.nacionalidad =$rootScope.usuario.nacionalidad;
-            }else{
-                alert("Error al cargar las Nacionalidades");
-            }
-        })
-    }
 
     $scope.cancelar = function(){
         $location.path( '/usuarios' );
@@ -3440,13 +3382,6 @@ app.controller('modificarUsuariosController', function($scope, $location, $rootS
     }
 
     var init = function(){
-
-
-        $scope.listarPaises();
-        $scope.listarCiudades();
-        $scope.listarBarrios();
-        $scope.listarSexos();
-        $scope.listarNacionalidades();
         $scope.listarRoles();
 
         $timeout( function (){
@@ -7038,8 +6973,7 @@ app.directive('uppercase', function() {
             //This part of the code manipulates the model
             ngModel.$parsers.push(function(input) {
                 return input ? input.toUpperCase() : "";
-//                input = parseInt(input);
-//                return input ? input.toLocaleString() : "";
+
             });
 
             //This part of the code manipulates the viewvalue of the element
