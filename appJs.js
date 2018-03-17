@@ -342,6 +342,8 @@ app.controller('agregarClientesController', function($scope, $location, $rootSco
                     $scope.existeEnClientes = true;
                     $scope.datos.codigo = response.data[0].codigo;
                     $scope.datos.razonSocial = response.data[0].razonSocial;
+                    $scope.datos.razonSocial = response.data[0].razonSocial;
+                    $scope.datos.tipoPersona= response.data[0].tipoPersona;
                     $scope.datos.limiteCredito = response.data[0].limiteCredito;
                 }
                 else{
@@ -379,8 +381,20 @@ app.controller('agregarClientesController', function($scope, $location, $rootSco
         })
     }
 
+    $scope.listarTiposPersona = function(){
+        var json =angular.toJson({"dominio":"TIPOS_PERSONA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTiposPersona = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function(){
         $scope.bloquearCamposSecundarios=true;
+        $scope.listarTiposPersona();
         var urlParams = $location.search().param;
         if(typeof urlParams.codigo == 'undefined'){
             $scope.cancelar();
@@ -394,7 +408,7 @@ app.controller('agregarClientesController', function($scope, $location, $rootSco
     init();
 });
 
-app.controller('modificarClientesController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, PersonasService) {
+app.controller('modificarClientesController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ClientesService, $timeout) {
     $scope.datos = {};
 
     $scope.cancelar = function(){
@@ -412,14 +426,32 @@ app.controller('modificarClientesController', function($scope, $location, $rootS
         })
     }
 
+    $scope.listarTiposPersona = function(){
+        var json =angular.toJson({"dominio":"TIPOS_PERSONA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTiposPersona = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function(){
+        $scope.listarTiposPersona();
         var urlParams = $location.search().param;
         if(typeof urlParams.codigo == 'undefined'){
             $scope.cancelar();
         }
-        $scope.datos.codigo= urlParams.codigo;
-        $scope.datos.razonSocial= urlParams.razonSocial;
-        $scope.datos.limiteCredito=parseInt(urlParams.limiteCredito); //urlParams.limiteCredito;
+
+        $timeout( function (){
+            $scope.datos.tipoPersona= urlParams.tipoPersona;
+            $scope.datos.codigo= urlParams.codigo;
+            $scope.datos.razonSocial= urlParams.razonSocial;
+            $scope.datos.limiteCredito=parseInt(urlParams.limiteCredito);
+
+            $scope.$apply();
+        }, 1000)
     }
 
     init();
@@ -442,7 +474,8 @@ app.service('ClientesService', function($http) {
         var obj = {
             "codigo":datos.codigo,
             "razonSocial":datos.razonSocial,
-            "limiteCredito":datos.limiteCredito
+            "limiteCredito":datos.limiteCredito,
+            "tipo_persona":datos.tipoPersona
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -457,7 +490,8 @@ app.service('ClientesService', function($http) {
         var obj = {
             "codigo":datos.codigo,
             "razonSocial":datos.razonSocial,
-            "limiteCredito":datos.limiteCredito
+            "limiteCredito":datos.limiteCredito,
+            "tipoPersona":datos.tipoPersona
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);

@@ -18,8 +18,6 @@
                                ng-model="datos.codigo" disabled/>
                     </div>
                 </div>
-            </div>
-            <div class="col-lg-4">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Raz&oacute;n Social</label>
                     <div class="col-sm-8">
@@ -28,12 +26,24 @@
                     </div>
                 </div>
             </div>
-                <div class="col-lg-4">
+            <div class="col-lg-4">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-6 control-label">L&iacute;mite Cr&eacute;dito</label>
                     <div class="col-sm-4">
                         <input maxlength="50" class="form-control input-sm"  required primary type="number"
                                ng-model="datos.limiteCredito" ng-disabled="bloquearCamposSecundarios"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">Tipos de Personas</label>
+                    <div class="col-sm-6">
+                        <select id="tipoPersona"   class="form-control input-sm"
+                                ng-model=datos.tipoPersona>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaTiposPersona"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
                     </div>
                 </div>
             </div>
