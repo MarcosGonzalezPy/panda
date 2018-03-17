@@ -238,6 +238,18 @@ app.config(function($routeProvider) {
 
         //Agregados por Aurora Inicio
 
+        .when('/reportes/abm', {
+            templateUrl : 'pages/reportes/reportes.html',
+            controller  : 'reportesController'
+        })
+        .when('/reportes/agregar', {
+            templateUrl : 'pages/reportes/agregar-reportes.html',
+            controller  :  'agregarReportesController'
+        })
+        .when('/reportes/modificar', {
+            templateUrl : 'pages/timbrados/modificar-reportes.html',
+            controller  :  'modificarReportesController'
+        })
         .when('/timbrados', {
             templateUrl : 'pages/timbrados/timbrados.html',
             controller  : 'timbradosController'
@@ -3295,9 +3307,9 @@ app.controller('agregarUsuariosController', function($scope, $location, $rootSco
             $scope.cancelar();
         }
         $timeout( function (){
-        $scope.datos.codigo= urlParams.codigo;
-        $scope.datosAux.codigo= urlParams.codigo;
-        $scope.buscarExisteUsuarios();
+            $scope.datos.codigo= urlParams.codigo;
+            $scope.datosAux.codigo= urlParams.codigo;
+            $scope.buscarExisteUsuarios();
             $scope.$apply();
         }, 1000)
     }
@@ -7206,7 +7218,7 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
 
 });
 
-app.service('ReportesService', function($http) {
+/*app.service('ReportesService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
     this.listar = function(modulo) {
@@ -7217,7 +7229,7 @@ app.service('ReportesService', function($http) {
         return myResponseData;
     }
 
-});
+});*/
 
 
 

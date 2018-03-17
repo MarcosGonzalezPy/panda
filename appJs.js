@@ -479,3 +479,250 @@ app.service('ClientesService', function($http) {
 });
 
 
+app.controller('reportesController', function($scope, $location, ReportesService, $rootScope, $dialogs) {
+
+    $scope.datos ={};
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.agregar = function() {
+        $location.path( '/reportes/agregar');
+
+    }
+
+    $scope.buscar = function() {
+        ReportesService.listarABM($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/reportes/modificar');
+    }
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+
+            ReportesService.eliminarABM(element.codigo).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+    }
+
+
+    var init = function () {
+
+    }
+
+    init();
+});
+
+app.controller('agregarReportesController', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, ValoresService ) {
+
+    $scope.datos = {};
+
+    $scope.cancelar = function(){
+        $location.path('/reportes/abm');
+    }
+
+    $scope.agregar = function() {
+        ReportesService.insertarABM($scope.datos).then(function(response){
+            if(response.status == 200){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarModulos = function(){
+        var json =angular.toJson({"dominio":"MODULOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listarModulos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function(){
+        $scope.listarModulos();
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+app.controller('modificarReportesController', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, ValoresService, $timeout) {
+
+    $scope.datos = {};
+
+    $scope.cancelar = function(){
+        $location.path('/reportes/abm');
+    }
+
+    $scope.guardar = function() {
+        ReportesService.modificarABM($scope.datos).then(function(response){
+            if(response.status == 200 && response.data == "true"){
+
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarModulos = function(){
+        var json =angular.toJson({"dominio":"MODULOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listarModulos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_PARAMETRICOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.id == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarModulos();
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.id = urlParams.id;
+            $scope.datos.modulo = urlParams.modulo;
+            $scope.datos.path = urlParams.path;
+            $scope.datos.estado =  urlParams.estado;
+            $scope.datos.nombre =  urlParams.nombre;
+            $scope.datos.descripcion = urlParams.descripcion;
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
+
+app.service('ReportesService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listar = function(modulo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/listar/' +modulo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.listarABM = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/listarABM?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+    this.insertarABM = function(datos){
+        var obj = {
+            "modulo":datos.modulo,
+            "path":datos.path,
+            "estado": datos.estado,
+            "nombre": datos.nombre ,
+            "descripcion": datos.descripcion
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/insertarABM?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificarABM = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "representanteNombre":datos.representanteNombre,
+            "representanteTelefono": datos.representanteTelefono,
+            "representanteCelular": datos.representanteCelular ,
+            "paginaWeb": datos.paginaWeb,
+            "obs": datos.obs
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/modificarABM?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarABM = function(id){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/eliminarABM/'+id)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+});
+
+
+
