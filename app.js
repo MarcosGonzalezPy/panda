@@ -66,6 +66,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/ventas/nota-credito.html',
             controller  : 'notaCreditoController'
         })
+        .when('/ventas/nota-credito/item', {
+            templateUrl : 'pages/ventas/ventas/nota-credito-item.html',
+            controller  : 'notaCreditoItemController'
+        })
         .when('/articulos', {
             templateUrl : 'pages/articulos/articulos.html',
             controller  : 'articulosController'
@@ -312,6 +316,7 @@ app.run(function( $rootScope, $cookies) {
            $rootScope.rolCatalogo = (modulos.indexOf("CATALOGO")!=-1)?true:false;
            $rootScope.rolDesarrollo = (modulos.indexOf("PRUEBA")!=-1)?true:false;
            $rootScope.rolPersonas = (modulos.indexOf("PERSONAS")!=-1)?true:false;
+           $rootScope.rolReportes = (modulos.indexOf("REPORTES")!=-1)?true:false;
        }
 
 
@@ -377,6 +382,7 @@ app.controller('mainController', function($scope, $rootScope, AccesosService, $c
         $rootScope.rolCatalogo = (modulos.indexOf("CATALOGO")!=-1)?true:false;
         $rootScope.rolDesarrollo = (modulos.indexOf("PRUEBA")!=-1)?true:false;
         $rootScope.rolPersonas = (modulos.indexOf("PERSONAS")!=-1)?true:false;
+        $rootScope.rolReportes = (modulos.indexOf("REPORTES")!=-1)?true:false;
     }
 });
 
@@ -464,7 +470,7 @@ app.service('AccesosService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
     this.login = function(usuario, pass) {
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/accesos/'+usuario+'/'+pass)
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/accesos/'+usuario+'/'+pass)
             .then(function (response) {
                 return response;
             });
@@ -1337,7 +1343,7 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
 
 app.controller('detalleFacturaController',function($scope,$modalInstance,data){
     $scope.datos = {};
-    //$scope.precio =1500000
+
 
     $scope.listaProductos = [
         {"codigo":"1","descripcion":"Notebook HP PRO 4530", "precio":"270000", "cantidad": "10"},
@@ -1615,9 +1621,8 @@ app.controller('ingresarEquipoController', function($scope, $location, ValoresSe
 
 
     $scope.buscarCliente= function(){
-        var obj = '{}';
-        var encoJson = encodeURIComponent(obj);
-        ClientesService.listarComplex(encoJson).then(function(response){
+
+        ClientesService.listar({}).then(function(response){
             if(response.status == 200){
                 $scope.listaClientes = response.data;
             }else{
@@ -2054,11 +2059,21 @@ app.service('ServiciosService', function($http) {
         return myResponseData;
     }
 
-    //aprobar
     this.transpasoFacturacion = function(obj) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/transpaso-facturacion?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    //aprobar
+    this.entregar = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/servicios/entregar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -2459,6 +2474,22 @@ app.controller('circuitoController', function($scope, $location, $rootScope, $co
                 $scope.buscar();
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al pasar a Facturacion'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.entregar = function(index){
+        var datos = {
+            secuencia: $scope.lista[index].secuencia,
+            lugar: $scope.lista[index].lugar,
+            responsable: $cookies.usuario
+        }
+        ServiciosService.entregar(datos).then(function(response){
+            if(response.status == 200 &&  response.data == "true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Entrega existoso'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Entregar'},{key: false,back: 'static'});
             }
         })
     }
@@ -4394,6 +4425,7 @@ app.controller('ventasController', function($scope, $location, $rootScope, $cook
     var init= function(){
        $scope.listarEstados();
        $scope.listarSucursales();
+       $scope.buscar();
     }
 
     init();
@@ -5291,6 +5323,20 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     $scope.inhabilitarAgregar =true;
     $scope.inhabilitarCBarra = false;
     $scope.listaArticulos=[];
+    $scope.listaNotaCredito=[];
+    $scope.mostrarItem = false;
+    $scope.listaId=null;
+
+    $scope.copiar =function(index){
+        $scope.mostrarItem = true;
+        $scope.lista[index].estado='COPIADO';
+        $scope.itemCredito=  $scope.lista[index];
+        //$scope.listaNotaCredito.push(elemento);
+    }
+
+    $scope.cambiarMostrarItem =function(index){
+        $scope.mostrarItem = false;
+    }
 
     $scope.limpiar = function(){
         $scope.inhabilitarAgregar =true;
@@ -5312,58 +5358,6 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         }
     }
 
-//    $scope.buscarArticuloExistente = function(){
-//        console.log('buscare');
-//        $scope.producto.sucursal = 'MATRIZ'
-//        VentasService.listarStockPorSucursal($scope.producto).then(function(response){
-//            if(response.status == 200){
-//                if(response.data.length == 1){
-//                    $scope.articulo =   response.data[0];
-//                    $scope.producto.codigo = $scope.articulo.codigo;
-//                    if($scope.producto.codigoBarra ==null || typeof $scope.producto.codigoBarra == 'undefined'){
-//                        $scope.inhabilitarCBarra = true;
-//                    }else{
-//                        $scope.inhabilitarCBarra = false;
-//                    }
-//                    $scope.producto.codigoBarra = $scope.articulo.codigoBarra;
-//                    $scope.producto.descripcion = $scope.articulo.descripcion;
-//                    $scope.datos.precio = $scope.articulo.precioUnitario;
-//                    $scope.datos.grabado = $scope.articulo.grabado;
-//                    if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
-//                        $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
-//                        $scope.inhabilitarAgregar =false;
-//                    }
-//                    $scope.articuloValido  = true;
-//
-//                }else{
-//                    $scope.articuloValido  = false;
-//                    $scope.inhabilitarAgregar =true;
-//                    $scope.listaArticulos =   response.data;
-//                }
-//
-//            }else{
-//                $scope.articuloValido  = false;
-//                $scope.inhabilitarAgregar =true;
-//                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-//            }
-//        })
-//        console.log('lo encontre');
-//    }
-
-//    function pad(n, width, z) {
-//        z = z || '0';
-//        n = n + '';
-//        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
-//    }
-
-//    $scope.habilitarCuotas = function(condicion){
-//        if(condicion=='contado'){
-//            $scope.mostrarCutas= false;
-//        }else{
-//            $scope.mostrarCutas= true;
-//        }
-//    }
-
     function formatMesDia (param){
         if(param<10){
             return '0'+param;
@@ -5377,30 +5371,6 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
             return valor1;
         return valor2
     }
-
-//    $scope.buscarClientes= function(){
-//        var obj = {
-//            ruc: $scope.datos.ruc,
-//            nombre: (typeof $scope.datos.nombre== 'undefined')? null: $scope.datos.nombre.replace(" ", "%")
-//        }
-//        var json = angular.toJson(obj);
-//        var encoJson = encodeURIComponent(json);
-//        ClientesService.listarComplex(encoJson).then(function(response){
-//            if(response.status == 200){
-//                if(response.data.length>1){
-//                    $scope.listaClientes = response.data;
-//                }else if(response.data.length==1){
-//                    $scope.datos.nombre = response.data[0].nombre +" "+ response.data[0].apellido;
-//                    $scope.datos.ruc =  nvl(response.data[0].ruc, response.data[0].cedula);
-//                    $scope.datos.telefono = nvl( response.data[0].telefono, response.data[0].celular1);
-//                    $scope.datos.codigoPersona = response.data[0].codigo;
-//                }
-//
-//            }else{
-//                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-//            }
-//        })
-//    }
 
     $scope.cancelar = function() {
         $location.path( '/ventas' );
@@ -5489,8 +5459,8 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         })
     };
 
-    $scope.remove = function(index) {
-        $scope.lista.splice(index, 1);
+    $scope.eliminar = function(index) {
+        $scope.listaNoteCredito.splice(index, 1);
     }
 
 
@@ -7016,7 +6986,6 @@ app.directive('uppercase', function() {
             ngModel.$parsers.push(function(input) {
                 return input ? input.toUpperCase() : "";
 
-                //return input ? input.toLocaleString() : "";
             });
 
             //This part of the code manipulates the viewvalue of the element
@@ -7205,7 +7174,7 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
         $window.open('http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf');
     }
 
-    $scope.separadorDeMiles = function() {
+    $scope.separadorDeMilesTelefono = function() {
         var cadena = $scope.datos.telefono.replace(/[^0-9]+/g,'');
         $scope.datos.telefono=  Number(cadena).toLocaleString();
     }
