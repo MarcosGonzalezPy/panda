@@ -475,7 +475,7 @@ app.service('ClientesService', function($http) {
             "codigo":datos.codigo,
             "razonSocial":datos.razonSocial,
             "limiteCredito":datos.limiteCredito,
-            "tipo_persona":datos.tipoPersona
+            "tipoPersona":datos.tipoPersona
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
