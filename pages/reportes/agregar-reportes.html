@@ -74,17 +74,21 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="form-group margin-bottom-5">
-                    <label class="col-sm-4 control-label">Tipo de Dato</label>
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">Tipo Dato</label>
                     <div class="col-sm-6">
-                        <input maxlength="50" class="form-control input-sm" required primary
-                               type="text"  ng-model="datos.tipoDato" />
+                        <select id="tipoDato"   class="form-control input-sm"
+                                ng-model=datos.tipoDato>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaDatosReportes"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
                     </div>
                 </div>
             </div>
             <div class="col-sm-2">
                 <div class="form-group margin-bottom-5">
-                    <input type="button" ng-click="agregar()"
+                    <input type="button" ng-click="agregarDatoParametro()"
                            class="btn btn-primary btn-sm" value="Agregar Par&aacute;metro"
                            ng-disabled ="!datos.parametro || !datos.tipoDato"/>
                 </div>
@@ -94,7 +98,7 @@
     </div>
 </div>
 
-<div class="panel panel-primary"   ng-show="lista.length>0" >
+<div class="panel panel-primary"   ng-show="listaDatoParametro.length>0" >
     <!--<div class="panel-heading">Tabla de parametros</div>-->
     <div class="panel-body nopadding" >
         <form ng-submit="add()" class="form-horizontal">
@@ -108,9 +112,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="item in lista">
+                    <tr ng-repeat="item in listaDatoParametro">
                         <td>{{item.parametro}}</td>
-                        <td>{{item.tipo_dato}}</td>
+                        <td>{{item.tipoDato}}</td>
                         <td>
                             <input type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />
                         </td>

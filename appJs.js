@@ -583,13 +583,43 @@ app.controller('reportesController', function($scope, $location, ReportesService
 app.controller('agregarReportesController', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, ValoresService ) {
 
     $scope.datos = {};
-
+    $scope.listaDatoParametro = [];
     $scope.cancelar = function(){
         $location.path('/reportes/abm');
     }
 
+    $scope.agregarDatoParametro = function(){
+        var obj= {
+            parametro: $scope.datos.parametro,
+            tipoDato: $scope.datos.tipoDato
+        }
+        $scope.listaDatoParametro.push(obj);
+        $scope.limpiarSimple();
+    }
+
+    $scope.limpiarSimple = function(){
+        $scope.datos.parametro = null;
+        $scope.datos.tipoDato = null;
+    }
+
     $scope.agregar = function() {
-        ReportesService.insertarABM($scope.datos).then(function(response){
+        var listaDatoParametro = angular.copy($scope.listaDatoParametro);
+        var cabecera = {
+            modulo: $scope.datos.modulo,
+            path:$scope.datos.path,
+            estado: $scope.datos.estado,
+            nombre: $scope.datos.nombre,
+            descripcion: $scope.datos.descripcion
+        }
+        /*for(i=0;i<listaDatoParametro.length;i++){
+            delete listaDatoParametro[i].descripcion
+        }*/
+
+        var param = {
+            cabecera: cabecera,
+            detalle: listaDatoParametro
+        }
+        ReportesService.insertarReportesCompuestos(param).then(function(response){
             if(response.status == 200){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
@@ -621,9 +651,21 @@ app.controller('agregarReportesController', function($scope, $location, $rootSco
         })
     }
 
+    $scope.listarDatosReportes = function(){
+        var json =angular.toJson({"dominio":"TIPOS_DATOS_REPORTES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaDatosReportes = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function(){
         $scope.listarModulos();
         $scope.listarEstados();
+        $scope.listarDatosReportes();
     }
 
     init();
@@ -724,6 +766,20 @@ app.service('ReportesService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/insertarABM?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.insertarReportesCompuestos = function(datos){
+        var obj = {
+            "reportes": datos.cabecera,
+            "listaParametros": datos.detalle
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/insertarReportesCompuestos?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
