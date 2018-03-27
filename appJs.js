@@ -611,9 +611,6 @@ app.controller('agregarReportesController', function($scope, $location, $rootSco
             nombre: $scope.datos.nombre,
             descripcion: $scope.datos.descripcion
         }
-        /*for(i=0;i<listaDatoParametro.length;i++){
-            delete listaDatoParametro[i].descripcion
-        }*/
 
         var param = {
             cabecera: cabecera,
@@ -680,7 +677,20 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
     }
 
     $scope.guardar = function() {
-        ReportesService.modificarABM($scope.datos).then(function(response){
+        var listaDatoParametro = angular.copy($scope.listaDatoParametro);
+        var cabecera = {
+            modulo: $scope.datos.modulo,
+            path:$scope.datos.path,
+            estado: $scope.datos.estado,
+            nombre: $scope.datos.nombre,
+            descripcion: $scope.datos.descripcion
+        }
+
+        var param = {
+            cabecera: cabecera,
+            detalle: listaDatoParametro
+        }
+        ReportesService.modificarReportesCompuestos(param).then(function(response){
             if(response.status == 200 && response.data == "true"){
 
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
@@ -689,6 +699,20 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
             }
         })
+    }
+
+    $scope.agregarDatoParametro = function(){
+        var obj= {
+            parametro: $scope.datos.parametro,
+            tipoDato: $scope.datos.tipoDato
+        }
+        $scope.listaDatoParametro.push(obj);
+        $scope.limpiarSimple();
+    }
+
+    $scope.limpiarSimple = function(){
+        $scope.datos.parametro = null;
+        $scope.datos.tipoDato = null;
     }
 
     $scope.listarModulos = function(){
@@ -713,23 +737,21 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
         })
     }
 
+    $scope.listarDatosReportes = function(){
+        var json =angular.toJson({"dominio":"TIPOS_DATOS_REPORTES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaDatosReportes = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init = function(){
-        var urlParams = $location.search().param;
-        if(typeof urlParams.id == 'undefined'){
-            $scope.cancelar();
-        }
         $scope.listarModulos();
         $scope.listarEstados();
-
-        $timeout( function (){
-            $scope.datos.id = urlParams.id;
-            $scope.datos.modulo = urlParams.modulo;
-            $scope.datos.path = urlParams.path;
-            $scope.datos.estado =  urlParams.estado;
-            $scope.datos.nombre =  urlParams.nombre;
-            $scope.datos.descripcion = urlParams.descripcion;
-            $scope.$apply();
-        }, 1000)
+        $scope.listarDatosReportes();
     }
 
     init();
@@ -798,6 +820,20 @@ app.service('ReportesService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/modificarABM?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificarReportesCompuestos = function(datos){
+        var obj = {
+            "reportes": datos.cabecera,
+            "listaParametros": datos.detalle
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/reportes/modificarReportesCompuestos?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
