@@ -226,6 +226,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/cajas/agregar-cajas.html',
             controller  : 'agregarCajasController'
         })
+        .when('/cajas/modificar', {
+            templateUrl : 'pages/ventas/cajas/modificar-cajas.html',
+            controller  : 'modificarCajasController'
+        })
         .when('/cajas-movimientos', {
             templateUrl : 'pages/ventas/cajas-movimientos/cajas-movimientos.html',
             controller  : 'cajasMovimientosController'
@@ -4165,6 +4169,23 @@ app.service('CajasService', function($http) {
         return myResponseData;
     }
 
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "estado":datos.estado,
+            "numero":datos.numero,
+            "sucursal":datos.sucursal,
+            "expedicion":datos.expedicion
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cajas/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 });                                            1
 
@@ -4242,6 +4263,12 @@ app.controller('cajasController', function($scope, $location, $rootScope, $cooki
 
     }
 
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/cajas/modificar').search({param: element, other:'ok'});
+    }
+
+
     var init = function () {
         $scope.listarTaller();
         $scope.listarEstados();
@@ -4300,6 +4327,67 @@ app.controller('agregarCajasController', function($scope,    $location, $rootSco
     init();
 });
 
+app.controller('modificarCajasController', function($scope,    $location, $rootScope, $cookies, $dialogs, CajasService, ValoresService, $timeout) {
+    $scope.datos = {};
+
+    $scope.guardar = function() {
+        CajasService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.cancelar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cajas' );
+    }
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CAJA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarTaller();
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.estado = urlParams.estado;
+            $scope.datos.numero =  urlParams.numero;
+            $scope.datos.sucursal =  urlParams.sucursal;
+            $scope.datos.expedicion = urlParams.expedicion;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
 
 app.controller('agregarCajasMovimientosController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, CajasMovimientosService, CajasService) {
     $scope.datos = {};
