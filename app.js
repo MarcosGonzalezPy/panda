@@ -7239,6 +7239,10 @@ app.controller('historialController', function($scope, $location, $rootScope, $c
 
 app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, $window, ValoresService) {
     $scope.datos = {};
+    $scope.mostrarParametros = false;
+    $scope.params = [];
+    $scope.paramsConcatenados = "";
+    $scope.listaParametroSelect= [];
 
 
     $scope.listarModulos = function(){
@@ -7295,11 +7299,40 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
     }
 
     $scope.listarParametros = function(){
+        $scope.listaParametroSelect= [];
+       if( $scope.listaParametros.length>0){
+           $scope.mostrarParametros = true;
+           for(i=0;i<$scope.listaParametros.length;i++){
+               $scope.listaParametroSelect.push($scope.listaParametros.parametro);
+           }
+       }else{
+           $scope.mostrarParametros = false
+       }
+    }
 
+    $scope.changParametro = function(){
+
+    }
+
+    $scope.agregarParametro= function(){
+        var obj={};
+        obj[$scope.paramLabel]= $scope.paramValor;
+        $scope.params.push(obj);
+    }
+
+    $scope.limpiarParametro = function(){
+        $scope.paramsConcatenados = "";
+        $scope.params=[];
     }
 
     var init= function(){
         $scope.listarModulos();
+        $scope.listaParametros = [
+            {
+                "parametro": 'facturaId',
+                "tipoDato": 'LONG'
+            }
+        ]
     }
 
     init();
