@@ -510,6 +510,15 @@ app.service('ClientesService', function($http) {
         return myResponseData;
     }
 
+    this.listarComplex = function(json) {
+        //var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/dominios/{"codigo":"PAISES"}')
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/clientes/complex?paramJson='+json)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 

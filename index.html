@@ -15,6 +15,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.7/angular.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.3/angular-route.js"></script>
     <script src="https://code.angularjs.org/1.2.32/angular-cookies.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 
     <script src="librerias/ui-bootstrap-tpls-0.6.0.js" type="text/javascript"></script>
@@ -211,8 +212,8 @@
                     <a href="#demo7" ng-show="rolInventario" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Inventario  <i class="fa fa-caret-down"></i></a>
                     <div class="collapse" id="demo7">
                         <a href="#inventario" class="list-group-item">Inventario</a>
-                        <a href="#juste-inventario/negativo" class="list-group-item">Ajuste (-)</a>
-                        <a href="#ajuste-positivo" class="list-group-item">Ajuste (+)</a>
+                        <a href="#ajuste-inventario-negativo" class="list-group-item">Ajuste (-)</a>
+                        <a href="#ajuste-inventario-positivo" class="list-group-item">Ajuste (+)</a>
                     </div>
                     <!--ng-show="rolServicios"-->
                     <a href="#demo8" ng-show="rolServicios" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Servicios  <i class="fa fa-caret-down"></i></a>
@@ -223,8 +224,8 @@
 
                     <a href="#demo9" ng-show="rolReportes" class="list-group-item list-group-item-success" data-toggle="collapse" data-parent="#MainMenu">Reportes  <i class="fa fa-caret-down"></i></a>
                     <div class="collapse" id="demo9">
-                        <a href="#reportes" class="list-group-item">Reportes</a>
-                        <a href="#reportes/abm" class="list-group-item">ReportesABM</a>
+                        <a href="#imprimir-reportes" class="list-group-item">Imprimir Reportes</a>
+                        <a href="#reportes/abm" class="list-group-item">Reportes</a>
 
                     </div>
                 </div>
