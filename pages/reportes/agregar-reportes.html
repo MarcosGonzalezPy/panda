@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html >
 <body>
-<!--<head>-->
-    <!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.8/angular.js"></script>-->
-    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">-->
-<!--</head>-->
 
 <div class="panel panel-primary">
     <div class="panel-heading">Agregar Reportes</div>
@@ -43,6 +39,7 @@
                 </div>
             </div>
             </div>
+
             <div class="col-lg-6">
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Nombre</label>
@@ -60,19 +57,80 @@
                 </div>
             </div>
 
-                <div class="form-group">
-                <div class="col-sm-offset-5 col-sm-10">
-                    <!--|| !datos.descripcion || !datos.dominio-->
-                    </br>
-                    <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"
-                            ng-disabled = "(!datos.modulo || !datos.path || !datos.estado || !datos.nombre || !datos.descripcion )"/>
+        </form>
+    </div>
+</div>
 
-                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+<div class="panel panel-primary">
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Par&aacute;metro</label>
+                    <div class="col-sm-6">
+                        <input maxlength="50" class="form-control input-sm" required primary
+                               type="text"  ng-model="datos.parametro" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">Tipo Dato</label>
+                    <div class="col-sm-6">
+                        <select id="tipoDato"   class="form-control input-sm"
+                                ng-model=datos.tipoDato>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaDatosReportes"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group margin-bottom-5">
+                    <input type="button" ng-click="agregarDatoParametro()"
+                           class="btn btn-primary btn-sm" value="Agregar Par&aacute;metro"
+                           ng-disabled ="!datos.parametro || !datos.tipoDato"/>
                 </div>
             </div>
 
         </form>
+    </div>
+</div>
 
+<div class="panel panel-primary"   ng-show="listaDatoParametro.length>0" >
+    <!--<div class="panel-heading">Tabla de parametros</div>-->
+    <div class="panel-body nopadding" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div  id="div1">
+                <table class="table" >
+                    <thead>
+                    <tr>
+                        <th>Par&aacute;metro</th>
+                        <th>Tipo de Dato</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in listaDatoParametro">
+                        <td>{{item.parametro}}</td>
+                        <td>{{item.tipoDato}}</td>
+                        <td>
+                            <input type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="col-sm-offset-5 col-sm-10">
+        <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar"/>
+        <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
     </div>
 </div>
 

@@ -78,6 +78,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/articulos/agregar-articulos.html',
             controller  : 'agregarArticulosController'
         })
+        .when('/articulos/modificar', {
+            templateUrl : 'pages/articulos/modificar-articulos.html',
+            controller  : 'modificarArticulosController'
+        })
         .when('/articulos-factura', {
             templateUrl : 'pages/articulos-factura/articulos-factura.html',
             controller  : 'articulosFacturaController'
@@ -226,6 +230,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/cajas/agregar-cajas.html',
             controller  : 'agregarCajasController'
         })
+        .when('/cajas/modificar', {
+            templateUrl : 'pages/ventas/cajas/modificar-cajas.html',
+            controller  : 'modificarCajasController'
+        })
         .when('/cajas-movimientos', {
             templateUrl : 'pages/ventas/cajas-movimientos/cajas-movimientos.html',
             controller  : 'cajasMovimientosController'
@@ -255,7 +263,7 @@ app.config(function($routeProvider) {
             controller  :  'agregarReportesController'
         })
         .when('/reportes/modificar', {
-            templateUrl : 'pages/timbrados/modificar-reportes.html',
+            templateUrl : 'pages/reportes/modificar-reportes.html',
             controller  :  'modificarReportesController'
         })
         .when('/timbrados', {
@@ -1446,6 +1454,12 @@ app.controller('articulosController', function($scope, $location, ArticulosServi
 
     }
 
+    $scope.modificar = function(index) {
+        var element = $scope.listaArticulos[index];
+        $location.path( '/articulos/modificar').search({param: element, other:'ok'});
+    }
+
+
     $scope.buscar = function() {
         var json = angular.toJson($scope.datos);
         console.log(json);
@@ -1530,6 +1544,114 @@ app.controller('articulosFacturaController', function($scope, $location, Articul
     init();
 });
 
+app.controller('modificarArticulosController', function($scope, $location, $rootScope, $cookies, $dialogs, ArticulosService,ValoresService,  $timeout) {
+
+    $scope.datos = {};
+    $scope.listaModelos=[];
+    $scope.listaTipos = [];
+    $scope.listaMarcas = [];
+    $scope.listaGrabados=[];
+    $scope.listaMonedas=[];
+
+    $scope.cancelar = function(){
+        $location.path( '/articulos' );
+    }
+
+    $scope.guardar = function() {
+        ArticulosService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data == "true"){
+
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarModelos = function(){
+        var json =angular.toJson({"dominio":"MODELOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaModelos = response.data;
+            }else{
+                alert("Error al cargar los modelos");
+            }
+        })
+    }
+
+    $scope.listarTipos = function(){
+        var json =angular.toJson({"dominio":"TIPOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarMarcas= function(){
+        var json =angular.toJson({"dominio":"MARCAS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaMarcas = response.data;
+            }else{
+                alert("Error al cargar las Marcas");
+            }
+        })
+    }
+
+    $scope.listarGrabados= function(){
+        var json =angular.toJson({"dominio":"IMPUESTOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaGrabados = response.data;
+            }else{
+                alert("Error al cargar los Impuestos");
+            }
+        })
+    }
+
+    $scope.listarMonedas= function(){
+        var json =angular.toJson({"dominio":"MONEDAS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaMonedas = response.data;
+            }else{
+                alert("Error al cargar los Monedas");
+            }
+        })
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarModelos();
+        $scope.listarTipos();
+        $scope.listarMarcas();
+        $scope.listarGrabados();
+        $scope.listarMonedas();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.precioUnitario = urlParams.precioUnitario;
+            $scope.datos.codigoBarra =  urlParams.codigoBarra;
+            $scope.datos.descripcion =  urlParams.descripcion;
+            $scope.datos.modelo = urlParams.modelo;
+            $scope.datos.tipo = urlParams.tipo;
+            $scope.datos.marca = urlParams.marca;
+            $scope.datos.grabado = urlParams.grabado;
+            $scope.datos.moneda = urlParams.moneda;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
 
 app.service('ArticulosService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
@@ -1575,6 +1697,26 @@ app.service('ArticulosService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/articulos/insert?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "codigoBarra":datos.codigoBarra,
+            "marca":datos.marca,
+            "modelo":datos.modelo,
+            "tipo":datos.tipo,
+            "descripcion": datos.descripcion,
+            "precioUnitario": datos.precioUnitario,
+            "grabado": datos.grabado,
+            "moneda": datos.moneda
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/catalogo/articulos/modificar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -4034,6 +4176,23 @@ app.service('CajasService', function($http) {
         return myResponseData;
     }
 
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "estado":datos.estado,
+            "numero":datos.numero,
+            "sucursal":datos.sucursal,
+            "expedicion":datos.expedicion
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cajas/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 });                                            1
 
@@ -4111,6 +4270,12 @@ app.controller('cajasController', function($scope, $location, $rootScope, $cooki
 
     }
 
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/cajas/modificar').search({param: element, other:'ok'});
+    }
+
+
     var init = function () {
         $scope.listarTaller();
         $scope.listarEstados();
@@ -4169,6 +4334,67 @@ app.controller('agregarCajasController', function($scope,    $location, $rootSco
     init();
 });
 
+app.controller('modificarCajasController', function($scope,    $location, $rootScope, $cookies, $dialogs, CajasService, ValoresService, $timeout) {
+    $scope.datos = {};
+
+    $scope.guardar = function() {
+        CajasService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.cancelar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cajas' );
+    }
+
+    $scope.listarTaller = function(){
+        var json =angular.toJson({"dominio":"TALLER_INTERNO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTaller = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CAJA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarTaller();
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.estado = urlParams.estado;
+            $scope.datos.numero =  urlParams.numero;
+            $scope.datos.sucursal =  urlParams.sucursal;
+            $scope.datos.expedicion = urlParams.expedicion;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
 
 app.controller('agregarCajasMovimientosController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, CajasMovimientosService, CajasService) {
     $scope.datos = {};
