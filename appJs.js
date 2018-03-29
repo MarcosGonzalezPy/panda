@@ -536,6 +536,11 @@ app.controller('reportesController', function($scope, $location, ReportesService
 
     }
 
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/reportes/modificar').search({param: element, other:'ok'});
+    }
+
     $scope.buscar = function() {
         ReportesService.listarABM($scope.datos).then(function(response){
             if(response.status == 200){
@@ -546,18 +551,12 @@ app.controller('reportesController', function($scope, $location, ReportesService
         })
     }
 
-    $scope.modificar = function(index) {
-        var element = $scope.lista[index];
-        $location.path( '/reportes/modificar');
-    }
-
     $scope.remove = function(index) {
         var element = $scope.lista[index];
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
 
-            ReportesService.eliminarABM(element.codigo).then(function(response){
-
+            ReportesService.eliminarReporteCompuesto(element.id).then(function(response){
                 if(response.status == 200){
                     var resultado = response.data;
                     if(resultado == "true"){
@@ -609,6 +608,17 @@ app.controller('agregarReportesController', function($scope, $location, $rootSco
     $scope.limpiarSimple = function(){
         $scope.datos.parametro = null;
         $scope.datos.tipoDato = null;
+    }
+
+    $scope.remove = function(index) {
+        var element = $scope.listaDatoParametro[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            $scope.listaDatoParametro.splice(index, 1);
+        },function(){
+
+        })
     }
 
     $scope.agregar = function() {
@@ -680,14 +690,45 @@ app.controller('agregarReportesController', function($scope, $location, $rootSco
 app.controller('modificarReportesController', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, ValoresService, $timeout) {
 
     $scope.datos = {};
-
+    $scope.listaReporteParametros = [];
+    $scope.listaEliminar = [];
     $scope.cancelar = function(){
         $location.path('/reportes/abm');
     }
 
+    $scope.remove = function(index) {
+        var element = $scope.listaDatoParametro[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            $scope.listaEliminar.push(element);
+            $scope.listaDatoParametro.splice(index, 1);
+        },function(){
+
+        })
+    }
+
     $scope.guardar = function() {
+
         var listaDatoParametro = angular.copy($scope.listaDatoParametro);
+        var listaReporteParametrosEliminar = angular.copy($scope.listaEliminar);
+
+        for(var i = listaDatoParametro.length; i--;){
+
+            if(listaDatoParametro[i].recuperado=='S'){
+                listaDatoParametro.splice(i,1);
+            } else{
+                delete listaDatoParametro[i].recuperado;
+            }
+            ;
+        }
+        for(var j = listaReporteParametrosEliminar.length; j--;){
+
+            delete listaReporteParametrosEliminar[j].recuperado;
+        }
+
         var cabecera = {
+            id : $scope.datos.id,
             modulo: $scope.datos.modulo,
             path:$scope.datos.path,
             estado: $scope.datos.estado,
@@ -697,7 +738,8 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
 
         var param = {
             cabecera: cabecera,
-            detalle: listaDatoParametro
+            detalle: listaDatoParametro,
+            listaReporteParametrosEliminar:   listaReporteParametrosEliminar
         }
         ReportesService.modificarReportesCompuestos(param).then(function(response){
             if(response.status == 200 && response.data == "true"){
@@ -705,7 +747,7 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al modificar'},{key: false,back: 'static'});
             }
         })
     }
@@ -757,14 +799,45 @@ app.controller('modificarReportesController', function($scope, $location, $rootS
         })
     }
 
+    $scope.buscarReporteParametros = function() {
+        ReportesService.listarReporteParametros($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.listaDatoParametro = response.data;
+                for(i=0;i<$scope.listaDatoParametro.length;i++){
+                    $scope.listaDatoParametro[i].recuperado =  'S';
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
     var init = function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.id  == 'undefined'){
+            $scope.cancelar();
+        }
+
         $scope.listarModulos();
         $scope.listarEstados();
         $scope.listarDatosReportes();
+
+        $timeout( function (){
+            $scope.datos.id  = urlParams.id ;
+            $scope.datos.modulo =  urlParams.modulo;
+            $scope.datos.path =  urlParams.path;
+            $scope.datos.estado = urlParams.estado;
+            $scope.datos.nombre = urlParams.nombre;
+            $scope.datos.descripcion = urlParams.descripcion;
+            $scope.buscarReporteParametros();
+
+            $scope.$apply();
+        }, 1000)
     }
 
-    init();
-});
+        init();
+
+    });
 
 app.service('ReportesService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
@@ -786,6 +859,20 @@ app.service('ReportesService', function($http) {
             });
         return myResponseData;
     }
+
+    this.listarReporteParametros   = function(datos) {
+        var obj = {
+            "reporteId":datos.id
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/listarReporteParametros?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
     this.insertarABM = function(datos){
         var obj = {
             "modulo":datos.modulo,
@@ -838,7 +925,8 @@ app.service('ReportesService', function($http) {
     this.modificarReportesCompuestos = function(datos){
         var obj = {
             "reportes": datos.cabecera,
-            "listaParametros": datos.detalle
+            "listaParametros": datos.detalle,
+            "listaReporteParametrosEliminar": datos.listaReporteParametrosEliminar
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -851,6 +939,14 @@ app.service('ReportesService', function($http) {
 
     this.eliminarABM = function(id){
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/eliminarABM/'+id)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarReporteCompuesto = function(id){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/reportes/eliminar-compuesto/'+id)
             .then(function (response) {
                 return response;
             });
