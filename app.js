@@ -7465,7 +7465,7 @@ app.controller('historialController', function($scope, $location, $rootScope, $c
 
 app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, $window, ValoresService) {
     $scope.datos = {};
-    $scope.mostrarParametros = false;
+    $scope.mostrarParametros = true;
     $scope.params = [];
     $scope.paramsConcatenados = "";
     $scope.listaParametroSelect= [];
@@ -7511,12 +7511,43 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
         $scope.datos.path = null;
     }
 
+    $scope.limpiarTodo= function(){
+        $scope.datos = {};
+        $scope.mostrarParametros = true;
+        $scope.params = [];
+        $scope.paramsConcatenados = "";
+        $scope.listaParametroSelect= [];
+    }
+
     $scope.reportePrueba = function(){
          $window.open('http://localhost:8081/jasperserver/rest_v2/reports/reports/prueba2.pdf', '_blank');
     }
 
     $scope.openTab= function(){
-        $window.open('http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf');
+        var path ='http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf'
+        if($scope.params.length>0){
+            path+='?'
+
+            var keyNames = Object.keys( $scope.params);
+            console.log(keyNames);
+            for(i=0;i<$scope.params.length;i++){
+                var cont = 1;
+                var paramsElements = $scope.params[i];
+                for (var key in paramsElements) {
+                    if (paramsElements.hasOwnProperty(key)) {
+                        path+=key+'='+paramsElements[key];
+                    }
+                    if(cont< $scope.params.length){
+                        path+='&';
+                    }
+                    cont++;
+                }
+            }
+
+
+        }
+        $window.open(path);
+        //$scope.limpiarTodo();
     }
 
     $scope.separadorDeMilesTelefono = function() {
@@ -7525,7 +7556,7 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
     }
 
     $scope.listarParametros = function(){
-        $scope.listaParametroSelect= [];
+       $scope.listaParametroSelect= [];
        if( $scope.listaParametros.length>0){
            $scope.mostrarParametros = true;
            for(i=0;i<$scope.listaParametros.length;i++){
@@ -7536,14 +7567,17 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
        }
     }
 
-    $scope.changParametro = function(){
+    $scope.changeParametro = function(){
 
     }
 
     $scope.agregarParametro= function(){
         var obj={};
-        obj[$scope.paramLabel]= $scope.paramValor;
+        obj[$scope.datos.paramLabel]= $scope.datos.paramValor;
         $scope.params.push(obj);
+        $scope.paramsConcatenados = $scope.paramsConcatenados +' {"'+$scope.datos.paramLabel+'":"'+$scope.datos.paramValor+'"} ';
+        delete $scope.datos.paramLabel;
+        delete $scope.datos.paramValor;
     }
 
     $scope.limpiarParametro = function(){
