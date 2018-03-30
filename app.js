@@ -3370,7 +3370,17 @@ app.service('UsuariosService', function($http) {
     }
 
     this.listarComplex = function(json) {
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/complex/'+json)
+        /*lista los usuario_sucursal
+         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/complex/'+json)*/
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/'+json)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.listarUsuarioSucursal = function() {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/')
             .then(function (response) {
                 return response;
             });
@@ -4194,7 +4204,7 @@ app.service('CajasService', function($http) {
     }
 
 
-});                                            1
+});
 
 
 
@@ -4411,7 +4421,7 @@ app.controller('agregarCajasMovimientosController', function($scope, $location, 
 
     $scope.listarUsuarios= function(){
         var json = angular.toJson({});
-        UsuariosService.listarComplex(json).then(function(response){
+        UsuariosService.listarUsuarioSucursal(json).then(function(response){
             if(response.status == 200){
                 $scope.listaUsuarios = response.data;
             }else{
