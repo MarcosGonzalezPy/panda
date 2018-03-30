@@ -4439,11 +4439,16 @@ app.controller('agregarCajasMovimientosController', function($scope, $location, 
     $scope.agregar= function(){
         $scope.datos.usuarioCreacion =$cookies.usuario;
         CajasMovimientosService.insertar($scope.datos).then(function(response){
-            if(response.status == 200 && response.data=="true"){
+            if(response.status == 200 && response.data=="S"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                if(response.data) {
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:response.data},{key: false,back: 'static'});
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                }
+
             }
         })
     }
