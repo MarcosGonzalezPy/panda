@@ -4287,8 +4287,6 @@ app.controller('cajasController', function($scope, $location, $rootScope, $cooki
 app.controller('agregarCajasController', function($scope,    $location, $rootScope, $cookies, $dialogs, CajasService, ValoresService) {
     $scope.datos = {};
 
-
-
     $scope.agregar = function() {
         CajasService.insertar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
