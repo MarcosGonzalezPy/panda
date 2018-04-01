@@ -243,6 +243,19 @@ app.config(function($routeProvider) {
             controller  : 'agregarCajasMovimientosController'
         })
 
+        .when('/cheques', {
+            templateUrl : 'pages/ventas/cheques/cheques.html',
+            controller  : 'chequesController'
+        })
+        .when('/cheques/agregar', {
+            templateUrl : 'pages/ventas/cheques/agregar-cheques.html',
+            controller  :  'agregarChequesController'
+        })
+        .when('/cheques/modificar', {
+            templateUrl : 'pages/ventas/cheques/modificar-cheques.html',
+            controller  :  'modificarChequesController'
+        })
+
         .when('/prueba', {
             templateUrl : 'pages/prueba.html',
             controller  : 'dialogServiceTest'

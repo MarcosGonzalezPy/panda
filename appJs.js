@@ -956,4 +956,270 @@ app.service('ReportesService', function($http) {
 });
 
 
+app.controller('chequesController', function($scope, $location, $rootScope, $cookies, $dialogs,ValoresService, ChequesService) {
+    $scope.datos = {};
+    $scope.lista= []
+
+    $scope.limpiar = function(){
+        $scope.datos = {};
+        $scope.lista  = [];
+    }
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.buscar= function(){
+        ChequesService.listar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.remove = function(index) {
+        var element = $scope.lista[index];
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            ChequesService.eliminar(element.codigo).then(function(response){
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+        },function(){
+
+        });
+    }
+
+
+    $scope.agregar = function() {
+        $location.path( '/cheques/agregar' );
+
+    }
+
+    $scope.modificar = function(index) {
+        var element = $scope.lista[index];
+        $location.path( '/cheques/modificar').search({param: element, other:'ok'});
+    }
+
+
+    var init = function () {
+        $scope.listarBancos();
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+
+app.controller('agregarChequesController', function($scope,    $location, $rootScope, $cookies, $dialogs, ChequesService, ValoresService) {
+    $scope.datos = {};
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.agregar = function() {
+        ChequesService.insertar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.cancelar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cheques' );
+    }
+
+    var init = function () {
+        $scope.listarBancos();
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+app.controller('modificarChequesController', function($scope,    $location, $rootScope, $cookies, $dialogs, ChequesService, ValoresService, $timeout) {
+    $scope.datos = {};
+
+    $scope.guardar = function() {
+        CajasService.modificar($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.cancelar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cheques' );
+    }
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.listarBancos();
+        $scope.listarEstados();
+
+        $timeout( function (){
+            $scope.datos.codigo = urlParams.codigo;
+            $scope.datos.monto = urlParams.monto;
+            $scope.datos.numeroCheque =  urlParams.numeroCheque;
+            $scope.datos.estado =  urlParams.estado;
+            $scope.datos.banco = urlParams.banco;
+            $scope.datos.fecha = urlParams.fecha;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
+
+app.service('ChequesService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listar = function(datos){
+       var obj = {
+            "codigo":datos.codigo,
+            "estado":datos.estado,
+            "banco":datos.banco?datos.banco:null,
+            "numeroCheque":datos.numeroCheque
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheque/listar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.insertar = function(datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "monto":datos.monto,
+            "numeroCheque":datos.numeroCheque,
+            "estado":datos.estado,
+            "banco":datos.banco,
+            "fecha":datos.fecha
+        }
+        var json = angular.toJson(datos);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheques/insertar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificar = function (datos){
+        var obj = {
+            "codigo":datos.codigo,
+            "monto":datos.monto,
+            "numeroCheque":datos.numeroCheque,
+            "estado":datos.estado,
+            "banco":datos.banco,
+            "fecha":datos.fecha
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cheques/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminar = function(codigo){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheques/delete/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+});
+
+
+
+
 
