@@ -7,15 +7,15 @@
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-sm-4">
                 <div class="form-group">
-                    <label class="col-sm-4 control-label">C&oacute;digo</label>
-                    <div class="col-sm-8">
+                    <label class="col-sm-6 control-label">C&oacute;digo</label>
+                    <div class="col-sm-6">
                         <input autofocus  maxlength="200" required primary type="text" class="form-control input-sm" ng-model="datos.codigo"/>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-4 control-label">N&uacute;mero de Cheque</label>
-                    <div class="col-sm-8">
+                    <label class="col-sm-6 control-label">N&uacute;mero de Cheque</label>
+                    <div class="col-sm-6">
                         <input autofocus  maxlength="200" required primary type="text" class="form-control input-sm" ng-model="datos.numeroCheque"/>
                     </div>
                 </div>
@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-4 control-label">Estado:</label>
+                    <label class="col-sm-4 control-label">Estado</label>
                     <div class="col-sm-8">
                         <select id="estado"   class="form-control input-sm"
                                 ng-model=datos.estado>
@@ -49,6 +49,7 @@
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input type="button"   ng-click="cobrar()"  class="btn btn-success btn-sm" value="Cobrar" />
                 </div>
             </div>
         </form>
@@ -68,7 +69,7 @@
         <table class="table" >
             <thead>
             <tr>
-                <th>Codigo</th>
+                <th></th>
                 <th>Monto</th>
                 <th>Numero</th>
                 <th>Estado</th>
@@ -79,15 +80,18 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td>{{item.codigo}}</td>
+                <td><input ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.monto}}</td>
                 <td>{{item.numeroCheque}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.banco}}</td>
                 <td>{{item.fecha}}</td>
                 <td>
-                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
-                    <button ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
+                    <button ng-show="item.estado != 'COBRADO'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-show="item.estado != 'COBRADO'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
+                </td>
+                <td>
+                    {{item.checkActivo}}
                 </td>
             </tr>
             </tbody>

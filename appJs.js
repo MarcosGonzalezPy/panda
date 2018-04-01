@@ -997,6 +997,24 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         })
     }
 
+
+    $scope.cobrar= function(index){
+       console.log($scope.lista);
+    }
+
+    $scope.foo = function (index) {
+        var element =  $scope.lista[index];
+        for(i=0;i<$scope.lista.length;i++){
+            if(element.codigo == $scope.lista[i].codigo){
+               if($scope.lista[i].checkActivo=='S'){
+                   $scope.lista[i].checkActivo = 'N';
+               }else{
+                   $scope.lista[i].checkActivo = 'S';
+               }
+            }
+        }
+    }
+
     $scope.remove = function(index) {
         var element = $scope.lista[index];
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
@@ -1037,6 +1055,7 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
     var init = function () {
         $scope.listarBancos();
         $scope.listarEstados();
+        $scope.buscar();
     }
 
     init();
@@ -1057,7 +1076,7 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
         })
     }
 
-    $scope.listarEstados = function(){
+   /*$scope.listarEstados = function(){
         var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
@@ -1066,7 +1085,7 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
                 alert("Error al cargar los tipos");
             }
         })
-    }
+    }*/
 
     $scope.agregar = function() {
         ChequesService.insertar($scope.datos).then(function(response){
@@ -1085,7 +1104,8 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
 
     var init = function () {
         $scope.listarBancos();
-        $scope.listarEstados();
+        /*$scope.listarEstados();*/
+        $scope.datos.estado='PENDIENTE_COBRO';
     }
 
     init();
@@ -1095,7 +1115,7 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
     $scope.datos = {};
 
     $scope.guardar = function() {
-        CajasService.modificar($scope.datos).then(function(response){
+        ChequesService.modificar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
                 $scope.cancelar();
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
@@ -1131,6 +1151,15 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
         })
     }
 
+
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
+    }
+
     var init = function () {
         var urlParams = $location.search().param;
         if(typeof urlParams.codigo == 'undefined'){
@@ -1145,7 +1174,11 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
             $scope.datos.numeroCheque =  urlParams.numeroCheque;
             $scope.datos.estado =  urlParams.estado;
             $scope.datos.banco = urlParams.banco;
-            $scope.datos.fecha = urlParams.fecha;
+
+
+            var fecha =   new Date (urlParams.fecha);
+            var fechaformateada =  fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth()+1)+'-'+formatMesDia(fecha.getDate());
+            $scope.datos.fecha =  fechaformateada;
 
             $scope.$apply();
         }, 1000)
@@ -1175,7 +1208,6 @@ app.service('ChequesService', function($http) {
 
     this.insertar = function(datos){
         var obj = {
-            "codigo":datos.codigo,
             "monto":datos.monto,
             "numeroCheque":datos.numeroCheque,
             "estado":datos.estado,
@@ -1184,7 +1216,7 @@ app.service('ChequesService', function($http) {
         }
         var json = angular.toJson(datos);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheques/insertar?paramJson='+encoJson)
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheque/insertar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -1202,7 +1234,7 @@ app.service('ChequesService', function($http) {
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cheques/modificar?paramJson='+encoJson)
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cheque/modificar?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
