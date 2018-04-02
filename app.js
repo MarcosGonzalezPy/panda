@@ -243,6 +243,19 @@ app.config(function($routeProvider) {
             controller  : 'agregarCajasMovimientosController'
         })
 
+        .when('/cheques', {
+            templateUrl : 'pages/ventas/cheques/cheques.html',
+            controller  : 'chequesController'
+        })
+        .when('/cheques/agregar', {
+            templateUrl : 'pages/ventas/cheques/agregar-cheques.html',
+            controller  :  'agregarChequesController'
+        })
+        .when('/cheques/modificar', {
+            templateUrl : 'pages/ventas/cheques/modificar-cheques.html',
+            controller  :  'modificarChequesController'
+        })
+
         .when('/prueba', {
             templateUrl : 'pages/prueba.html',
             controller  : 'dialogServiceTest'
@@ -3370,7 +3383,17 @@ app.service('UsuariosService', function($http) {
     }
 
     this.listarComplex = function(json) {
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/complex/'+json)
+        /*lista los usuario_sucursal
+         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/complex/'+json)*/
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/'+json)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.listarUsuarioSucursal = function() {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuario-sucursal/')
             .then(function (response) {
                 return response;
             });
@@ -4194,7 +4217,7 @@ app.service('CajasService', function($http) {
     }
 
 
-});                                            1
+});
 
 
 
@@ -4286,8 +4309,6 @@ app.controller('cajasController', function($scope, $location, $rootScope, $cooki
 
 app.controller('agregarCajasController', function($scope,    $location, $rootScope, $cookies, $dialogs, CajasService, ValoresService) {
     $scope.datos = {};
-
-
 
     $scope.agregar = function() {
         CajasService.insertar($scope.datos).then(function(response){
@@ -4413,7 +4434,7 @@ app.controller('agregarCajasMovimientosController', function($scope, $location, 
 
     $scope.listarUsuarios= function(){
         var json = angular.toJson({});
-        UsuariosService.listarComplex(json).then(function(response){
+        UsuariosService.listarUsuarioSucursal(json).then(function(response){
             if(response.status == 200){
                 $scope.listaUsuarios = response.data;
             }else{
