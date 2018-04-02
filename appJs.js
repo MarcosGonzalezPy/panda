@@ -997,9 +997,28 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         })
     }
 
-
     $scope.cobrar= function(index){
-       console.log($scope.lista);
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+           if(listaCopy[i].checkActivo=='S'){
+             $scope.listaACobrar.push(listaCopy[i]);
+           }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+
+        ChequesService.modificarEstadoCheque($scope.listaACobrar).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.buscar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+
     }
 
     $scope.foo = function (index) {
@@ -1076,17 +1095,6 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
         })
     }
 
-   /*$scope.listarEstados = function(){
-        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
-        ValoresService.listarJson(json).then(function(response){
-            if(response.status ==200){
-                $scope.listaEstados = response.data;
-            }else{
-                alert("Error al cargar los tipos");
-            }
-        })
-    }*/
-
     $scope.agregar = function() {
         ChequesService.insertar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
@@ -1104,7 +1112,6 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
 
     var init = function () {
         $scope.listarBancos();
-        /*$scope.listarEstados();*/
         $scope.datos.estado='PENDIENTE_COBRO';
     }
 
@@ -1235,6 +1242,19 @@ app.service('ChequesService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cheque/modificar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.modificarEstadoCheque = function (datos){
+        var obj={
+            listaCheques: datos
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/cheque/modificar-lista?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
