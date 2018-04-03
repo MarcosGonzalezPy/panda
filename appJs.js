@@ -1176,10 +1176,10 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
         $scope.listarEstados();
 
         $timeout( function (){
+            $scope.datos.estado =  urlParams.estado;
             $scope.datos.codigo = urlParams.codigo;
             $scope.datos.monto = urlParams.monto;
             $scope.datos.numeroCheque =  urlParams.numeroCheque;
-            $scope.datos.estado =  urlParams.estado;
             $scope.datos.banco = urlParams.banco;
 
 
