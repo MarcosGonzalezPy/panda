@@ -1271,6 +1271,51 @@ app.service('ChequesService', function($http) {
 
 });
 
+app.controller('cambiarPasswordController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, $cookies,$timeout) {
+    $scope.datos = {};
+    $scope.habilitarBoton=true;
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.cancelar = function(){
+            $location.path( '/usuarios' );
+    }
+
+    $scope.habilitarCambio= function(){
+        if($scope.datos.anteriorPassword != $scope.datos.nuevoPassword ){
+            if(  ($scope.datos.nuevoPassword == $scope.datos.confirmarPassword)
+                && (  $scope.datos.nuevoPassword &&  $scope.datos.nuevoPassword.length >5) ){
+                $scope.habilitarBoton=false;
+            } else{
+                $scope.habilitarBoton=true;
+            }
+        }
+    }
+
+    $scope.cambiar = function() {
+        UsuariosService.cambiarPassword($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function(){
+        $timeout( function (){
+            $scope.datos.usuario=  $cookies.usuario;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
 
 
 

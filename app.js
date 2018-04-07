@@ -146,6 +146,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/personas/personas/modificar-personas.html',
             controller  : 'modificarPersonasController'
         })
+        .when('/personas/cambiar-password', {
+            templateUrl : 'pages/personas/usuarios/cambiar-password.html',
+            controller  : 'cambiarPasswordController'
+        })
         .when('/servicios', {
             templateUrl : 'pages/servicios/servicios.html',
             controller  : 'serviciosController'
@@ -3294,6 +3298,11 @@ app.controller('usuariosController', function($scope, $location, $rootScope, $co
 
     }
 
+    $scope.cambiar = function() {
+        $location.path('/personas/cambiar-password').search({param:'usuarios'});
+
+    }
+
     $scope.modificar = function(index) {
         $rootScope.usuario = $scope.listaUsuarios[index];
         $location.path( '/usuarios/modificar' );
@@ -3426,6 +3435,20 @@ app.service('UsuariosService', function($http) {
         return myResponseData;
     }
 
+    this.cambiarPassword = function(datos){
+        var obj = {
+            "usuario": datos.usuario,
+            "anteriorPassword": datos.anteriorPassword,
+            "nuevoPassword": datos.nuevoPassword
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/personas/usuarios/cambiar-password?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
 
 
 });
