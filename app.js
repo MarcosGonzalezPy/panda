@@ -3106,8 +3106,7 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
     }
 
     $scope.listarProveedores= function(){
-        var json ="";
-        ProveedoresService.listarComplex(json).then(function(response){
+        ProveedoresService.listarSinParametro().then(function(response){
             if(response.status ==200){
                 $scope.listaProveedores = response.data;
             }else{
@@ -3115,6 +3114,15 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
             }
         })
     }
+
+    $scope.changeProveedor = function(){
+        for(i=0;i<$scope.listaProveedores.length;i++){
+            if($scope.listaProveedores[i].nombre==$scope.datos2.proveedor){
+                 $scope.proveedorCodigo =  $scope.listaProveedores[i].codigo;
+            }
+        }
+    }
+
 
     $scope.secuencia = function(){
         UtilService.secuencia("orden_compra_seq").then(function(response){
@@ -3157,7 +3165,6 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
             "codigoBarra": $scope.datos.codigoBarra,
             "descripcion": $scope.datos.descripcion,
             "cantidad": $scope.datos2.cantidad,
-            "precio": $scope.datos2.precio,
             "iva": $scope.datos2.iva
         }
         $scope.listraRegistroarticulos.push(obj);
@@ -3176,6 +3183,7 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
                         $scope.datos.codigo = $scope.articulo.codigo;
                         $scope.datos.codigoBarra = $scope.articulo.codigoBarra;
                         $scope.datos.descripcion = $scope.articulo.descripcion;
+                        $scope.datos2.iva = $scope.articulo.grabado;
                         $scope.articuloValido  = true;
                         $scope.inhabilitarAgregar =false;
                     }else{
@@ -3223,7 +3231,8 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
             "condicionCompra": $scope.datos2.condicionCompra,
             "plazos": $scope.datos2.plazos,
             "fechaEntrega": $scope.datos2.fechaEntrega,
-            "usuario":  $cookies.usuario
+            "usuario":  $cookies.usuario,
+            "proveedorCodigo": $scope.proveedorCodigo
         }
         for(i=0;i<$scope.listraRegistroarticulos.length;i++){
             $scope.listraRegistroarticulos[i].codigo = $scope.listraRegistroarticulos[i].id;
@@ -3739,8 +3748,15 @@ app.service('ComprasService', function($http) {
     }
 
 
-    this.eliminar = function(id){
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/delete/'+id)
+    this.anular = function(datos){
+        var obj={
+            "codigo":datos.codigo,
+            "estado":datos.estado,
+            "sucursal": datos.sucursal
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/anular?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -3805,21 +3821,21 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         })
     }
 
-    $scope.remove = function(index) {
+    $scope.anular = function(index) {
         var element = $scope.listaCompras[index];
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea anular?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
             //alert(resultado);
 
-            ComprasService.eliminar(element.codigo).then(function(response){
+            ComprasService.anular(element).then(function(response){
                 if(response.status == 200){
                     var resultado = response.data;
                     if(resultado == "true"){
-                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion Exitosa'},{key: false,back: 'static'});
                         $scope.limpiar();
                         $scope.buscar();
                     }else{
-                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al anular'},{key: false,back: 'static'});
                         $scope.limpiar();
                         $scope.buscar();
                     }
@@ -3845,7 +3861,7 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     var init = function () {
         $scope.listarTaller();
         $scope.listarEstados();
-        $scope.datos.estado = 'ACTIVO';
+        //$scope.datos.estado = 'ACTIVO';
         $scope.buscar();
     }
 
@@ -3874,7 +3890,8 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
             "condicionCompra": $scope.datos2.condicionCompra,
             "plazo": $scope.datos2.plazo,
             "fechaEntrega": $scope.datos2.fechaEntregaReal,
-            "usuario":  $cookies.usuario
+            "usuario":  $cookies.usuario,
+            "proveedorCodigo": $scope.datos2.proveedorCodigo
         }
         for(i=0;i<$scope.lista.length;i++){
             $scope.lista[i].id = $scope.lista[i].codigo;
@@ -3886,7 +3903,7 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
             "detalle": $scope.lista
         }
         ComprasService.insertarRegistroCompra(param).then(function(response){
-            if(response.status == 200){
+            if(response.status == 200 && response.data == "true"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
@@ -5197,9 +5214,24 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
     $scope.inhabilitarCredito = true;
     $scope.inhabilitarTC = true;
     $scope.listaCredito = [];
+    $scope.agregarNotaCredito = false;
 
     $scope.listarCredito = function(){
+        var obj = {
+            cliente : $scope.datos.codigoPersona,
+            estado: 'PENDIENTE'
+        }
+        VentasService.listarFondoDebito(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaFondoDebito = response.data;
+                if($scope.listaFondoDebito.length>0){
+                    $scope.agregarNotaCredito=true;
 
+                }
+            }else{
+                alert("Error al cargar el Fondo Debito");
+            }
+        })
 
     }
 
@@ -5208,6 +5240,7 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaCondicionesCompra = response.data;
+                $scope.listarCredito();
             }else{
                 alert("Error al cargar la Condicion de Pago");
             }
@@ -5236,6 +5269,11 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaMediosPago = response.data;
+                if($scope.agregarNotaCredito==true){
+                    $scope.listaMediosPago.push(
+                        {"valor":"NOTA CREDITO"}
+                    )
+                }
             }else{
                 alert("Error al cargar los Medios de Pago");
             }
@@ -5345,7 +5383,7 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         $scope.datos.caja=$rootScope.pago.caja;
         $scope.datos.cajero=$rootScope.pago.cajero;
         $scope.datos.sucursal=$rootScope.pago.sucursal;
-        //console.log($args);
+        $scope.datos.codigoPersona=$rootScope.pago.codigoPersona;
 
         $scope.datos.montoTotal = $rootScope.montoTotal;
         $scope.pagadoTotal = 0;
@@ -5353,6 +5391,7 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         $scope.datos.numeroFactura = $rootScope.venta.numeroFactura;
         $scope.listarCondicionesCompra();
         $scope.listarMarcaTarjeta();
+
     }
 
     init();

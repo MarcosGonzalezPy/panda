@@ -69,7 +69,7 @@
                     </div>
                     <label class="col-sm-2 control-label">Proveedor:</label>
                     <div class="col-sm-4">
-                        <select id="proveedor"   class="form-control input-sm"
+                        <select id="proveedor"   class="form-control input-sm"  ng-change="changeProveedor()"
                                 ng-model=datos2.proveedor>
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaProveedores"

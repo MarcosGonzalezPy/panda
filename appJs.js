@@ -207,6 +207,15 @@ app.service('ProveedoresService', function($http) {
             });
         return myResponseData;
     }
+
+    this.listarSinParametro = function() {
+
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/proveedores/listar')
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
     this.insertar = function(datos){
         var obj = {
             "codigo":datos.codigo,
