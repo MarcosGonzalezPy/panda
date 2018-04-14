@@ -4607,6 +4607,24 @@ app.service('VentasService', function($http) {
         return myResponseData;
     }
 
+    this.listarDetalleAprovadoReparacion = function(secuencia) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/listar-detalle-aprovado-reparacion/'+secuencia)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.listarFondoDebito = function(param) {
+        var json = angular.toJson(param);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/listar-fondo-debito?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 
@@ -5205,6 +5223,12 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
     $scope.lista = [];
     $scope.inhabilitarCredito = true;
     $scope.inhabilitarTC = true;
+    $scope.listaCredito = [];
+
+    $scope.listarCredito = function(){
+
+
+    }
 
     $scope.listarCondicionesCompra = function(){
         var json =angular.toJson({"dominio":"CONDICION_PAGO"});
@@ -7518,7 +7542,7 @@ app.controller('historialController', function($scope, $location, $rootScope, $c
 
 app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dialogs, ReportesService, $window, ValoresService) {
     $scope.datos = {};
-    $scope.mostrarParametros = true;
+    $scope.mostrarParametros = false;
     $scope.params = [];
     $scope.paramsConcatenados = "";
     $scope.listaParametroSelect= [];
@@ -7550,11 +7574,14 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
     }
 
     $scope.changeReporte= function(){
-        $scope.limpiar();
+        $scope.params=[];
+        $scope.paramsConcatenados = "";
         for(j=0;j<$scope.listaReportes.length;j++){
             if($scope.listaReportes[j].nombre==$scope.datos.nombre){
                 $scope.datos.descripcion =  $scope.listaReportes[j].descripcion;
                 $scope.datos.path =  $scope.listaReportes[j].path;
+                $scope.datos.reporteId = $scope.listaReportes[j].id;
+                $scope.listarParametros();
             }
         }
     }
@@ -7577,10 +7604,8 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
     }
 
     $scope.openTab= function(){
-        var path ='http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf'
+        var path ='http://localhost:8081/jasperserver/rest_v2/reports/'+$scope.datos.path+'.pdf?'
         if($scope.params.length>0){
-            path+='?'
-
             var keyNames = Object.keys( $scope.params);
             console.log(keyNames);
             for(i=0;i<$scope.params.length;i++){
@@ -7596,8 +7621,9 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
                     cont++;
                 }
             }
-
-
+            path+="&j_username=jasperadmin&j_password=jasperadmin"
+        }else{
+            path+="j_username=jasperadmin&j_password=jasperadmin"
         }
         $window.open(path);
         //$scope.limpiarTodo();
@@ -7609,15 +7635,24 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
     }
 
     $scope.listarParametros = function(){
-       $scope.listaParametroSelect= [];
-       if( $scope.listaParametros.length>0){
-           $scope.mostrarParametros = true;
-           for(i=0;i<$scope.listaParametros.length;i++){
-               $scope.listaParametroSelect.push($scope.listaParametros.parametro);
-           }
-       }else{
-           $scope.mostrarParametros = false
-       }
+        $scope.listaParametros= [];
+        var obj={
+            id:$scope.datos.reporteId
+        }
+        ReportesService.listarReporteParametros(obj).then(function(response){
+            if(response.status ==200){
+                if(response.data.length>0){
+                    $scope.mostrarParametros = true;
+                    $scope.listaParametros = response.data;
+                }else{
+                    $scope.mostrarParametros = false
+                }
+
+            }else{
+                alert("Error al cargar los Reportes");
+            }
+        })
+
     }
 
     $scope.changeParametro = function(){
@@ -7640,12 +7675,12 @@ app.controller('reporte', function($scope, $location, $rootScope, $cookies, $dia
 
     var init= function(){
         $scope.listarModulos();
-        $scope.listaParametros = [
-            {
-                "parametro": 'facturaId',
-                "tipoDato": 'LONG'
-            }
-        ]
+//        $scope.listaParametros = [
+//            {
+//                "parametro": 'facturaId',
+//                "tipoDato": 'LONG'
+//            }
+//        ]
     }
 
     init();
@@ -7861,6 +7896,9 @@ app.controller('ajusteInventarioNegativoController', function($scope, $location,
 
     init();
 });
+
+
+
 
 
 
