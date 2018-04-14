@@ -967,7 +967,8 @@ app.service('ReportesService', function($http) {
 
 app.controller('chequesController', function($scope, $location, $rootScope, $cookies, $dialogs,ValoresService, ChequesService) {
     $scope.datos = {};
-    $scope.lista= []
+    $scope.lista= [];
+    $scope.inhabilitarCambio= true;
 
     $scope.limpiar = function(){
         $scope.datos = {};
@@ -1010,9 +1011,9 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         var listaCopy  = angular.copy($scope.lista);
         $scope.listaACobrar=[];
         for(i=0;i<listaCopy.length;i++){
-           if(listaCopy[i].checkActivo=='S'){
-             $scope.listaACobrar.push(listaCopy[i]);
-           }
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
         }
         for(j=0;j<$scope.listaACobrar.length;j++){
             delete $scope.listaACobrar[j].checkActivo;
@@ -1040,6 +1041,20 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
                    $scope.lista[i].checkActivo = 'S';
                }
             }
+        }
+        var activos = false;
+        for(j=0;j<$scope.lista.length;j++){
+            if($scope.lista[j].checkActivo=='S'){
+                activos= true;
+                break;
+            }
+
+        }
+        if(activos==true){
+            $scope.inhabilitarCambio= false;
+        }
+        else{
+            $scope.inhabilitarCambio= true;
         }
     }
 
@@ -1079,11 +1094,105 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         $location.path( '/cheques/modificar').search({param: element, other:'ok'});
     }
 
+    $scope.depositar = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/cheques/depositar').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
 
     var init = function () {
         $scope.listarBancos();
         $scope.listarEstados();
         $scope.buscar();
+    }
+
+    init();
+});
+
+app.controller('depositarChequesController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, ChequesService, CuentasBancariasService) {
+    $scope.datos = {};
+    $scope.lista= [];
+
+    $scope.limpiar = function(){
+        $scope.datos = {};
+        $scope.lista  = [];
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/cheques' );
+    }
+
+    $scope.guardarDepositos= function(index){
+        if($scope.datos.numero ==null || typeof $scope.datos.numero == undefined || $scope.datos.numero == ''){
+            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error: Debe ingresar La Cuenta Bancaria.'},{key: false,back: 'static'});
+            return;
+        }
+        var listaCopy  = angular.copy($scope.lista);
+
+        ChequesService.depositarCheques(listaCopy, $scope.datos.numero).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                $scope.buscar();
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarCuentaBancaria = function(datos){
+        var obj = {};
+        if(datos){
+            obj = datos;
+        }
+        CuentasBancariasService.listar(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaCuentasBancarias = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listaCuentasSegunBanco = function(datos){
+        var obj = {};
+        if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
+            obj = {
+                "banco":$scope.datos.banco
+            }
+        }
+        $scope.listarCuentaBancaria(obj);
+    }
+
+    var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams == 'undefined' && urlParams.length<0){
+            $scope.cancelar();
+        }
+        $scope.listarBancos();
+        $scope.listarCuentaBancaria();
+        $scope.lista = urlParams;
+
     }
 
     init();
@@ -1185,10 +1294,10 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
         $scope.listarEstados();
 
         $timeout( function (){
+            $scope.datos.estado =  urlParams.estado;
             $scope.datos.codigo = urlParams.codigo;
             $scope.datos.monto = urlParams.monto;
             $scope.datos.numeroCheque =  urlParams.numeroCheque;
-            $scope.datos.estado =  urlParams.estado;
             $scope.datos.banco = urlParams.banco;
 
 
@@ -1270,6 +1379,19 @@ app.service('ChequesService', function($http) {
         return myResponseData;
     }
 
+    this.depositarCheques = function (lista,datos){
+        var obj={
+            listaCheques: lista
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/movimientos-cuenta-bancaria/depositar-cheques+/'+datos+'/?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
     this.eliminar = function(codigo){
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheques/delete/'+codigo)
             .then(function (response) {
@@ -1280,6 +1402,51 @@ app.service('ChequesService', function($http) {
 
 });
 
+app.controller('cambiarPasswordController', function($scope, $location, $rootScope, $cookies, $dialogs, UsuariosService, $cookies,$timeout) {
+    $scope.datos = {};
+    $scope.habilitarBoton=true;
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.cancelar = function(){
+            $location.path( '/usuarios' );
+    }
+
+    $scope.habilitarCambio= function(){
+        if($scope.datos.anteriorPassword != $scope.datos.nuevoPassword ){
+            if(  ($scope.datos.nuevoPassword == $scope.datos.confirmarPassword)
+                && (  $scope.datos.nuevoPassword &&  $scope.datos.nuevoPassword.length >5) ){
+                $scope.habilitarBoton=false;
+            } else{
+                $scope.habilitarBoton=true;
+            }
+        }
+    }
+
+    $scope.cambiar = function() {
+        UsuariosService.cambiarPassword($scope.datos).then(function(response){
+            if(response.status == 200 && response.data=="true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function(){
+        $timeout( function (){
+            $scope.datos.usuario=  $cookies.usuario;
+
+            $scope.$apply();
+        }, 1000)
+    }
+
+    init();
+});
 
 
 
