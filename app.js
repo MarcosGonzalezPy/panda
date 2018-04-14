@@ -259,6 +259,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/cheques/modificar-cheques.html',
             controller  :  'modificarChequesController'
         })
+        .when('/cheques/depositar', {
+            templateUrl : 'pages/ventas/cheques/depositar-cheques.html',
+            controller  :  'depositarChequesController'
+        })
 
         .when('/prueba', {
             templateUrl : 'pages/prueba.html',

@@ -49,7 +49,8 @@
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
-                    <input type="button"   ng-click="cobrar()"  class="btn btn-success btn-sm" value="Cobrar" />
+                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="cobrar()"  class="btn btn-success btn-sm" value="Cobrar" />
+                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="depositar()"  class="btn btn-info btn-sm" value="Depositar" />
                 </div>
             </div>
         </form>
