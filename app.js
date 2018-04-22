@@ -58,8 +58,8 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/ventas/pagar-factura.html',
             controller  : 'pagarFacturaController'
         })
-        .when('/ventas/saldo-cliente', {
-            templateUrl : 'pages/ventas/saldo-cliente.html',
+        .when('/saldo-cliente', {
+            templateUrl : 'pages/pagos/saldo-cliente.html',
             controller  : 'saldoClienteController'
         })
         .when('/ventas/nota-credito', {
@@ -212,6 +212,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/compras/admin-recepcion-compra.html',
             controller  : 'AdminRecepcionCompraController'
         })
+        .when('/nota-debito', {
+            templateUrl : 'pages/compras/nota-debito.html',
+            controller  : 'notaDebitoController'
+        })
         .when('/ajuste-inventario-positivo', {
             templateUrl : 'pages/inventario/ajuste-inventario.html',
             controller  : 'ajusteInventarioPositivoController'
@@ -326,6 +330,11 @@ app.config(function($routeProvider) {
             controller  : 'modificarCuentasBancariasController'
         })
         // agregados por Aurora Fin
+
+        .when('/pago-proveedores', {
+            templateUrl : 'pages/compras/pago-proveedores.html',
+            controller  : 'pagoProveedoresController'
+        })
 
         .otherwise({
             redirectTo: '/' ,
@@ -1968,6 +1977,7 @@ app.controller('agregarArticulosController', function($scope, $location, $rootSc
     }
 
     $scope.agregar = function() {
+        $scope.datos.precioUnitario= $scope.datos.precioUnitario.replace(/[^0-9]+/g,'')
         ArticulosService.insertar($scope.datos).then(function(response){
 
             if(response.status == 200){
@@ -1982,6 +1992,15 @@ app.controller('agregarArticulosController', function($scope, $location, $rootSc
 
     $scope.cancelar = function(){
         $location.path( '/articulos' );
+    }
+
+    $scope.changePrecio = function(){
+        if($scope.datos.precioUnitario){
+            $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+        }
+    }
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
     var init = function(){
@@ -3163,6 +3182,7 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
     $scope.limpiarSimple = function(){
         $scope.datos = {};
         $scope.articuloValido  = false;
+        delete $scope.datos2.cantidad;
     }
 
     $scope.agregar = function(){
@@ -3242,19 +3262,20 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
             "usuario":  $cookies.usuario,
             "proveedorCodigo": $scope.proveedorCodigo
         }
-        for(i=0;i<$scope.listraRegistroarticulos.length;i++){
-            $scope.listraRegistroarticulos[i].codigo = $scope.listraRegistroarticulos[i].id;
-            delete  $scope.listraRegistroarticulos[i].id;
-            delete  $scope.listraRegistroarticulos[i].codigoBarra;
-            delete  $scope.listraRegistroarticulos[i].descripcion;
-            delete  $scope.listraRegistroarticulos[i].sucursal;
+        var lista = angular.copy($scope.listraRegistroarticulos);
+        for(i=0;i<lista.length;i++){
+            lista[i].codigo =lista[i].id;
+            delete  lista[i].id;
+            delete  lista[i].codigoBarra;
+            delete  lista[i].descripcion;
+            delete  lista[i].sucursal;
         }
         var param = {
             "cabecera": cabecera,
-            "detalle": $scope.listraRegistroarticulos
+            "detalle": lista
         }
         ComprasService.insertar(param).then(function(response){
-            if(response.status == 200){
+            if(response.status == 200 && response.data == 'true'){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.listraRegistroarticulos=[];
                 $scope.limpiar();
@@ -3774,6 +3795,13 @@ app.service('ComprasService', function($http) {
         return myResponseData;
     }
 
+    this.listarDetalleRegistro = function(codigo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/listar-detalle-registro/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
 
     this.anular = function(datos){
         var obj={
@@ -3794,6 +3822,16 @@ app.service('ComprasService', function($http) {
         var json = angular.toJson(listaParam);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/registro-compra/insertar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.registrarNotaDebito = function(obj) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/registrarn-nota-debito?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -3879,6 +3917,12 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     $scope.recepcion = function(index){
         $rootScope.compras =   $scope.listaCompras[index];
         $location.path( '/recepcion-compra');
+    }
+
+
+    $scope.notaDebito = function(index){
+        var element =   $scope.listaCompras[index];
+        $location.path( '/nota-debito').search({param: element, other:'ok'});
     }
 
     $scope.agregar = function(index){
@@ -4899,7 +4943,7 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
     init();
 });
 
-app.controller('saldoClienteController', function($scope, $location, $rootScope, $cookies, $dialogs, ClientesService, SaldoClienteService, ValoresService) {
+app.controller('saldoClienteController', function($scope, $location, $rootScope, $cookies, $dialogs, ClientesService, PagosService, ValoresService) {
     $scope.datos = {};
 
     $scope.limpiar = function(){
@@ -4938,7 +4982,7 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
-        SaldoClienteService.listar(encoJson).then(function(response){
+        PagosService.listarPorClientes(encoJson).then(function(response){
             if(response.status == 200){
                  $scope.lista = response.data;
                 if($scope.datos.codigo){
@@ -4947,15 +4991,31 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
                         if($scope.lista[i].estado == 'PENDIENTE'){
                             $scope.datos.total = $scope.datos.total + $scope.lista[i].monto;
                         }
+
+
                     }
+                    $scope.datos.total =   separadorDeMil($scope.datos.total);
                 }else{
                     $scope.datos.total=null;
+                    for(i=0;i<$scope.lista.length;i++){
+                        $scope.lista[i].monto =separadorDeMil($scope.lista[i].monto);
+                    }
                 }
 
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
+    }
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+
+
+    $scope.separadorDeMilesTotal = function(numero) {
+        $scope.datos.total=  Number($scope.datos.total.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
     $scope.listarEstados = function(){
@@ -4972,16 +5032,26 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
     var init = function(){
         $scope.buscarClientes();
         $scope.listarEstados();
+        $scope.buscar();
     }
 
     init();
 });
 
-app.service('SaldoClienteService', function($http) {
+app.service('PagosService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
-    this.listar = function(json) {
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/saldo-cliente/listar?paramJson='+json)
+    this.listarPorClientes = function(json) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/listar/clientes?paramJson='+json)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
+    this.listarPorProveedores = function(json) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/listar/proveedores?paramJson='+json)
             .then(function (response) {
                 return response;
             });
@@ -7931,6 +8001,411 @@ app.controller('ajusteInventarioNegativoController', function($scope, $location,
         $scope.listarTaller();
         $scope.listarArticulos();
         $scope.listarUsuarios();
+    }
+
+    init();
+});
+
+
+
+
+app.controller('notaDebitoController', function($scope, $location, $rootScope, $cookies, $dialogs, AccesosService, UtilService, ArticulosService, ClientesService, VentasService, CajasService, UsuarioSucursalService, ComprasService) {
+
+    $scope.datos = {};
+    $scope.producto = {}
+    $scope.inhabilitarAgregar =true;
+    $scope.inhabilitarCBarra = false;
+    $scope.listaArticulos=[];
+    $scope.listaNotaCredito=[];
+    $scope.mostrarItem = false;
+    $scope.listaId=null;
+    $scope.inhabilitarItem = true;
+
+    $scope.copiar =function(index){
+        $scope.mostrarItem = true;
+        //$scope.lista[index].estado='COPIADO';
+        $scope.itemCredito=  angular.copy($scope.lista[index]);
+        //$scope.listaNotaCredito.push(elemento);
+    }
+
+    $scope.changeNuevoPrecio=function(){
+        if(!typeof $scope.itemCredito.precioNuevo=="undefined"){
+            $scope.itemCredito.precioNuevo = Number($scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,''));
+        }
+        if(typeof $scope.itemCredito.precioNuevo=="undefined"||$scope.itemCredito.precioNuevo <0 || $scope.itemCredito.precioNuevo> $scope.itemCredito.precio ){
+            $scope.inhabilitarItem = true;
+        }else{
+            $scope.inhabilitarItem=false;
+        }
+        $scope.nuevoResumen();
+        //$scope.itemCredito.precioNuevo=  Number($scope.itemCredito.precioNuevo).toLocaleString();
+    }
+
+    $scope.changeNuevaCantidad=function(){
+        if(!typeof $scope.itemCredito.cantidadNueva=='undefined'){
+            $cope.itemCredito.cantidadNueva= Number($scope.itemCredito.cantidadNueva);
+        }
+        if(typeof $scope.itemCredito.cantidadNueva=="undefined"||$scope.itemCredito.cantidadNueva <0 || $scope.itemCredito.cantidadNueva> $scope.itemCredito.cantidad ){
+            $scope.inhabilitarItem = true;
+        }else{
+            $scope.inhabilitarItem=false;
+        }
+        $scope.nuevoResumen();
+    }
+
+    $scope.nuevoResumen= function(){
+        $scope.itemCredito.total =  nvl($scope.itemCredito.precioNuevo,$scope.itemCredito.precio)
+            * nvl($scope.itemCredito.cantidadNueva,$scope.itemCredito.cantidad )
+        var nuevoIva = 0;
+        if($scope.itemCredito.iva==5){
+            nuevoIva = $scope.itemCredito.total/21;
+        }else{
+            nuevoIva = $scope.itemCredito.total/11;
+        }
+
+
+        $scope.itemCredito.impuesto = nuevoIva>1? Math.trunc(nuevoIva): 0;
+
+    }
+
+    function nvl(valor1, valor2){
+        if(valor1!=null && typeof valor1 != 'undefined' && valor1!='' && valor1!= 'null')
+            return valor1;
+        return valor2
+    }
+
+    $scope.agregarItem = function(){
+        var encontrado = false;
+        var continuar = true;
+        for(i=0;i<$scope.listaNotaCredito.length;i++){
+            if($scope.itemCredito.codigoArticulo == $scope.listaNotaCredito[i].codigoArticulo){
+                encontrado = true;
+            }
+        }
+        if(encontrado){
+            dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Este item ya tiene una referencia, desea reemplazarla?'},{key: false,back: 'static'});
+            dlg.result.then(function(resultado){
+                continuar = true;
+                $scope.agregarElementoListaNotaCredito(encontrado);
+            },function(){
+                continuar = false;
+            });
+        }else{
+            $scope.agregarElementoListaNotaCredito(encontrado);
+        }
+    }
+
+    $scope.agregarElementoListaNotaCredito=function(encontrado){
+        if($scope.itemCredito.precioNuevo){
+            $scope.itemCredito.precio = $scope.itemCredito.precioNuevo;
+            delete $scope.itemCredito.precioNuevo;
+        }
+        if($scope.itemCredito.cantidadNueva){
+            $scope.itemCredito.cantidad = $scope.itemCredito.cantidadNueva;
+            delete $scope.itemCredito.cantidadNueva;
+        }
+        if(encontrado){
+            for(i=0;i<$scope.listaNotaCredito.length;i++){
+                if($scope.listaNotaCredito[i].codigoArticulo == $scope.itemCredito.codigoArticulo){
+                    $scope.listaNotaCredito.splice(i, 1);
+                    $scope.listaNotaCredito.push($scope.itemCredito);
+                }
+            }
+        }else{
+            $scope.listaNotaCredito.push($scope.itemCredito);
+        }
+        $scope.mostrarItem = false;
+    }
+
+    $scope.cambiarMostrarItem =function(){
+        $scope.mostrarItem = false;
+    }
+
+    $scope.limpiar = function(){
+        $scope.inhabilitarAgregar =true;
+        $scope.inhabilitarCBarra = false;
+        $scope.producto.sucursal = $scope.datos.sucursal;
+    }
+
+    $scope.changeCantidad = function(){
+        if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
+            if($scope.datos.cantidad>0){
+                $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
+                $scope.inhabilitarAgregar =false;
+            }else{
+                $scope.datos.cantidad=1;
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Cantidad invalida'},{key: false,back: 'static'});
+            }
+        }else{
+            $scope.inhabilitarAgregar =true;
+        }
+    }
+
+    function formatMesDia (param){
+        if(param<10){
+            return '0'+param;
+        }else{
+            return param;
+        }
+    }
+
+    function nvl(valor1, valor2){
+        if(valor1!=null && typeof valor1 != 'undefined' && valor1!='' && valor1!= 'null')
+            return valor1;
+        return valor2
+    }
+
+    $scope.cancelar = function() {
+        $location.path( '/compras' );
+    }
+
+    $scope.obtenerUsuarioSucursal = function(usuario){
+        UsuarioSucursalService.obtener(usuario).then(function(response){
+            if(response.status == 200){
+                if(response.data.length == 1){
+                    $scope.datos.sucursal =  response.data[0].sucursal;
+                } else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'El usuario '+usuario+' no esta asignado a ninguna sucursal.'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }
+
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+
+            }
+        })
+    };
+
+    $scope.agregar = function(){
+        var impuesto =  $scope.datos.total* $scope.datos.grabado/100 ;
+        var obj= {
+            codigoArticulo: $scope.producto.codigo,
+            descripcion: $scope.producto.descripcion,
+            cantidad: $scope.datos.cantidad,
+            precio: $scope.datos.precio,
+            iva: $scope.datos.grabado,
+            impuesto: impuesto,
+            total: $scope.datos.total,
+            tipo:$scope.articulo.tipo
+        }
+        $scope.lista.push(obj);
+        $scope.limpiarSimple();
+    }
+
+    $scope.limpiarSimple = function(){
+        $scope.producto = {};
+        $scope.datos.cantidad = null;
+        $scope.datos.precio = null;
+        $scope.datos.total = null;
+        $scope.inhabilitarAgregar =true;
+        $scope.inhabilitarCBarra = false;
+    }
+     /*
+    $scope.guardar = function(){
+        var lista = angular.copy($scope.lista);
+        var cabecera = {
+            numeroFactura: $scope.datos.numeroFactura,
+            timbrado:$scope.datos.timbrado,
+            codigoPersona: $scope.datos.codigoPersona,
+            cliente: $scope.datos.nombre,
+            ruc: $scope.datos.ruc,
+            telefono: $scope.datos.telefono,
+            sucursal: $scope.datos.sucursal,
+            caja:$scope.datos.nroCaja,
+            usuario:$cookies.usuario
+        }
+        for(i=0;i<lista.length;i++){
+            delete lista[i].descripcion
+        }
+
+        var param = {
+            cabecera: cabecera,
+            detalle: lista
+        }
+        ComprasService.registrarNotaDebio(param).then(function(response){
+            if(response.status == 200 && response.data =="true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+        })
+    }
+    */
+
+    $scope.listarDetalle = function(id){
+        ComprasService.listarDetalleRegistro(id).then(function(response){
+            if(response.status == 200){
+                $scope.lista =response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
+    $scope.eliminar = function(index) {
+        $scope.listaNotaCredito.splice(index, 1);
+    }
+
+    $scope.procesar = function(){
+        var listaDetalle = angular.copy($scope.listaNotaCredito)
+        for(i=0;i<listaDetalle.length;i++){
+            delete listaDetalle[i].descripcion;
+        }
+        var notaCreditoCabecera={
+            numeroRegistroCompra:$scope.datos.codigo,
+            sucursal:$scope.datos.sucursal,
+            usuario: $cookies.usuario,
+            estado:'ACTIVO'
+        }
+        var param={
+            cabecera: notaCreditoCabecera,
+            detalle:  listaDetalle
+        }
+        ComprasService.registrarNotaDebito(param).then(function(response){
+            if(response.status == 200 && response.data =="true"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        $scope.datos.sucursal = urlParams.sucursal;
+        $scope.datos.codigo = urlParams.codigo;
+        $scope.datos.proveedor = urlParams.proveedor;
+        $scope.datos.usuario = urlParams.usuario;
+
+        //var fecha =   new Date();
+        //var fecha= urlParams.fecha.toDate();
+        //var fechaformateada =  formatMesDia(fecha.getDate())+'/'+formatMesDia(fecha.getMonth())+'/'+fecha.getFullYear();
+        $scope.datos.fecha =  urlParams.fecha;
+        $scope.datos.usuarioTransaccion =  $cookies.usuario;
+
+        $scope.listarDetalle($scope.datos.codigo);
+    }
+
+    init();
+});
+
+
+
+app.controller('pagoProveedoresController', function($scope, $location, $rootScope, $cookies, $dialogs, ProveedoresService, PagosService,ValoresService) {
+
+    $scope.datos = {};
+
+    $scope.limpiar = function(){
+        $scope.datos = {}
+        $scope.lista = [];
+    }
+
+    $scope.listarProveedores= function(){
+        ProveedoresService.listarSinParametro().then(function(response){
+            if(response.status ==200){
+                $scope.listaProveedores = response.data;
+            }else{
+                alert("Error al cargar los Impuestos");
+            }
+        })
+    }
+
+    $scope.buscar= function(){
+        var obj = {
+            estado: $scope.datos.estado,
+            nombre: $scope.datos.nombre
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        PagosService.listarPorProveedores(encoJson).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+                if($scope.datos.codigo){
+                    $scope.datos.total = 0;
+                    for(i=0;i<$scope.lista.length;i++){
+                        if($scope.lista[i].estado == 'PENDIENTE'){
+                            $scope.datos.total = $scope.datos.total + $scope.lista[i].monto;
+                        }
+
+                    }
+                }else{
+                    $scope.datos.total=null;
+                }
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_FONDO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.foo = function (index) {
+        var element =  $scope.lista[index];
+        for(i=0;i<$scope.lista.length;i++){
+            if(element.codigo == $scope.lista[i].codigo){
+                if($scope.lista[i].checkActivo=='S'){
+                    $scope.lista[i].checkActivo = 'N';
+                }else{
+                    $scope.lista[i].checkActivo = 'S';
+                }
+            }
+        }
+        var activos = false;
+        for(j=0;j<$scope.lista.length;j++){
+            if($scope.lista[j].checkActivo=='S'){
+                activos= true;
+                break;
+            }
+
+        }
+        if(activos==true){
+            $scope.inhabilitarCambio= false;
+        }
+        else{
+            $scope.inhabilitarCambio= true;
+        }
+    }
+
+
+    $scope.pagarProveedores = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/cheques/depositar').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        $scope.listarProveedores();
+        $scope.listarEstados();
+        $scope.buscar();
     }
 
     init();

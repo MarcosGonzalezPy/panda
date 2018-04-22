@@ -83,15 +83,26 @@
                         <button class="btn btn-danger btn-xs" ng-click="anular($index)">
                             Anular
                         </button>
+                        <button  class="btn btn-info btn-xs" ng-click="notaDebito($index)">
+                            N. Debito
+                        </button>
+                        <button  class="btn btn-primary btn-xs" ng-click="pagar($index)">
+                            Pagar
+                        </button>
                     </div>
                     <div ng-show="item.estado == 'ACTIVO' ">
                         <button class="btn btn-danger btn-xs" ng-click="anular($index)">
                             Anular
                         </button>
-                        <button  class="btn btn-default btn-xs" ng-click="recepcion($index)">
+                        <button  class="btn btn-success btn-xs" ng-click="recepcion($index)">
                             Recepcionar
                         </button>
                      </div>
+                    <div ng-show="item.estado == 'CON ND' ">
+                        <button  class="btn btn-primary btn-xs" ng-click="pagar($index)">
+                            Pagar
+                        </button>
+                    </div>
                 </td>
             </tr>
             </tbody>
