@@ -332,8 +332,12 @@ app.config(function($routeProvider) {
         // agregados por Aurora Fin
 
         .when('/pago-proveedores', {
-            templateUrl : 'pages/compras/pago-proveedores.html',
+            templateUrl : 'pages/pagos/pago-proveedores.html',
             controller  : 'pagoProveedoresController'
+        })
+        .when('/pagos/generar-cheque', {
+            templateUrl : 'pages/pagos/generar-cheque.html',
+            controller  : 'generarChequeController'
         })
 
         .otherwise({
@@ -5058,6 +5062,16 @@ app.service('PagosService', function($http) {
         return myResponseData;
     }
 
+    this.generarCheque = function(obj, usuario) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/generar-cheque/'+usuario+'?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 
@@ -8381,7 +8395,7 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
     }
 
 
-    $scope.pagarProveedores = function(index) {
+    $scope.generarCheque = function(index) {
         var listaCopy  = angular.copy($scope.lista);
         $scope.listaACobrar=[];
         for(i=0;i<listaCopy.length;i++){
@@ -8393,7 +8407,7 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
             delete $scope.listaACobrar[j].checkActivo;
             delete $scope.listaACobrar[j].fecha;
         }
-        $location.path( '/cheques/depositar').search({param: $scope.listaACobrar, other:'ok'});
+        $location.path( '/pagos/generar-cheque').search({param: $scope.listaACobrar, other:'ok'});
     }
 
 
@@ -8411,7 +8425,92 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
     init();
 });
 
+app.controller('generarChequeController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService,CuentasBancariasService, PagosService) {
+    $scope.datos = {};
 
+    $scope.cancelar = function(){
+        $location.path( '/pago-proveedores' );
+    }
+
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.changeBancos = function(){
+        delete $scope.datos.cuentaBancaria;
+        delete $scope.datos.numerosCheque;
+        $scope.listaCuentasBancarias = [];
+        if($scope.datos.banco){
+            $scope.listarCuentasBancarias();
+        }else{
+
+        }
+    }
+
+    $scope.listarCuentasBancarias = function(){
+        var obj = {};
+        if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
+            obj = {
+                "banco":$scope.datos.banco
+            }
+        }
+        CuentasBancariasService.listar(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaCuentasBancarias = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+    $scope.generarCheque =function(){
+        var cheque = {
+            "monto": $scope.datos.total.replace(/[^0-9]+/g,''),
+            "numeroCheque": $scope.datos.numeroCheque,
+            "banco": $scope.datos.banco,
+            "codigoPersona": $scope.lista[0].codigoPersona,
+            "nombreApellido": $scope.lista[0].nombre,
+            "cuentaBancaria": $scope.datos.cuentaBancaria,
+            "documento": $scope.lista[0].documento,
+            "documentoNumero": $scope.lista[0].documentoNumero
+        }
+        PagosService.generarCheque(cheque, $cookies.usuario).then(function(response){
+            if(response.status == 200 && response.data =="OK"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.cancelar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function(){
+        var urlParams = $location.search().param;
+        $scope.lista = urlParams;
+        $scope.datos.total = 0;
+        for(i=0;i<$scope.lista.length;i++){
+            $scope.datos.total =parseInt($scope.datos.total)+ parseInt($scope.lista[i].monto.replace(/[^0-9]+/g,''));
+        }
+        $scope.datos.total = separadorDeMil($scope.datos.total);
+        $scope.listarBancos();
+        $scope.listaNumerosCheque = [];
+        $scope.listaNumerosCheque.push({"numero":1234})
+    }
+
+    init();
+});
 
 
 

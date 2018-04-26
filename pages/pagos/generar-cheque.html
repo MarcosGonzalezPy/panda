@@ -7,29 +7,47 @@
 <!--</head>-->
 
 <div class="panel panel-primary">
-    <div class="panel-heading">Pago a Proveedores</div>
+    <div class="panel-heading">Generar Cheque</div>
     <div class="panel-body" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-6">
                 <div class="form-group margin-bottom-5">
-                    <label class="col-sm-4 control-label">Proveedores:</label>
+                    <label class="col-sm-4 control-label">Banco:</label>
                     <div class="col-sm-8">
-                        <input ng-change="changeCliente()" uppercase autofocus class="form-control input-sm"
-                               list="browsers" name="browser" ng-model="datos.nombre"  >
-                        <datalist id="browsers" >
-                            <option ng-repeat="c in listaProveedores"
-                                    value="{{c.representanteNombre}}">
-                        </datalist>
+                        <select id="banco"   class="form-control input-sm"
+                                ng-model=datos.banco ng-change="changeBancos()">
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaBancos"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+
+                        </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="col-sm-4 control-label">Estado:</label>
+
+                <div class="form-group  margin-bottom-5">
+                    <label class="col-sm-4 control-label">Numero Cheque:</label>
                     <div class="col-sm-8">
-                        <select id="estado"   class="form-control input-sm"
-                                ng-model=datos.estado>
+                        <select id="numeroCheque" ng-disabled="!datos.cuentaBancaria"   class="form-control input-sm"
+                                ng-model=datos.numeroCheque>
                             <option value> --Seleccionar --</option>
-                            <option ng-repeat="c in listaEstados"
-                                    value="{{c.valor}}">{{c.valor}}</option>
+                            <option ng-repeat="c in listaNumerosCheque"
+                                    value="{{c.numero}}">{{c.numero}}</option>
+
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Cuentas Bancaria:</label>
+                    <div class="col-sm-8">
+                        <select id="cuentasBancaria" ng-disabled="!datos.banco"   class="form-control input-sm"
+                                ng-model=datos.cuentaBancaria>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaCuentasBancarias"
+                                    value="{{c.numero}}">{{c.numero}}</option>
 
                         </select>
                     </div>
@@ -41,32 +59,24 @@
                     </div>
                 </div>
             </div>
-
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
-                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
-                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="cobrar()"  class="btn btn-success btn-sm" value="Generar Cheque" />
+                    <input type="button" ng-disabled="!datos.banco||!datos.cuentaBancaria||!datos.numeroCheque"
+                            ng-click="generarCheque()"  class="btn btn-success btn-sm" value="Generar Cheque" />
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
                 </div>
             </div>
         </form>
-
     </div>
 </div>
-<!--<div class="row">-->
-<!--<div class="form-group">-->
-<!--<div class="col-sm-10">-->
-<!--<input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />-->
-<!--</div>-->
-<!--</div>-->
-<!--</div>-->
+
 
 <div class="panel panel-default" ng-show="lista.length > 0">
     <div  id="div1">
         <table class="table" >
             <thead>
             <tr>
-                <th></th>
+
                 <th>Nombre</th>
                 <th>Estado</th>
                 <th>Vencimiento</th>
@@ -74,12 +84,12 @@
                 <th>Documento</th>
                 <th>Doc Numero</th>
                 <th>Monto</th>
-                <th></th>
+
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+
                 <td>{{item.nombre}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.fechaVencimiento}}</td>
@@ -87,9 +97,7 @@
                 <td>{{item.documento}}</td>
                 <td>{{item.documentoNumero}}</td>
                 <td>{{item.monto}}</td>
-                <td>
-                    {{item.checkActivo}}
-                </td>
+
             </tr>
             </tbody>
         </table>
