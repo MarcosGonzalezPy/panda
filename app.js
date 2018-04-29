@@ -3148,7 +3148,7 @@ app.controller('pedidoCompraController', function($scope, $location, $rootScope,
 
     $scope.changeProveedor = function(){
         for(i=0;i<$scope.listaProveedores.length;i++){
-            if($scope.listaProveedores[i].nombre==$scope.datos2.proveedor){
+            if($scope.listaProveedores[i].representanteNombre==$scope.datos2.proveedor){
                  $scope.proveedorCodigo =  $scope.listaProveedores[i].codigo;
             }
         }
@@ -3943,9 +3943,10 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     init();
 });
 
-app.controller('recepcionCompraController', function($scope, $location, $rootScope, $cookies, $dialogs, ComprasService) {
+app.controller('recepcionCompraController', function($scope, $location, $rootScope, $cookies, $dialogs, ComprasService, ValoresService) {
     $scope.datos = {};
     $scope.lista= [];
+    $scope.habilitarCargar =false;
 
     $scope.listarDetalle = function(){
         ComprasService.listarDetalle($scope.datos2.codigo).then(function(response){
@@ -3993,6 +3994,47 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
 
     }
 
+    $scope.copiar=function(index) {
+        var element = $scope.lista[index];
+        $scope.datos = element
+        $scope.habilitarCargar =true;
+        $scope.copiarPosicion = index;
+    }
+
+    $scope.modificarCopia= function(){
+        $scope.lista[$scope.copiarPosicion].precioUnitario=$scope.datos.precioUnitario;
+        $scope.lista[$scope.copiarPosicion].precioTotal=$scope.datos.precioTotal;
+        $scope.lista[$scope.copiarPosicion].cantidad=$scope.datos.cantidad;
+        $scope.lista[$scope.copiarPosicion].iva=$scope.datos.iva;
+        $scope.lista[$scope.copiarPosicion].impuesto=$scope.datos.impuesto;
+        $scope.cancelarCopiar();
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+    $scope.changeCopia = function(){
+        $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
+        $scope.datos.precioTotal = $scope.datos.precioUnitario * $scope.datos.cantidad;
+
+        var iva=0;
+        if($scope.datos.iva=='5'){
+            iva = $scope.datos.precioTotal/21;
+        }else{
+            iva = $scope.datos.precioTotal/11;
+        }
+        $scope.datos.impuesto = iva>1? Math.trunc(iva): 0;
+        $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+        $scope.datos.precioTotal = separadorDeMil($scope.datos.precioTotal);
+        $scope.datos.impuesto = separadorDeMil ($scope.datos.impuesto);
+    }
+
+    $scope.cancelarCopiar=function(){
+        $scope.habilitarCargar =false;
+    }
+
     function formatMesDia (param){
         if(param<10){
             return '0'+param;
@@ -4001,19 +4043,51 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
         }
     }
 
+    $scope.listarCondicionesCompra = function(){
+        var json =angular.toJson({"dominio":"CONDICION_PAGO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaCondicionesCompra = response.data;
+
+            }else{
+                alert("Error al cargar la Condicion de Pago");
+            }
+        })
+    }
+
+
+    $scope.listarPlazos= function(){
+        var json =angular.toJson({"dominio":"PLAZOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaPlazos = response.data;
+            }else{
+                alert("Error al cargar los Impuestos");
+            }
+        })
+    }
+
     var init = function(){
+
+        if(!$rootScope.compras){
+            $scope.cancelar();
+        }
         $scope.datos2 = $rootScope.compras;
+
         if($scope.datos2.plazos == null || $scope.datos2.plazos == 'null'){
             $scope.datos2.plazo = '';
         }else{
             $scope.datos2.plazo = $scope.datos2.plazos;
         }
-                              //TODO
+        //TODO
         var fecha =  new Date();
         var fechaformateada =  formatMesDia(fecha.getDate())+'/'+formatMesDia(fecha.getMonth())+'/'+fecha.getFullYear();
         $scope.datos2.fechaEntrega =  fechaformateada;
+        $scope.datos.fechaFactura =fechaformateada;
         $scope.datos2.fechaEntregaReal = +fecha.getFullYear()+'-'+formatMesDia(fecha.getMonth())+'-'+formatMesDia(fecha.getDate());
         $scope.listarDetalle();
+        $scope.listarCondicionesCompra();
+        $scope.listarPlazos();
     }
 
     init();
@@ -4025,6 +4099,12 @@ app.directive('editableTd', [function() {
         link: function(scope, element, attrs) {
             element.css("cursor", "pointer");
             element.attr('contenteditable', 'true'); // Referencia: Inciso 1
+//            element.bind('blur keyup change', function() { // Referencia: Inciso 2
+//                var numeroSinCambiar = element.text();
+//                var elementoCambiado = Number(numeroSinCambiar.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+//                element.textContent =  elementoCambiado;
+//                scope.lista[attrs.row][attrs.field] = elementoCambiado;//element.text();
+//            });
             element.bind('blur keyup change', function() { // Referencia: Inciso 2
                 scope.lista[attrs.row][attrs.field] = element.text();
             });
@@ -8487,11 +8567,11 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
             "documentoNumero": $scope.lista[0].documentoNumero
         }
         PagosService.generarCheque(cheque, $cookies.usuario).then(function(response){
-            if(response.status == 200 && response.data =="OK"){
+            if(response.status == 200 && response.data.respuesta =="OK"){
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
                 $scope.cancelar();
             }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data},{key: false,back: 'static'});
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data.respuesta},{key: false,back: 'static'});
             }
         })
     }
