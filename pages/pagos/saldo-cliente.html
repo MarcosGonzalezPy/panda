@@ -60,6 +60,7 @@
         <table class="table" >
             <thead>
             <tr>
+                <th></th>
                 <th>Nombre</th>
                 <th>Estado</th>
                 <th>Vencimiento</th>
@@ -71,6 +72,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
+                <td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.nombre}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.fechaVencimiento}}</td>

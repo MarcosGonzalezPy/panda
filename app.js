@@ -1592,6 +1592,7 @@ app.controller('modificarArticulosController', function($scope, $location, $root
     }
 
     $scope.guardar = function() {
+        $scope.datos.precioUnitario = $scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ArticulosService.modificar($scope.datos).then(function(response){
             if(response.status == 200 && response.data == "true"){
 
@@ -1658,6 +1659,15 @@ app.controller('modificarArticulosController', function($scope, $location, $root
         })
     }
 
+    $scope.changePrecio=function(){
+        $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
     var init = function(){
         var urlParams = $location.search().param;
         if(typeof urlParams.codigo == 'undefined'){
@@ -1671,7 +1681,7 @@ app.controller('modificarArticulosController', function($scope, $location, $root
 
         $timeout( function (){
             $scope.datos.codigo = urlParams.codigo;
-            $scope.datos.precioUnitario = urlParams.precioUnitario;
+            $scope.datos.precioUnitario = separadorDeMil(urlParams.precioUnitario);
             $scope.datos.codigoBarra =  urlParams.codigoBarra;
             $scope.datos.descripcion =  urlParams.descripcion;
             $scope.datos.modelo = urlParams.modelo;
@@ -5127,6 +5137,75 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
 
     function separadorDeMil(numero) {
         return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+    $scope.foo = function (index) {
+        var element =  $scope.lista[index];
+        for(i=0;i<$scope.lista.length;i++){
+            if(element.codigo == $scope.lista[i].codigo){
+                if($scope.lista[i].checkActivo=='S'){
+                    $scope.lista[i].checkActivo = 'N';
+                }else{
+                    $scope.lista[i].checkActivo = 'S';
+                }
+            }
+        }
+        var activos = false;
+        for(j=0;j<$scope.lista.length;j++){
+            if($scope.lista[j].checkActivo=='S'){
+                activos= true;
+                break;
+            }
+
+        }
+        if(activos==true){
+            $scope.inhabilitarCambio= false;
+        }
+        else{
+            $scope.inhabilitarCambio= true;
+        }
+    }
+
+
+    $scope.generarCheque = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/pagos/generar-cheque').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+    $scope.efectivizar =function(){
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        var fondoDebito = {
+            "documento": $scope.listaACobrar[0].documento,
+            "documentoNumero": $scope.listaACobrar[0].documentoNumero
+        }
+        PagosService.efectivizar(fondoDebito, $cookies.usuario).then(function(response){
+            if(response.status == 200 && response.data.respuesta =="OK"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data.respuesta},{key: false,back: 'static'});
+            }
+        })
     }
 
 
