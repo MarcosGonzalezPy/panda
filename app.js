@@ -2404,11 +2404,18 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
         ServiciosService.listarServicio($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.listaServicios = response.data;
+                for(i=0;i<$scope.listaServicios.length;i++){
+                    $scope.listaServicios[i].precioUnitario= separadorDeMil($scope.listaServicios[i].precioUnitario);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
         $scope.limpiar();
+    }
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
     $scope.modificar = function(index) {
@@ -2448,6 +2455,7 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
         })
     }
     $scope.agregar = function() {
+        $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ServiciosService.insertarServicios($scope.datos).then(function(response){
 
             if(response.status == 200){
@@ -2463,6 +2471,16 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
             }
 
         })
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+
+    $scope.changePrecio=function(){
+        $scope.datos.precioUnitario=separadorDeMil($scope.datos.precioUnitario);
     }
 
     $scope.cancelar = function(){
@@ -2510,6 +2528,7 @@ app.controller('modificarServiciosController', function($scope, $location, $root
     }
 
     $scope.modificar = function() {
+        $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ServiciosService.modificarServicios($scope.datos).then(function(response){
             if(response.status == 200){
                 var resultado = response.data;
@@ -2524,6 +2543,17 @@ app.controller('modificarServiciosController', function($scope, $location, $root
             }
         })
     }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    };
+
+    $scope.changePrecio = function(){
+        if($scope.datos.precioUnitario){
+            $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+        }
+    };
 
     var init = function () {
         var urlParams = $location.search().param;

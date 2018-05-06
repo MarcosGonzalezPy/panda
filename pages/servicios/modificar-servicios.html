@@ -21,7 +21,7 @@
                 <div class="form-group">
                     <label class="col-sm-4 control-label">Precio Unitario</label>
                     <div class="col-sm-8">
-                        <input required  ng-disabled=true   style="text-transform:uppercase" type="text" class="form-control input-sm" ng-model="datos.precioUnitario" maxlength="50"/>
+                        <input required  ng-change="changePrecio()" type="text" class="form-control input-sm" ng-model="datos.precioUnitario" maxlength="50"/>
                     </div>
                 </div>
                  </div>
