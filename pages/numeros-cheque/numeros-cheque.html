@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html >
+<body>
+<div class="panel panel-primary">
+    <div class="panel-heading">Numeros Cheques</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-sm-6">
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Banco</label>
+                    <div class="col-sm-8">
+                        <select id="banco"   class="form-control input-sm"
+                                ng-model=datos.banco ng-change="changeBancos()">
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaBancos"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group  margin-bottom-5">
+                    <label class="col-sm-4 control-label">Cuenta Bancaria</label>
+                    <div class="col-sm-8">
+                        <select id="numeroCuentaBancaria" ng-disabled="!datos.banco"   class="form-control input-sm"
+                                ng-model=datos.numeroCuentaBancaria>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaCuentasBancarias"
+                                    value="{{c.numero}}">{{c.numero}}</option>
+
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Estado</label>
+                    <div class="col-sm-7">
+                        <select id="estado" class="form-control input-sm" ng-model=datos.estado>
+                            <option value> --Seleccionar --</option> <option ng-repeat="c in listaEstados" value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-5 control-label">Numero</label>
+                    <div class="col-sm-7">
+                        <input maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.numero"/>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="button" ng-click="buscar()"
+                           class="btn btn-primary btn-sm" value="Buscar" />
+                    <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input type="button" ng-click="eliminarRangos()"  class="btn btn-danger btn-sm" value="Eliminar Rangos" />
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="lista.length > 0">
+    <div  id="div1">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th>Codigo</th>
+                <th>Banco</th>
+                <th>Cuenta Bancaria</th>
+                <th>Numero</th>
+                <th>Estado</th>
+                <th>Fecha Creacion</th>
+                <th>Usuario</th>
+                <!-- <th></th>    -->
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="item in lista">
+            <td>{{item.codigo}}</td>
+            <td>{{item.banco}}</td>
+            <td>{{item.numeroCuentaBancaria}}</td>
+            <td>{{item.numeroDesde}}</td>
+            <td>{{item.estado}}</td>
+            <td>{{item.fechaCreacion}}</td>
+            <td>{{item.usuario}}</td>
+            <!-- <td> <button  ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button> </td> </tr> -->
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+
+</body>
+</html>

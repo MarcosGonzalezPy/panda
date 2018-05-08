@@ -1449,5 +1449,285 @@ app.controller('cambiarPasswordController', function($scope, $location, $rootSco
 });
 
 
+app.controller('numerosChequeController', function($scope, $location, $rootScope, $cookies, $dialogs, NumerosChequeService, ValoresService, CuentasBancariasService) {
+    $scope.datos = {};
+    $scope.lista = [];
+
+    $scope.listarEstados = function(){
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUE"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.changeBancos = function(){
+        delete $scope.datos.cuentaBancaria;
+        $scope.listaCuentasBancarias = [];
+        if($scope.datos.banco){
+            $scope.listarCuentasBancarias();
+        }else{
+
+        }
+    }
+
+    $scope.listarCuentasBancarias = function(){
+        $scope.datos.numeroCuentaBancaria="";
+        var obj = {};
+        if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
+            obj = {
+                "banco":$scope.datos.banco
+            }
+        }
+        CuentasBancariasService.listar(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaCuentasBancarias = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.limpiar = function() {
+        $scope.datos = {};
+        $scope.lista = [];
+    }
+
+    $scope.agregar = function() {
+        $location.path( '/numeros-cheque/agregar' );
+    }
+
+    $scope.eliminarRangos = function() {
+        $location.path( '/numeros-cheque/eliminarRangos' );
+    }
+
+    $scope.buscar = function() {
+
+        NumerosChequeService.listar($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista = response.data;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    var init = function () {
+        $scope.listarEstados();
+        $scope.listarBancos();
+    }
+
+    init();
+
+});
+
+app.controller('agregarNumerosChequeController', function($scope, $location, NumerosChequeService, ValoresService, $cookies, $rootScope, $dialogs, CuentasBancariasService) {
+    $scope.datos = {};
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.changeBancos = function(){
+        delete $scope.datos.cuentaBancaria;
+        $scope.listaCuentasBancarias = [];
+        if($scope.datos.banco){
+            $scope.listarCuentasBancarias();
+        }else{
+
+        }
+    }
+
+    $scope.listarCuentasBancarias = function(){
+        $scope.datos.numeroCuentaBancaria="";
+        var obj = {};
+        if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
+            obj = {
+                "banco":$scope.datos.banco
+            }
+        }
+        CuentasBancariasService.listar(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaCuentasBancarias = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+
+    $scope.agregar = function() {
+        $scope.datos.usuario  =$cookies.usuario;
+        NumerosChequeService.insertar($scope.datos).then(function(response){
+
+            if(response.status == 200){
+                $location.path( '/numeros-cheque' );
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            }
+
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/numeros-cheque' );
+    }
+
+    var init = function () {
+        $scope.listarBancos();
+    }
+
+    init();
+});
+
+
+app.controller('eliminarRangosNumerosChequeController', function($scope, $location, NumerosChequeService, ValoresService, $cookies, $rootScope, $dialogs, CuentasBancariasService) {
+    $scope.datos = {};
+
+    $scope.listarBancos = function(){
+        var json =angular.toJson({"dominio":"BANCOS"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaBancos = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.changeBancos = function(){
+        delete $scope.datos.cuentaBancaria;
+        $scope.listaCuentasBancarias = [];
+        if($scope.datos.banco){
+            $scope.listarCuentasBancarias();
+        }else{
+
+        }
+    }
+
+    $scope.listarCuentasBancarias = function(){
+        $scope.datos.numeroCuentaBancaria="";
+        var obj = {};
+        if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
+            obj = {
+                "banco":$scope.datos.banco
+            }
+        }
+        CuentasBancariasService.listar(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaCuentasBancarias = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.cancelar = function(){
+        $location.path( '/numeros-cheque' );
+    }
+
+    $scope.eliminarRango = function(index) {
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,
+            {msg:'Esta seguro que desea eliminar?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            NumerosChequeService.eliminarById($scope.datos).then(function(response){
+
+                if(response.status == 200){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Eliminacion Exitosa'},{key: false,back: 'static'});
+
+                        $scope.cancelar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al eliminar el dominio'},{key: false,back: 'static'});
+
+                        $scope.cancelar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+        });
+
+    }
+
+    var init = function () {
+        $scope.listarBancos();
+    }
+
+    init();
+
+});
+
+app.service('NumerosChequeService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listar = function(datos) {
+        var obj = {
+            "numeroCuentaBancaria":datos.numeroCuentaBancaria,
+            "estado":datos.estado?datos.estado:null,
+            "banco":datos.banco?datos.banco:null,
+            "numeroDesde":datos.numero
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/numeros-cheque/listar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+    this.insertar = function(datos){
+        var obj = {
+            "banco":datos.banco,
+            "numeroCuentaBancaria":datos.numeroCuentaBancaria,
+            "numeroDesde":datos.numeroDesde,
+            "numeroHasta": datos.numeroHasta,
+            "usuario": datos.usuario
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/numeros-cheque/insertar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.eliminarById = function(datos){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/catalogo/numeros-cheque/eliminar/'
+                + datos.banco +'/'+ datos.numeroCuentaBancaria  +'/'+ datos.numeroDesde+'/'+ datos.numeroHasta)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+});
+
+
 
 
