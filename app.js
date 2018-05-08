@@ -329,6 +329,19 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/cuentas-bancarias/modificar-cuentas-bancarias.html',
             controller  : 'modificarCuentasBancariasController'
         })
+
+        .when('/numeros-cheque', {
+            templateUrl : 'pages/numeros-cheque/numeros-cheque.html',
+            controller  : 'numerosChequeController'
+        })
+        .when('/numeros-cheque/agregar', {
+            templateUrl : 'pages/numeros-cheque/agregar-numeros-cheque.html',
+            controller  : 'agregarNumerosChequeController'
+        })
+        .when('/numeros-cheque/eliminarRangos', {
+            templateUrl : 'pages/numeros-cheque/eliminar-rangos-numeros-cheque.html',
+            controller  : 'eliminarRangosNumerosChequeController'
+        })
         // agregados por Aurora Fin
 
         .when('/pago-proveedores', {

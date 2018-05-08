@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html >
+<body>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">Agregar Numeros Cheque</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-sm-6">
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Banco</label>
+                    <div class="col-sm-8">
+                        <select id="banco"   class="form-control input-sm"
+                                ng-model=datos.banco ng-change="changeBancos()">
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaBancos"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group  margin-bottom-5">
+                    <label class="col-sm-4 control-label">Cuenta Bancaria</label>
+                    <div class="col-sm-8">
+                        <select id="numeroCuentaBancaria" ng-disabled="!datos.banco"   class="form-control input-sm"
+                                ng-model=datos.numeroCuentaBancaria>
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaCuentasBancarias"
+                                    value="{{c.numero}}">{{c.numero}}</option>
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Numero Desde</label>
+                    <div class="col-sm-4">
+                        <input autofocus  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.numeroDesde"/>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Numero Hasta</label>
+                    <div class="col-sm-4">
+                        <input autofocus  maxlength="20" required primary type="text" class="form-control input-sm" ng-model="datos.numeroHasta"/>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <div class="col-sm-offset-5 col-sm-10">
+                    </br>
+                    <input  type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+                </div>
+            </div>
+
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
+
+</body>
+</html>
