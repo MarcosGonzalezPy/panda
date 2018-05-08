@@ -1605,6 +1605,7 @@ app.controller('modificarArticulosController', function($scope, $location, $root
     }
 
     $scope.guardar = function() {
+        $scope.datos.precioUnitario = $scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ArticulosService.modificar($scope.datos).then(function(response){
             if(response.status == 200 && response.data == "true"){
 
@@ -1671,6 +1672,15 @@ app.controller('modificarArticulosController', function($scope, $location, $root
         })
     }
 
+    $scope.changePrecio=function(){
+        $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
     var init = function(){
         var urlParams = $location.search().param;
         if(typeof urlParams.codigo == 'undefined'){
@@ -1684,7 +1694,7 @@ app.controller('modificarArticulosController', function($scope, $location, $root
 
         $timeout( function (){
             $scope.datos.codigo = urlParams.codigo;
-            $scope.datos.precioUnitario = urlParams.precioUnitario;
+            $scope.datos.precioUnitario = separadorDeMil(urlParams.precioUnitario);
             $scope.datos.codigoBarra =  urlParams.codigoBarra;
             $scope.datos.descripcion =  urlParams.descripcion;
             $scope.datos.modelo = urlParams.modelo;
@@ -2407,11 +2417,18 @@ app.controller('serviciosController', function($scope, $location, ServiciosServi
         ServiciosService.listarServicio($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.listaServicios = response.data;
+                for(i=0;i<$scope.listaServicios.length;i++){
+                    $scope.listaServicios[i].precioUnitario= separadorDeMil($scope.listaServicios[i].precioUnitario);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
         })
         $scope.limpiar();
+    }
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
     $scope.modificar = function(index) {
@@ -2451,6 +2468,7 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
         })
     }
     $scope.agregar = function() {
+        $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ServiciosService.insertarServicios($scope.datos).then(function(response){
 
             if(response.status == 200){
@@ -2466,6 +2484,16 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
             }
 
         })
+    }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
+
+    $scope.changePrecio=function(){
+        $scope.datos.precioUnitario=separadorDeMil($scope.datos.precioUnitario);
     }
 
     $scope.cancelar = function(){
@@ -2513,6 +2541,7 @@ app.controller('modificarServiciosController', function($scope, $location, $root
     }
 
     $scope.modificar = function() {
+        $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ServiciosService.modificarServicios($scope.datos).then(function(response){
             if(response.status == 200){
                 var resultado = response.data;
@@ -2527,6 +2556,17 @@ app.controller('modificarServiciosController', function($scope, $location, $root
             }
         })
     }
+
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    };
+
+    $scope.changePrecio = function(){
+        if($scope.datos.precioUnitario){
+            $scope.datos.precioUnitario = separadorDeMil($scope.datos.precioUnitario);
+        }
+    };
 
     var init = function () {
         var urlParams = $location.search().param;
@@ -3956,7 +3996,7 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     init();
 });
 
-app.controller('recepcionCompraController', function($scope, $location, $rootScope, $cookies, $dialogs, ComprasService, ValoresService) {
+app.controller('recepcionCompraController', function($scope, $location, $rootScope, $cookies, $dialogs, ComprasService, ValoresService, PersonasService) {
     $scope.datos = {};
     $scope.lista= [];
     $scope.habilitarCargar =false;
@@ -3971,34 +4011,66 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
         })
     }
 
+    $scope.obtenerRucProveedor = function() {
+        var obj={
+            "codigo":$scope.datos2.proveedorCodigo
+        }
+        PersonasService.listar(obj).then(function(response){
+            if(response.status == 200){
+                $scope.datos2.ruc = response.data[0].ruc;
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
     $scope.guardar = function(){
         var cabecera = {
-            "id": $scope.datos2.codigo,
+            "codigo": $scope.datos2.codigo,
             "sucursal": $scope.datos2.sucursal,
             "proveedor": $scope.datos2.proveedor,
             "condicionCompra": $scope.datos2.condicionCompra,
             "plazo": $scope.datos2.plazo,
             "fechaEntrega": $scope.datos2.fechaEntregaReal,
-            "usuario":  $cookies.usuario,
-            "proveedorCodigo": $scope.datos2.proveedorCodigo
+            "usuarioRecepcion":  $cookies.usuario,
+            "proveedorCodigo": $scope.datos2.proveedorCodigo,
+            "numeroFactura":$scope.datos2.numeroFactura,
+            "timbrado":$scope.datos2.timbrado,
+            "ruc":$scope.datos2.ruc
+
         }
+        var listaValida= true;
+        var lista = angular.copy($scope.lista);
         for(i=0;i<$scope.lista.length;i++){
-            $scope.lista[i].id = $scope.lista[i].codigo;
-            delete $scope.lista[i].codigo;
-            delete  $scope.lista[i].descripcion;
-        }
-        var param = {
-            "cabecera": cabecera,
-            "detalle": $scope.lista
-        }
-        ComprasService.insertarRegistroCompra(param).then(function(response){
-            if(response.status == 200 && response.data == "true"){
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
-                $scope.cancelar();
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+            if($scope.lista[i].precioUnitario==null || typeof $scope.lista[i].precioUnitario =='undefined'){
+                listaValida=false;
+                break;
             }
-        })
+            lista[i].precio = lista[i].precioUnitario.replace(/[^0-9]+/g,'');
+            lista[i].total = lista[i].precioTotal.replace(/[^0-9]+/g,'');
+            lista[i].impuesto =lista[i].impuesto.replace(/[^0-9]+/g,'');
+            delete lista[i].precioUnitario;
+            delete lista[i].precioTotal;
+            delete lista[i].descripcion;
+
+        }
+        if(listaValida){
+            var param = {
+                "cabecera": cabecera,
+                "detalle": lista
+            }
+            ComprasService.insertarRegistroCompra(param).then(function(response){
+                if(response.status == 200 && response.data == "true"){
+                    dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                }
+            })
+        }else{
+            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Debe cargar todos los datos de los detalles de la factura.'},{key: false,back: 'static'});
+        }
+
 
     }
 
@@ -4101,6 +4173,7 @@ app.controller('recepcionCompraController', function($scope, $location, $rootSco
         $scope.listarDetalle();
         $scope.listarCondicionesCompra();
         $scope.listarPlazos();
+        $scope.obtenerRucProveedor();
     }
 
     init();
@@ -5109,6 +5182,75 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
         return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
+    $scope.foo = function (index) {
+        var element =  $scope.lista[index];
+        for(i=0;i<$scope.lista.length;i++){
+            if(element.codigo == $scope.lista[i].codigo){
+                if($scope.lista[i].checkActivo=='S'){
+                    $scope.lista[i].checkActivo = 'N';
+                }else{
+                    $scope.lista[i].checkActivo = 'S';
+                }
+            }
+        }
+        var activos = false;
+        for(j=0;j<$scope.lista.length;j++){
+            if($scope.lista[j].checkActivo=='S'){
+                activos= true;
+                break;
+            }
+
+        }
+        if(activos==true){
+            $scope.inhabilitarCambio= false;
+        }
+        else{
+            $scope.inhabilitarCambio= true;
+        }
+    }
+
+
+    $scope.generarCheque = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/pagos/generar-cheque').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+    $scope.efectivizar =function(){
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        var fondoDebito = {
+            "documento": $scope.listaACobrar[0].documento,
+            "documentoNumero": $scope.listaACobrar[0].documentoNumero
+        }
+        PagosService.efectivizar(fondoDebito, $cookies.usuario).then(function(response){
+            if(response.status == 200 && response.data.respuesta =="OK"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data.respuesta},{key: false,back: 'static'});
+            }
+        })
+    }
+
 
 
     $scope.separadorDeMilesTotal = function(numero) {
@@ -5159,6 +5301,16 @@ app.service('PagosService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/generar-cheque/'+usuario+'?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.efectivizar = function(obj, usuario) {
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/efectivizar/'+usuario+'?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });
@@ -8130,9 +8282,7 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
 
     $scope.copiar =function(index){
         $scope.mostrarItem = true;
-        //$scope.lista[index].estado='COPIADO';
         $scope.itemCredito=  angular.copy($scope.lista[index]);
-        //$scope.listaNotaCredito.push(elemento);
     }
 
     $scope.changeNuevoPrecio=function(){
@@ -8161,6 +8311,8 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
     }
 
     $scope.nuevoResumen= function(){
+        $scope.itemCredito.precioNuevo = $scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,'');
+        $scope.itemCredito.precio = $scope.itemCredito.precio.replace(/[^0-9]+/g,'');
         $scope.itemCredito.total =  nvl($scope.itemCredito.precioNuevo,$scope.itemCredito.precio)
             * nvl($scope.itemCredito.cantidadNueva,$scope.itemCredito.cantidad )
         var nuevoIva = 0;
@@ -8170,9 +8322,11 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
             nuevoIva = $scope.itemCredito.total/11;
         }
 
-
         $scope.itemCredito.impuesto = nuevoIva>1? Math.trunc(nuevoIva): 0;
-
+        $scope.itemCredito.impuesto = separadorDeMil($scope.itemCredito.impuesto);
+        $scope.itemCredito.total = separadorDeMil($scope.itemCredito.total);
+        $scope.itemCredito.precioNuevo = separadorDeMil($scope.itemCredito.precioNuevo);
+        $scope.itemCredito.precio = separadorDeMil($scope.itemCredito.precio);
     }
 
     function nvl(valor1, valor2){
@@ -8307,43 +8461,20 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
         $scope.inhabilitarAgregar =true;
         $scope.inhabilitarCBarra = false;
     }
-     /*
-    $scope.guardar = function(){
-        var lista = angular.copy($scope.lista);
-        var cabecera = {
-            numeroFactura: $scope.datos.numeroFactura,
-            timbrado:$scope.datos.timbrado,
-            codigoPersona: $scope.datos.codigoPersona,
-            cliente: $scope.datos.nombre,
-            ruc: $scope.datos.ruc,
-            telefono: $scope.datos.telefono,
-            sucursal: $scope.datos.sucursal,
-            caja:$scope.datos.nroCaja,
-            usuario:$cookies.usuario
-        }
-        for(i=0;i<lista.length;i++){
-            delete lista[i].descripcion
-        }
 
-        var param = {
-            cabecera: cabecera,
-            detalle: lista
-        }
-        ComprasService.registrarNotaDebio(param).then(function(response){
-            if(response.status == 200 && response.data =="true"){
-                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
-                $scope.cancelar();
-            }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
-            }
-        })
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
-    */
 
     $scope.listarDetalle = function(id){
         ComprasService.listarDetalleRegistro(id).then(function(response){
             if(response.status == 200){
                 $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].precio = separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].total = separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].impuesto = separadorDeMil($scope.lista[i].impuesto);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -8358,6 +8489,9 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
         var listaDetalle = angular.copy($scope.listaNotaCredito)
         for(i=0;i<listaDetalle.length;i++){
             delete listaDetalle[i].descripcion;
+            listaDetalle[i].precio = listaDetalle[i].precio.replace(/[^0-9]+/g,'');
+            listaDetalle[i].total = listaDetalle[i].total.replace(/[^0-9]+/g,'');
+            listaDetalle[i].impuesto = listaDetalle[i].impuesto.replace(/[^0-9]+/g,'');
         }
         var notaCreditoCabecera={
             numeroRegistroCompra:$scope.datos.codigo,
@@ -8385,13 +8519,8 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
         $scope.datos.codigo = urlParams.codigo;
         $scope.datos.proveedor = urlParams.proveedor;
         $scope.datos.usuario = urlParams.usuario;
-
-        //var fecha =   new Date();
-        //var fecha= urlParams.fecha.toDate();
-        //var fechaformateada =  formatMesDia(fecha.getDate())+'/'+formatMesDia(fecha.getMonth())+'/'+fecha.getFullYear();
         $scope.datos.fecha =  urlParams.fecha;
         $scope.datos.usuarioTransaccion =  $cookies.usuario;
-
         $scope.listarDetalle($scope.datos.codigo);
     }
 
@@ -8403,6 +8532,7 @@ app.controller('notaDebitoController', function($scope, $location, $rootScope, $
 app.controller('pagoProveedoresController', function($scope, $location, $rootScope, $cookies, $dialogs, ProveedoresService, PagosService,ValoresService) {
 
     $scope.datos = {};
+    $scope.inhabilitarCambio = true;
 
     $scope.limpiar = function(){
         $scope.datos = {}
@@ -8501,6 +8631,32 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
             delete $scope.listaACobrar[j].fecha;
         }
         $location.path( '/pagos/generar-cheque').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+    $scope.efectivizar =function(){
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        var fondoDebito = {
+            "documento": $scope.listaACobrar[0].documento,
+            "documentoNumero": $scope.listaACobrar[0].documentoNumero
+        }
+        PagosService.efectivizar(fondoDebito, $cookies.usuario).then(function(response){
+            if(response.status == 200 && response.data.respuesta =="OK"){
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
+                $scope.buscar();
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar. '+response.data.respuesta},{key: false,back: 'static'});
+            }
+        })
     }
 
 

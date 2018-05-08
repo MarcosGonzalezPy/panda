@@ -22,7 +22,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Ruc:</label>
                     <div class="col-sm-8">
-                        <input disabled  class="form-control input-sm"   primary   ng-model="datos.ruc"/>
+                        <input disabled  class="form-control input-sm"   primary   ng-model="datos2.ruc"/>
                     </div>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Cond. Compra:</label>
                     <div class="col-sm-7">
-                        <select class="form-control input-sm" ng-model="datos.condicionCompra"
+                        <select class="form-control input-sm" ng-model="datos2.condicionCompra"
                                 ng-change= "changeCondicionesCompra()">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaCondicionesCompra"
@@ -52,7 +52,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-5 control-label">Factura Nro:</label>
                     <div class="col-sm-7">
-                        <input   class="form-control input-sm"   primary   ng-model="datos.facturaCompra"/>
+                        <input   class="form-control input-sm"   primary   ng-model="datos2.numeroFactura"/>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                 <div class="form-group margin-bottom-5">
                     <label class="col-sm-4 control-label">Timbrado:</label>
                     <div class="col-sm-8">
-                        <input  class="form-control input-sm" name="sucursal" class="nopadding col-sm-7" ng-model="datos.timbrado">
+                        <input  class="form-control input-sm" name="sucursal" class="nopadding col-sm-7" ng-model="datos2.timbrado">
                     </div>
                 </div>
                 <div class="form-group margin-bottom-5">
@@ -123,7 +123,7 @@
 
 <div class="form-group" ng-show="!habilitarCargar">
     <div class="col-sm-offset-5 col-sm-10">
-        <input ng-disabled="!datos.condicionCompra || !datos.facturaCompra || !datos.timbrado" type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+        <input ng-disabled="!datos2.condicionCompra || !datos2.numeroFactura || !datos2.timbrado" type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
         <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
     </div>
 </div>
