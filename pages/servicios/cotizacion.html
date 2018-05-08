@@ -115,7 +115,7 @@
     </div>
 </div>
 
-<div class="panel panel-primary">
+<div class="panel panel-primary" ng-show="lista.length > 0">
     <!--<div class="panel-heading">Registrar Venta</div>-->
     <div class="panel-body nopadding" >
         <form ng-submit="add()" class="form-horizontal">
@@ -158,7 +158,7 @@
 
     <div class="col-sm-offset-5 col-sm-10">
 
-        <input  type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+        <input ng-disabled="lista.length > 0" type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
         <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
         <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
     </div>

@@ -114,12 +114,12 @@
                 <div class="form-group">
                     <div class="col-sm-5  control-label">Importe</div>
                     <div class="col-sm-7">
-                        <input required type="text" class="form-control input-sm" ng-model="datos.importe" maxlength="50"/>
+                        <input ng-change="changeImporte()" required type="text" class="form-control input-sm" ng-model="datos.importe" maxlength="50"/>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4">
-                <input ng-disabled=" !datos.condicionCompra || !datos.importe" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                <input  ng-disabled=" !datos.condicionCompra || !datos.importe" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
             </div>
         </form>
 
