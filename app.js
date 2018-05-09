@@ -8808,7 +8808,7 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
     init();
 });
 
-app.controller('generarChequeController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService,CuentasBancariasService, PagosService) {
+app.controller('generarChequeController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService,CuentasBancariasService, PagosService,NumerosChequeService) {
     $scope.datos = {};
     $scope.direccionRetorno = "";
 
@@ -8855,6 +8855,30 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
         })
     }
 
+    $scope.changeCuentaBancaria = function(){
+        if($scope.datos.cuentaBancaria){
+            $scope.listarNumeroCheque();
+        }
+    }
+
+    $scope.listarNumeroCheque=function(){
+        var obj={
+            "banco":$scope.datos.banco,
+            "cuentaBancaria":$scope.datos.cuentaBancaria,
+            "estado":'DISPONIBLE'
+        }
+        NumerosChequeService.listar(obj).then(function(response){
+            if(response.status == 200){
+                $scope.listaNumerosCheque = response.data;
+                //for(i=0;i<$scope.lista.length;i++){
+                //    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                //}
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    }
+
     function separadorDeMil(numero) {
         return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
@@ -8882,6 +8906,9 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
 
     var init = function(){
         var urlParams = $location.search().param;
+        if(!urlParams.length){
+            $scope.cancelar();
+        }
         $scope.lista = urlParams;
         $scope.datos.total = 0;
         for(i=0;i<$scope.lista.length;i++){
@@ -8889,9 +8916,9 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
         }
         $scope.datos.total = separadorDeMil($scope.datos.total);
         $scope.listarBancos();
-        $scope.listaNumerosCheque = [];
-        $scope.listaNumerosCheque.push({"numero":1234})
-        $scope.direccionRetorno =$rootScope.dir //'/pago-proveedores'
+
+        //$scope.listaNumerosCheque.push({"numero":1234})
+        $scope.direccionRetorno =$rootScope.dir
 
     }
 

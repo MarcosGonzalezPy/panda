@@ -31,7 +31,7 @@
                                 ng-model=datos.numeroCheque>
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaNumerosCheque"
-                                    value="{{c.numero}}">{{c.numero}}</option>
+                                    value="{{c.numeroDesde}}">{{c.numeroDesde}}</option>
 
                         </select>
                     </div>
@@ -44,7 +44,7 @@
                     <label class="col-sm-4 control-label">Cuentas Bancaria:</label>
                     <div class="col-sm-8">
                         <select id="cuentasBancaria" ng-disabled="!datos.banco"   class="form-control input-sm"
-                                ng-model=datos.cuentaBancaria>
+                                ng-model=datos.cuentaBancaria ng-change="changeCuentaBancaria()">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaCuentasBancarias"
                                     value="{{c.numero}}">{{c.numero}}</option>
