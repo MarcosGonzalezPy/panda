@@ -1143,13 +1143,18 @@ app.controller('depositarChequesController', function($scope, $location, $rootSc
     }
 
     $scope.guardarDepositos= function(index){
+        $scope.listaAux = [];
         if($scope.datos.numero ==null || typeof $scope.datos.numero == undefined || $scope.datos.numero == ''){
             dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error: Debe ingresar La Cuenta Bancaria.'},{key: false,back: 'static'});
             return;
         }
-        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaAux = angular.copy($scope.lista);
 
-        ChequesService.depositarCheques(listaCopy, $scope.datos.numero).then(function(response){
+        for(j=0;j<$scope.listaAux.length;j++){
+            $scope.listaAux[j].monto= $scope.listaAux[j].monto.replace(/[^0-9]+/g,'');
+        }
+
+        ChequesService.depositarChequesAux($scope.listaAux, $scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
                 $scope.buscar();
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
@@ -1202,6 +1207,7 @@ app.controller('depositarChequesController', function($scope, $location, $rootSc
         $scope.listarBancos();
         $scope.listarCuentaBancaria();
         $scope.lista = urlParams;
+        $scope.datos.usuario=  $cookies.usuario;
 
     }
 
@@ -1223,7 +1229,20 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
         })
     }
 
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
+    $scope.changeMonto = function(){
+        if($scope.datos.monto){
+            $scope.datos.monto = separadorDeMil($scope.datos.monto);
+        }
+    }
+
     $scope.agregar = function() {
+        $scope.datos.monto=$scope.datos.monto.replace(/[^0-9]+/g,'');
         ChequesService.insertar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
                 $scope.cancelar();
@@ -1250,6 +1269,7 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
     $scope.datos = {};
 
     $scope.guardar = function() {
+        $scope.datos.monto=$scope.datos.monto.replace(/[^0-9]+/g,'');
         ChequesService.modificar($scope.datos).then(function(response){
             if(response.status == 200 && response.data=="true"){
                 $scope.cancelar();
@@ -1276,10 +1296,20 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
     }
 
     $scope.listarEstados = function(){
+        $scope.listaEstadosAux=[];
         var json =angular.toJson({"dominio":"ESTADOS_CHEQUE"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
-                $scope.listaEstados = response.data;
+                $scope.listaEstadosAux = response.data;
+
+                for(j=0;j<$scope.listaEstadosAux.length;j++){
+                    if($scope.listaEstadosAux[j].valor== "RETIRADO"){
+                        /* eliminamos el atributo Retirado de la lista obtenida */
+                        $scope.listaEstadosAux.splice(j, 1);
+                        $scope.listaEstados = $scope.listaEstadosAux;
+                    }
+
+                }
             }else{
                 alert("Error al cargar los tipos");
             }
@@ -1397,6 +1427,23 @@ app.service('ChequesService', function($http) {
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
         var myResponseData = $http.post('http://localhost:8080/panda-sys/webapi/ventas/movimientos-cuenta-bancaria/depositar-cheques+/'+datos+'/?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+
+    this.depositarChequesAux = function (lista,datos){
+        var obj={
+            listaCheques: lista
+        }
+        var numero = datos.numero;
+        var usuario =  datos.usuario;
+
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/movimientos-cuenta-bancaria/depositar-cheques+/'+numero+'/'+usuario+'/?paramJson='+encoJson)
             .then(function (response) {
                 return response;
             });

@@ -47,33 +47,22 @@
         <table class="table" >
             <thead>
             <tr>
-                <th></th>
                 <th>N&uacute;mero</th>
                 <th>Banco</th>
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Monto</th>
                 <th>En Guaran&iacute;es</th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <!--<td><input ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
-                --><td>{{item.numeroCheque}}</td>
+                <td>{{item.numeroCheque}}</td>
                 <td>{{item.banco}}</td>
                 <td>{{item.fecha}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.monto}}</td>
                 <td>{{item.glosa}}</td>
-
-                <td>
-                 <!--   <button ng-show="item.estado != 'COBRADO'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
-                    <button ng-show="item.estado != 'COBRADO'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button> -->
-                </td>
-                <!-- <td>
-                    {{item.checkActivo}}
-                </td> -->
             </tr>
             </tbody>
         </table>
