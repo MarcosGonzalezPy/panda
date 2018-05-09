@@ -10,7 +10,9 @@
                     <div class="col-sm-4">
                         Cliente
                     </div>
-                     <input disabled autofocus list="browsers" name="browser" ng-model="datos.nombre"  ng-blur="buscarClientes()">
+                    <div class="col-sm-8">
+                        <input  class="form-control input-sm" disabled autofocus list="browsers" name="browser" ng-model="datos.nombre"  ng-blur="buscarClientes()">
+                    </div>
                     <datalist id="browsers" >
                         <option ng-repeat="c in listaClientes"
                                 value="{{c.nombre}} {{c.apellido}}">
@@ -20,17 +22,17 @@
                     <div class="col-sm-4">
                         RUC/CI
                     </div>
-                    <!--<div>-->
-                    <input disabled    maxlength="20" required primary type="text"  ng-model="datos.ruc" ng-blur="buscarClientes()"/>
-                    <!--</div>-->
+                    <div class="col-sm-8">
+                        <input  class="form-control input-sm" disabled    maxlength="20" required primary type="text"  ng-model="datos.ruc" ng-blur="buscarClientes()"/>
+                    </div>
                 </div>
                 <div class="form-group margin-bottom-5">
                     <div class="col-sm-4">
                         Telefono
                     </div>
-                    <!--<div>-->
-                    <input  disabled  maxlength="20" required primary type="text"  ng-model="datos.telefono"/>
-                    <!--</div>-->
+                    <div class="col-sm-8">
+                        <input  class="form-control input-sm" disabled  maxlength="20" required primary type="text"  ng-model="datos.telefono"/>
+                    </div>
 
                 </div>
             </div>
@@ -40,21 +42,27 @@
                     <div class="col-sm-4">
                         Sucursal
                     </div>
-                    <input disabled  class="col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.sucursal"/>
+                    <div class="col-sm-8">
+                        <input class="form-control input-sm" disabled  class="col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.sucursal"/>
+                    </div>
                 </div>
 
                 <div class="form-group margin-bottom-5">
                     <div class="col-sm-4">
                         N° Caja
                     </div>
-                    <input disabled  class="col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.nroCaja"/>
+                    <div class="col-sm-8">
+                        <input class="form-control input-sm" disabled  class="col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.nroCaja"/>
+                    </div>
                 </div>
 
                 <div class="form-group margin-bottom-5">
                     <div class="col-sm-4">
                         Cajero
                     </div>
-                    <input disabled class="date  col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.usuario"/>
+                    <div class="col-sm-8">
+                        <input  class="form-control input-sm" disabled class="date  col-sm-8"  maxlength="20" required primary type="text"  ng-model="datos.usuario"/>
+                    </div>
                 </div>
 
 
@@ -65,132 +73,35 @@
                     <div class="col-sm-5">
                         N° Factura
                     </div>
-                    <input disabled  class="col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.numeroFactura"/>
+                    <div class="col-sm-7">
+                        <input class="form-control input-sm" disabled  class="col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.numeroFactura"/>
+                    </div>
                 </div>
 
                 <div class="form-group margin-bottom-5">
                     <div class="col-sm-5">
                         Timbrado
                     </div>
-                    <input disabled   class="col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.timbrado"/>
+                    <div class="col-sm-7">
+                        <input class="form-control input-sm" disabled   class="col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.timbrado"/>
+                    </div>
                 </div>
 
                 <div class="form-group margin-bottom-5">
                     <div class="col-sm-5">
                         Fecha
                     </div>
-                    <input disabled class="date  col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.fecha"/>
+                    <div class="col-sm-7">
+                        <input class="form-control input-sm" disabled class="date  col-sm-7"  maxlength="20" required primary type="text"  ng-model="datos.fecha"/>
+                    </div>
                 </div>
 
 
             </div>
-            <!--<div class="col-lg-3">-->
-
-                <!--<div class="form-group margin-bottom-5">-->
-                <!--<div class="col-sm-5">-->
-                <!--Medio Pago-->
-                <!--</div>-->
-                <!--<div class="nopadding">-->
-                <!--<select class="col-sm-7">-->
-                <!--<option value="ef">Efectivo</option>-->
-                <!--<option value="tc">Tarjeta de Credito</option>-->
-                <!--<option value="ch">Cheque</option>-->
-                <!--</select>-->
-                <!--</div>-->
-                <!--</div>-->
-
-
-                <!--<div class="form-group margin-bottom-5">-->
-                <!--<div class="col-sm-5">-->
-                <!--Cond. Pago-->
-                <!--</div>-->
-                <!--<div class="nopadding">-->
-                <!--<select class="col-sm-6" ng-model="datos.condicionPago" ng-change="habilitarCuotas(datos.condicionPago);">-->
-                <!--<option value="contado">Contado</option>-->
-                <!--<option value="credito">Credito</option>-->
-                <!--</select>-->
-                <!--</div>-->
-                <!--</div>-->
-
-                <!--<div class="form-group margin-bottom-5" ng-show="mostrarCutas">-->
-                <!--<div class="col-sm-5">-->
-                <!--Cuotas-->
-                <!--</div>-->
-                <!--<div class="nopadding">-->
-                <!--<select class="col-sm-6" >-->
-                <!--<option value="ef">3</option>-->
-                <!--<option value="tc">6</option>-->
-                <!--<option value="tc">9</option>-->
-                <!--<option value="tc">12</option>-->
-                <!--</select>-->
-                <!--</div>-->
-                <!--</div>-->
-
-            <!--</div>-->
         </form>
 
     </div>
 </div>
-
-<!--<div class="panel panel-primary">-->
-    <!--<div class="panel-body padding-minimo" >-->
-        <!--<form ng-submit="add()" class="form-horizontal">-->
-            <!--<div class="col-lg-3">-->
-                <!--<div class="form-group margin-bottom-5">-->
-                    <!--<div class="col-sm-4">-->
-                        <!--Codigo-->
-                    <!--</div>-->
-                    <!--<input list="codigo" ng-model="producto.codigo" class="nopadding col-sm-8" ng-blur="buscarArticuloExistente()">-->
-                <!--</div>-->
-
-                <!--<div class="form-group margin-bottom-5">-->
-                    <!--<div class="col-sm-4">-->
-                        <!--C. Barra-->
-                    <!--</div>-->
-                    <!--<input  ng-disabled="inhabilitarCBarra" list="codigoBarra" ng-model="producto.codigoBarra" class="nopadding col-sm-8" ng-blur="buscarArticuloExistente()">-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<div class="col-lg-9">-->
-                <!--<div class="form-group margin-bottom-5">-->
-                    <!--<div class="col-sm-2">-->
-                        <!--Descripcion-->
-                    <!--</div>-->
-                    <!--<input list="descripcion" ng-model="producto.descripcion" class="nopadding col-sm-8" ng-blur="buscarArticuloExistente()">-->
-                    <!--<datalist id="descripcion" >-->
-                        <!--<option ng-repeat="c in listaArticulos"-->
-                                <!--value="{{c.descripcion}}">{{c.descripcion}}</option>-->
-                    <!--</datalist>-->
-                <!--</div>-->
-                <!--<div class="col-sm-10">-->
-                    <!--<div class="col-sm-2">-->
-                        <!--Cantidad-->
-                    <!--</div>-->
-                    <!--<input class="nopadding col-sm-2" ng-blur="changeCantidad()"  maxlength="20" required  type="text"  ng-model="datos.cantidad"/>-->
-                    <!--<div class="col-sm-2">-->
-                        <!--Precio-->
-                    <!--</div>-->
-                    <!--<input disabled  class="col-sm-2"  maxlength="20" required  type="text"  ng-model="datos.precio"/>-->
-                    <!--<div class="col-sm-2">-->
-                        <!--Total-->
-                    <!--</div>-->
-                    <!--<input disabled  class="col-sm-2"  maxlength="20" required primary type="text"  ng-model="datos.total"/>-->
-                <!--</div>-->
-                <!--<div class="col-sm-2">-->
-                    <!--<div class="form-group margin-bottom-5">-->
-                        <!--<input ng-disabled="inhabilitarAgregar" type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</div>-->
-            <!--<span style="color:green;font-style:oblique;" ng-show="articuloValido">Articulo encontrado</span>-->
-        <!--</form>-->
-    <!--</div>-->
-<!--</div>-->
-
-
-
-<!--<div class="nopadding">-->
-<!--<button type="button" class="btn btn-primary btn-xs" ng-click="agregar()">Agregar</button>-->
-<!--</div>-->
 <div class="panel panel-primary">
     <!--<div class="panel-heading">Registrar Venta</div>-->
     <div class="panel-body nopadding" >

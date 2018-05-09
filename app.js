@@ -2576,8 +2576,6 @@ app.controller('modificarServiciosController', function($scope, $location, $root
         $scope.listarEstados();
         $scope.listarGrabados();
         $timeout( function (){
-            //$scope.datos =$rootScope.usuario;
-
             $scope.datos.codigo = urlParams.codigo;
             $scope.datos.descripcion = urlParams.descripcion;
             $scope.datos.precioUnitario = urlParams.precioUnitario;
@@ -3986,6 +3984,11 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         $location.path( '/pedido-compra');
     }
 
+    $scope.pagar = function(index){
+        var element =   $scope.listaCompras[index];
+        $location.path( '/pago-proveedores').search({param: element, other:'ok'});
+    }
+
     var init = function () {
         $scope.listarTaller();
         $scope.listarEstados();
@@ -4981,21 +4984,19 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
     $scope.producto = {}
     $scope.lista = [] ;
 
-//    $scope.secuencia = function(){
-//        UtilService.secuencia("factura_seq").then(function(response){
-//            if(response.status == 200){
-//                var aux  = response.data;
-//                $scope.datos.numeroFactura = pad(aux, 8);
-//            }else{
-//                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
-//            }
-//        })
-//    };
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
 
     $scope.listarDetalleFactura = function(id){
         VentasService.listarDetalleFactura(id).then(function(response){
             if(response.status == 200){
                 $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].precio = separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].total = separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].impuesto = separadorDeMil($scope.lista[i].impuesto);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -5080,7 +5081,7 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
     $scope.procesar= function(){
         $rootScope.montoTotal =0;
         for(i=0;i<$scope.lista.length;i++){
-            $rootScope.montoTotal=$rootScope.montoTotal+$scope.lista[i].total;
+            $rootScope.montoTotal =parseInt($rootScope.montoTotal)+ parseInt($scope.lista[i].total.replace(/[^0-9]+/g,''));
         }
         $rootScope.pago={};
         $rootScope.pago.timbrado=$scope.datos.timbrado;
@@ -5103,10 +5104,6 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
         $scope.datos.fecha =  fechaformateada;
         $scope.datos.usuario =  $cookies.usuario;
         $scope.obtenerSucursalTimbrado($scope.datos.usuario);
-        //$scope.secuencia();
-        //$scope.buscarClientes();
-        //$scope.buscarArticuloExistente();
-        //$scope.buscarCabeceraDetalle();
         $scope.listarDetalleFactura($scope.datos.numeroFactura);
     }
 
@@ -5625,11 +5622,11 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaMediosPago = response.data;
-                if($scope.agregarNotaCredito==true){
+                /*if($scope.agregarNotaCredito==true){
                     $scope.listaMediosPago.push(
                         {"valor":"NOTA CREDITO"}
                     )
-                }
+                }*/
             }else{
                 alert("Error al cargar los Medios de Pago");
             }
@@ -5692,14 +5689,32 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         var obj = {
             medioPago:$scope.datos.medioPago,
             marcaTarjeta: $scope.datos.marcaTarjeta,
-            importe:$scope.datos.importe
+            importe:separadorDeMil($scope.datos.importe)
         }
         $scope.lista.push(obj);
         $scope.datos.medioPago='';
         $scope.datos.marcaTarjeta='';
+
+        if($scope.pagadoTotal){
+            $scope.pagadoTotal=$scope.pagadoTotal.replace(/[^0-9]+/g,'');
+        }
+
+        $scope.datos.importe=$scope.datos.importe.replace(/[^0-9]+/g,'');
+        $scope.datos.montoTotal=$scope.datos.montoTotal.replace(/[^0-9]+/g,'');
+
         $scope.pagadoTotal = parseInt($scope.pagadoTotal)+parseInt($scope.datos.importe);
         $scope.datos.importe='';
         $scope.datos.cambio =  parseInt($scope.pagadoTotal) -parseInt($scope.datos.montoTotal);
+
+        $scope.pagadoTotal= separadorDeMil($scope.pagadoTotal);
+        $scope.datos.montoTotal=separadorDeMil($scope.datos.montoTotal);
+        if($scope.datos.cambio<0){
+            $scope.datos.cambio = '-'+separadorDeMil($scope.datos.cambio);
+        }else{
+            $scope.datos.cambio = separadorDeMil($scope.datos.cambio);
+        }
+
+
     }
 
     $scope.guardar = function(){
@@ -5718,6 +5733,10 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         }
         obj.listaFormaPago =  angular.copy($scope.lista);
 
+        for(i=0;i<obj.listaFormaPago.length;i++){
+            obj.listaFormaPago[i].importe=obj.listaFormaPago[i].importe.replace(/[^0-9]+/g,'');
+        }
+
         VentasService.registrarPago(obj).then(function(response){
             if(response.status == 200){
                 var resultado = response.data.respuesta;
@@ -5734,6 +5753,17 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
 
     }
 
+    $scope.changeImporte=function(){
+        $scope.datos.importe = separadorDeMil($scope.datos.importe);
+    }
+
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
     var init = function(){
         $scope.datos.timbrado=$rootScope.pago.timbrado;
         $scope.datos.caja=$rootScope.pago.caja;
@@ -5741,9 +5771,12 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         $scope.datos.sucursal=$rootScope.pago.sucursal;
         $scope.datos.codigoPersona=$rootScope.pago.codigoPersona;
 
+
         $scope.datos.montoTotal = $rootScope.montoTotal;
         $scope.pagadoTotal = 0;
-        $scope.datos.cambio  = -1*$scope.datos.montoTotal;
+        $scope.datos.cambio  = '-'+separadorDeMil($scope.datos.montoTotal);
+        $scope.datos.montoTotal = separadorDeMil($scope.datos.montoTotal)
+
         $scope.datos.numeroFactura = $rootScope.venta.numeroFactura;
         $scope.listarCondicionesCompra();
         $scope.listarMarcaTarjeta();
@@ -6016,7 +6049,6 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         $scope.mostrarItem = true;
         //$scope.lista[index].estado='COPIADO';
         $scope.itemCredito=  angular.copy($scope.lista[index]);
-        //$scope.listaNotaCredito.push(elemento);
     }
 
     $scope.changeNuevoPrecio=function(){
@@ -6045,11 +6077,19 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     }
 
     $scope.nuevoResumen= function(){
+
+        $scope.itemCredito.total = $scope.itemCredito.total.replace(/[^0-9]+/g,'');
+        $scope.itemCredito.precioNuevo = $scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,'');
+        $scope.itemCredito.precio = $scope.itemCredito.precio.replace(/[^0-9]+/g,'');
+
         $scope.itemCredito.total =  nvl($scope.itemCredito.precioNuevo,$scope.itemCredito.precio)
             * nvl($scope.itemCredito.cantidadNueva,$scope.itemCredito.cantidad )
         var nuevoIva = $scope.itemCredito.total/$scope.itemCredito.iva;
         $scope.itemCredito.impuesto = nuevoIva>1? Math.trunc(nuevoIva): 0;
 
+        $scope.itemCredito.total=separadorDeMil($scope.itemCredito.total);
+        $scope.itemCredito.precioNuevo=separadorDeMil($scope.itemCredito.precioNuevo);
+        $scope.itemCredito.precio=separadorDeMil($scope.itemCredito.precio);
      }
 
     function nvl(valor1, valor2){
@@ -6112,6 +6152,9 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     }
 
     $scope.changeCantidad = function(){
+        $scope.datos.total = $scope.datos.total.replace(/[^0-9]+/g,'');
+        $scope.datos.precio = $scope.datos.precio.replace(/[^0-9]+/g,'');
+
         if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
             if($scope.datos.cantidad>0){
                 $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
@@ -6186,6 +6229,7 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     }
 
     $scope.guardar = function(){
+
         var lista = angular.copy($scope.lista);
         var cabecera = {
             numeroFactura: $scope.datos.numeroFactura,
@@ -6220,6 +6264,11 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         VentasService.listarDetalleFactura(id).then(function(response){
             if(response.status == 200){
                 $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].total=separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].precio=separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].impuesto=separadorDeMil($scope.lista[i].impuesto);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -6231,6 +6280,15 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     }
 
     $scope.procesar = function(){
+        var lista = angular.copy($scope.listaNotaCredito);
+
+        for(i=0;i<lista.length;i++){
+            delete lista[i].descripcion
+            lista[i].total = lista[i].total.replace(/[^0-9]+/g,'');
+            //lista[i].precioNuevo = lista[i].precioNuevo.replace(/[^0-9]+/g,'');
+            lista[i].precio = lista[i].precio.replace(/[^0-9]+/g,'');
+        }
+
         var notaCreditoCabecera={
             numeroFactura:$scope.datos.numeroFactura,
             sucursal:$scope.datos.sucursal,
@@ -6239,7 +6297,7 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         }
         var param={
             notaCreditoCabecera: notaCreditoCabecera,
-            notaCreditoDetalles: $scope.listaNotaCredito
+            notaCreditoDetalles: lista
         }
         VentasService.registrarNotaCredito(param).then(function(response){
             if(response.status == 200 && response.data.respuesta ==true){
@@ -6249,6 +6307,12 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al guardar'},{key: false,back: 'static'});
             }
         })
+    }
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
     }
 
     var init = function(){
@@ -6262,17 +6326,10 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         $scope.datos.timbrado = urlParams.timbrado;
         $scope.datos.usuario = urlParams.usuario;
 
-        //var fecha =   new Date();
-        //var fecha= urlParams.fecha.toDate();
-        //var fechaformateada =  formatMesDia(fecha.getDate())+'/'+formatMesDia(fecha.getMonth())+'/'+fecha.getFullYear();
         $scope.datos.fecha =  urlParams.fecha;
         $scope.datos.usuarioTransaccion =  $cookies.usuario;
 
         $scope.listarDetalleFactura($scope.datos.numeroFactura);
-
-        //$scope.buscarClientes();
-        //$scope.buscarArticuloExistente();
-        //$scope.obtenerUsuarioSucursal($scope.datos.usuario);
     }
 
     init();
@@ -6375,7 +6432,6 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         $location.path( '/circuito' );
     }
 
-
     $scope.producto = {};
     $scope.datos = {};
     $scope.lista = [] ;
@@ -6393,6 +6449,9 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
     }
 
     $scope.changeCantidad = function(){
+        if($scope.datos.precio){
+            $scope.datos.precio=$scope.datos.precio.replace(/[^0-9]+/g,'');
+        }
         if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
             if($scope.datos.cantidad>0){
                 $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
@@ -6401,11 +6460,15 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
                 $scope.datos.cantidad=1;
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Cantidad invalida'},{key: false,back: 'static'});
             }
-
         }else{
             $scope.inhabilitarAgregar =true;
         }
-
+        if($scope.datos.precio){
+            $scope.datos.precio = separadorDeMil($scope.datos.precio);
+        }
+        if($scope.datos.total){
+            $scope.datos.total=separadorDeMil($scope.datos.total);
+        }
     }
 
     $scope.buscarArticuloExistente = function(){
@@ -6435,7 +6498,12 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
                     $scope.inhabilitarAgregar =true;
                     $scope.listaArticulos =   response.data;
                 }
-
+                if($scope.datos.precio){
+                    $scope.datos.precio = separadorDeMil($scope.datos.precio);
+                }
+                if($scope.datos.total){
+                    $scope.datos.total=separadorDeMil($scope.datos.total);
+                }
             }else{
                 $scope.articuloValido  = false;
                 $scope.inhabilitarAgregar =true;
@@ -6445,20 +6513,27 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
     }
 
     $scope.agregar = function(){
+        $scope.datos.total=$scope.datos.total.replace(/[^0-9]+/g,'') ;
+        $scope.datos.precio =  $scope.datos.precio.replace(/[^0-9]+/g,'');
         var impuesto =  $scope.datos.total* $scope.datos.grabado/100 ;
         var obj= {
             codigoArticulo: $scope.producto.codigo,
             descripcion: $scope.producto.descripcion,
             cantidad: $scope.datos.cantidad,
-            precio: $scope.datos.precio,
+            precio: separadorDeMil($scope.datos.precio),
             iva: $scope.datos.grabado,
-            impuesto: impuesto,
-            total: $scope.datos.total,
+            impuesto: separadorDeMil(impuesto),
+            total: separadorDeMil($scope.datos.total),
             tipo:$scope.articulo.tipo
         }
         $scope.lista.push(obj);
         $scope.limpiarSimple();
     }
+
+    function separadorDeMil(numero) {
+        return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+    }
+
 
     $scope.limpiarSimple = function(){
         $scope.producto = {};
@@ -6480,7 +6555,7 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         })
     };
 
-    $scope.guardar = function(){//LOL
+    $scope.guardar = function(){
         var lista = angular.copy($scope.lista);
         for(var j = lista.length; j--;){
             if(lista[j].recuperado == 'S'){
@@ -6497,6 +6572,9 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         }
         for(i=0;i<lista.length;i++){
             delete lista[i].descripcion
+            lista[i].total = lista[i].total.replace(/[^0-9]+/g,'');
+            lista[i].impuesto = lista[i].impuesto.replace(/[^0-9]+/g,'');
+            lista[i].precio = lista[i].precio.replace(/[^0-9]+/g,'');
         }
 
         var param = {
@@ -6519,6 +6597,9 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
                 $scope.lista = response.data;
                 for(i=0;i<$scope.lista.length;i++){
                     $scope.lista[i].recuperado = 'S';
+                    $scope.lista[i].total=separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].precio=separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].impuesto=separadorDeMil($scope.lista[i].impuesto);
                 }
             }else{
                 alert("Error al cargar los modelos");
@@ -6539,10 +6620,9 @@ app.controller('agregarCotizacionController', function($scope, $location, $rootS
         $scope.datos.paso =  urlParams.paso;
         $scope.buscarArticuloExistente();
         if($scope.datos.paso ==1){
-            $scope.secuencia();//PARA CARGAR LA SECUENCIA DE LA FACTURA
+            /**PARA CARGAR LA SECUENCIA DE LA FACTURA**/
+            $scope.secuencia();
         }else{
-            //buscarCotizacion
-            alert("Buscar cotizacion");
             $scope.listarDetalleAprovadoReparacion();
         }
 
@@ -8596,6 +8676,8 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
 
     $scope.buscar= function(){
         var obj = {
+            documentoNumero: $scope.datos.documentoNumero,
+            documento: $scope.datos.documento,
             estado: $scope.datos.estado,
             nombre: $scope.datos.nombre
         }
@@ -8711,6 +8793,10 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
 
     var init = function(){
         var urlParams = $location.search().param;
+        if(urlParams){
+           $scope.datos.documento ='COMPRA';
+           $scope.datos.documentoNumero =urlParams.codigo;
+        }
         $scope.listarProveedores();
         $scope.listarEstados();
         $scope.buscar();
@@ -8723,7 +8809,7 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
     $scope.datos = {};
 
     $scope.cancelar = function(){
-        $location.path( '/pago-proveedores' );
+        $location.path('/pago-proveedores');
     }
 
 
@@ -8801,6 +8887,8 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
         $scope.listarBancos();
         $scope.listaNumerosCheque = [];
         $scope.listaNumerosCheque.push({"numero":1234})
+
+
     }
 
     init();
