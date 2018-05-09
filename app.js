@@ -843,7 +843,7 @@ app.run(['$templateCache',function($templateCache, $rootScope){
             '</div></div></div></div>');
 
     $templateCache.put('/dialogs/exito.html',
-        '<div class="modal">' +
+        '<div class="modal" >' +
             '<div class="modal-dialog">' +
             '<div class="modal-content">' +
             '<div class="modal-header dialog-header-success">' +
@@ -3440,7 +3440,7 @@ app.service('UsuariosService', function($http) {
     delete $http.defaults.headers.common['X-Requested-With'];
 
     this.listarJson = function(json) {
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/'+json)
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/personas/usuarios/complex/'+json)
             .then(function (response) {
                 return response;
             });
@@ -4285,7 +4285,7 @@ app.controller('ajusteInventarioPositivoController', function($scope, $location,
 
     $scope.listarUsuarios= function(){
         var json = angular.toJson({});
-        UsuariosService.listarComplex(json).then(function(response){
+        UsuariosService.listarJson(json).then(function(response){
             if(response.status == 200){
                 $scope.listaUsuarios = response.data;
             }else{
@@ -5112,6 +5112,7 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
 
 app.controller('saldoClienteController', function($scope, $location, $rootScope, $cookies, $dialogs, ClientesService, PagosService, ValoresService) {
     $scope.datos = {};
+    $rootScope.dir ='/saldo-cliente';
 
     $scope.limpiar = function(){
         $scope.datos = {}
@@ -8215,7 +8216,7 @@ app.controller('ajusteInventarioNegativoController', function($scope, $location,
 
     $scope.listarUsuarios= function(){
         var json = angular.toJson({});
-        UsuariosService.listarComplex(json).then(function(response){
+        UsuariosService.listarJson(json).then(function(response){
             if(response.status == 200){
                 $scope.listaUsuarios = response.data;
             }else{
@@ -8309,6 +8310,7 @@ app.controller('ajusteInventarioNegativoController', function($scope, $location,
         for(i=0;i<$scope.lista.length;i++){
             delete  lista[i].descripcion;
             lista[i].usuario = $cookies.usuario;
+            lista[i].cantidad = lista[i].cantidad *-1;
         }
         InventarioService.registrarAjuste(param).then(function(response){
             if(response.status == 200){
@@ -8613,6 +8615,7 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
 
     $scope.datos = {};
     $scope.inhabilitarCambio = true;
+    $rootScope.dir ='/pago-proveedores';
 
     $scope.limpiar = function(){
         $scope.datos = {}
@@ -8762,9 +8765,10 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
 
 app.controller('generarChequeController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService,CuentasBancariasService, PagosService) {
     $scope.datos = {};
+    $scope.direccionRetorno = "";
 
     $scope.cancelar = function(){
-        $location.path('/pago-proveedores');
+        $location.path($scope.direccionRetorno);
     }
 
 
@@ -8842,7 +8846,7 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
         $scope.listarBancos();
         $scope.listaNumerosCheque = [];
         $scope.listaNumerosCheque.push({"numero":1234})
-
+        $scope.direccionRetorno =$rootScope.dir //'/pago-proveedores'
 
     }
 

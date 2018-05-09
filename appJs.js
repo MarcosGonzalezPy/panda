@@ -997,10 +997,19 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         })
     }
 
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
     $scope.buscar= function(){
         ChequesService.listar($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.lista = response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -1018,6 +1027,7 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
         for(j=0;j<$scope.listaACobrar.length;j++){
             delete $scope.listaACobrar[j].checkActivo;
             delete $scope.listaACobrar[j].fecha;
+            $scope.listaACobrar[j].monto = $scope.listaACobrar[j].monto.replace(/[^0-9]+/g,'');
         }
 
         ChequesService.modificarEstadoCheque($scope.listaACobrar).then(function(response){
@@ -1025,7 +1035,7 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
                 $scope.buscar();
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
             }else{
-                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al crear'},{key: false,back: 'static'});
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al cobrar'},{key: false,back: 'static'});
             }
         })
 
@@ -1393,7 +1403,7 @@ app.service('ChequesService', function($http) {
     }
 
     this.eliminar = function(codigo){
-        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheques/delete/'+codigo)
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/cheque/delete/'+codigo)
             .then(function (response) {
                 return response;
             });

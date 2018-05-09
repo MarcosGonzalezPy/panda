@@ -82,7 +82,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <td><input ng-show="item.estado == 'PENDIENTE_COBRO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.numeroCheque}}</td>
                 <td>{{item.banco}}</td>
                 <td>{{item.fecha}}</td>
@@ -91,12 +91,12 @@
                 <td>{{item.glosa}}</td>
 
                 <td>
-                    <button ng-show="item.estado != 'COBRADO'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
-                    <button ng-show="item.estado != 'COBRADO'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
+                    <button ng-show="item.estado != 'PENDIENTE_COBRO'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-show="item.estado == 'PENDIENTE_COBRO'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
                 </td>
-                <td>
-                    {{item.checkActivo}}
-                </td>
+                <!--<td>-->
+                    <!--{{item.checkActivo}}-->
+                <!--</td>-->
             </tr>
             </tbody>
         </table>
