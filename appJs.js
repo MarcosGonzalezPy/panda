@@ -987,7 +987,7 @@ app.controller('chequesController', function($scope, $location, $rootScope, $coo
     }
 
     $scope.listarEstados = function(){
-        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUE"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
@@ -1276,7 +1276,7 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
     }
 
     $scope.listarEstados = function(){
-        var json =angular.toJson({"dominio":"ESTADOS_CHEQUES"});
+        var json =angular.toJson({"dominio":"ESTADOS_CHEQUE"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
@@ -1317,6 +1317,7 @@ app.controller('modificarChequesController', function($scope,    $location, $roo
 
             $scope.$apply();
         }, 1000)
+
     }
 
     init();
@@ -1464,7 +1465,7 @@ app.controller('numerosChequeController', function($scope, $location, $rootScope
     $scope.lista = [];
 
     $scope.listarEstados = function(){
-        var json =angular.toJson({"dominio":"ESTADOS_CHEQUE"});
+        var json =angular.toJson({"dominio":"ESTADOS_NUMEROS_CHEQUE"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
@@ -1496,7 +1497,7 @@ app.controller('numerosChequeController', function($scope, $location, $rootScope
     }
 
     $scope.listarCuentasBancarias = function(){
-        $scope.datos.numeroCuentaBancaria="";
+
         var obj = {};
         if($scope.datos.banco!= null && typeof $scope.datos.banco != undefined && $scope.datos.banco!= '' ){
             obj = {
@@ -1591,7 +1592,7 @@ app.controller('agregarNumerosChequeController', function($scope, $location, Num
         $scope.datos.usuario  =$cookies.usuario;
         NumerosChequeService.insertar($scope.datos).then(function(response){
 
-            if(response.status == 200){
+            if(response.status == 200 && response.data=="true"){
                 $location.path( '/numeros-cheque' );
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
             }else{
