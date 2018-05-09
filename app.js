@@ -7073,6 +7073,17 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
         })
     }
 
+    $scope.listarTipo = function(){
+        var json =angular.toJson({"dominio":"TIPO_CUENTA_BANCARIA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipo = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     $scope.listarBancos = function(){
         var json =angular.toJson({"dominio":"BANCOS"});
         ValoresService.listarJson(json).then(function(response){
@@ -7145,6 +7156,7 @@ app.controller('cuentasBancariasController', function($scope, $location, $rootSc
 
     var init = function () {
         $scope.listarEstados();
+        $scope.listarTipo();
         $scope.listarBancos();
     }
 
@@ -7159,6 +7171,17 @@ app.controller('agregarCuentasBancariasController', function($scope, $location, 
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
+    $scope.listarTipo = function(){
+        var json =angular.toJson({"dominio":"TIPO_CUENTA_BANCARIA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipo = response.data;
             }else{
                 alert("Error al cargar los tipos");
             }
@@ -7196,6 +7219,7 @@ app.controller('agregarCuentasBancariasController', function($scope, $location, 
 
     var init = function () {
         $scope.listarEstados();
+        $scope.listarTipo();
         $scope.listarBancos();
     }
 
@@ -7217,6 +7241,17 @@ app.controller('modificarCuentasBancariasController', function($scope, $location
         })
     }
 
+    $scope.listarTipo = function(){
+        var json =angular.toJson({"dominio":"TIPO_CUENTA_BANCARIA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaTipo = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     $scope.listarBancos = function(){
         var json =angular.toJson({"dominio":"BANCOS"});
         ValoresService.listarJson(json).then(function(response){
@@ -7229,7 +7264,7 @@ app.controller('modificarCuentasBancariasController', function($scope, $location
     }
 
     $scope.modificar = function() {
-        $scope.datos.usuario  =$cookies.usuario;
+        $scope.datos.codigo  = $scope.datos.codigo;
         CuentasBancariasService.modificar($scope.datos).then(function(response){
 
             if(response.status == 200){
@@ -7252,13 +7287,20 @@ app.controller('modificarCuentasBancariasController', function($scope, $location
     }
 
     var init = function () {
+        var urlParams = $location.search().param;
+        if(typeof urlParams.codigo == 'undefined'){
+            $scope.cancelar();
+        }
 
         $scope.listarEstados();
+        $scope.listarTipo();
         $scope.listarBancos();
 
         $timeout( function (){
             $scope.datos.codigo = urlParams.codigo;
             $scope.datos.banco = urlParams.banco;
+            $scope.datos.tipo = urlParams.tipo;
+            $scope.datos.fondo = urlParams.fondo;
             $scope.datos.numero = urlParams.numero;
             $scope.datos.estado = urlParams.estado;
 
@@ -7288,8 +7330,9 @@ app.service('CuentasBancariasService', function($http) {
         var obj = {
             "banco":datos.banco,
             "numero":datos.numero,
-            "estado": datos.estado,
-            "usuario": datos.usuario
+            "usuario": datos.usuario ,
+            "fondo": datos.fondo,
+            "tipo": datos.tipo
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -7305,7 +7348,9 @@ app.service('CuentasBancariasService', function($http) {
             "codigo":datos.codigo,
             "banco":datos.banco,
             "numero":datos.numero,
-            "estado": datos.estado
+            "estado": datos.estado,
+            "fondo": datos.fondo,
+            "tipo": datos.tipo
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
