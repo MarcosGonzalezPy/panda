@@ -1639,7 +1639,7 @@ app.controller('agregarNumerosChequeController', function($scope, $location, Num
         $scope.datos.usuario  =$cookies.usuario;
         NumerosChequeService.insertar($scope.datos).then(function(response){
 
-            if(response.status == 200 && response.data=="true"){
+            if(response.status == 200 && response.data.respuesta=="OK"){
                 $location.path( '/numeros-cheque' );
                 dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Guardado existoso'},{key: false,back: 'static'});
             }else{

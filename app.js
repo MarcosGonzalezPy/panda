@@ -70,6 +70,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/ventas/ventas/nota-credito-item.html',
             controller  : 'notaCreditoItemController'
         })
+        .when('/compras/ver-compra', {
+            templateUrl : 'pages/compras/ver-compra.html',
+            controller  : 'verCompraController'
+        })
         .when('/articulos', {
             templateUrl : 'pages/articulos/articulos.html',
             controller  : 'articulosController'
@@ -190,7 +194,7 @@ app.config(function($routeProvider) {
         })
         .when('/inventario', {
             templateUrl : 'pages/inventario/inventario.html',
-            controller  : 'inventarioController'
+            controller  : 'invlentarioController'
         })
         .when('/roles/agregar', {
             templateUrl : 'pages/personas/roles/agregar-roles.html',
@@ -1183,6 +1187,7 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
     }
 
     $scope.changeCantidad = function(){
+        $scope.datos.precio=$scope.datos.precio.replace(/[^0-9]+/g,'');
         if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
             if($scope.datos.cantidad>0){
                 $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
@@ -1195,7 +1200,8 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
         }else{
             $scope.inhabilitarAgregar =true;
         }
-
+        $scope.datos.precio=separadorDeMil($scope.datos.precio);
+        $scope.datos.total=separadorDeMil($scope.datos.total);
     }
 
     $scope.buscarArticuloExistente = function(){
@@ -1215,7 +1221,7 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
                         }
                         $scope.producto.codigoBarra = $scope.articulo.codigoBarra;
                         $scope.producto.descripcion = $scope.articulo.descripcion;
-                        $scope.datos.precio = $scope.articulo.precioUnitario;
+                        $scope.datos.precio = separadorDeMil($scope.articulo.precioUnitario);
                         $scope.datos.grabado = $scope.articulo.grabado;
                         if($scope.datos.cantidad != null && $scope.datos.cantidad != '' && typeof $scope.datos.cantidad != 'undefined'){
                             $scope.datos.total= $scope.datos.cantidad * $scope.datos.precio;
@@ -1301,6 +1307,18 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
     }
 
 
+    $scope.changePrecio = function(){
+        if($scope.datos.precio){
+            $scope.datos.precio = separadorDeMil($scope.datos.precio);
+        }
+    }
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
     $scope.secuencia = function(){
         UtilService.secuencia("factura_seq").then(function(response){
             if(response.status == 200){
@@ -1330,7 +1348,17 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
     };
 
     $scope.agregar = function(){
-        var impuesto =  $scope.datos.total* $scope.datos.grabado/100 ;
+        var impuesto =0;
+        $scope.datos.total=$scope.datos.total.replace(/[^0-9]+/g,'')
+        if($scope.datos.grabado==10){
+            impuesto = $scope.datos.total/11;
+        }else{
+            impuesto = $scope.datos.total/21;
+        }
+        impuesto = impuesto>1?  Math.trunc(impuesto): 0;
+        impuesto =separadorDeMil(impuesto);
+        $scope.datos.precio =separadorDeMil( $scope.datos.precio);
+        $scope.datos.total =separadorDeMil($scope.datos.total);
         var obj= {
             codigoArticulo: $scope.producto.codigo,
             descripcion: $scope.producto.descripcion,
@@ -1371,6 +1399,9 @@ app.controller('registrarVentaController', function($scope, $location, $rootScop
         }
         for(i=0;i<lista.length;i++){
            delete lista[i].descripcion
+            lista[i].precio =lista[i].precio.replace(/[^0-9]+/g,'');
+            lista[i].impuesto =lista[i].impuesto.replace(/[^0-9]+/g,'');
+            lista[i].total =lista[i].total.replace(/[^0-9]+/g,'');
         }
 
         var param = {
@@ -3972,6 +4003,21 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     $scope.recepcion = function(index){
         $rootScope.compras =   $scope.listaCompras[index];
         $location.path( '/recepcion-compra');
+    }
+
+
+
+    $scope.ver = function(index){
+        var element =   $scope.listaCompras[index];
+        if(element.estado =='ACTIVO'){
+            element.titulo= "Ver Pedido";
+            $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
+        }else if(element.estado =='RECEPCIONADO'){
+                element.titulo= "Ver Recepcion";
+                $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
+        }else{
+            alert("FUCK NINGEN");
+        }
     }
 
 
@@ -8920,6 +8966,57 @@ app.controller('generarChequeController', function($scope, $location, $rootScope
         //$scope.listaNumerosCheque.push({"numero":1234})
         $scope.direccionRetorno =$rootScope.dir
 
+    }
+
+    init();
+});
+
+
+
+app.controller('verCompraController', function($scope, $location, $rootScope, $cookies, $dialogs, ComprasService) {
+
+    $scope.datos = {};
+
+    $scope.cancelar =function(){
+        $location.path("/compras");
+    }
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
+    $scope.listarDetalle = function(id){
+        ComprasService.listarDetalleRegistro(id).then(function(response){
+            if(response.status == 200){
+                $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].precio = separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].total = separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].impuesto = separadorDeMil($scope.lista[i].impuesto);
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
+    var init =function(){
+        var urlParams = $location.search().param;
+        if(typeof urlParams.titulo == 'undefined'){
+            $scope.cancelar();
+        }else{
+            $scope.datos=urlParams;
+            if($scope.datos.estado=='ACTIVO'){
+                $scope.listarDetalle($scope.datos.codigo);
+                delete $scope.datos.plazo;
+            }else if("RECEPCIONADO"){
+                $scope.listarDetalle($scope.datos.codigo);
+            }else{
+                alert("FUCK NINGEN");
+            }
+        }
     }
 
     init();
