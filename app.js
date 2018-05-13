@@ -3934,9 +3934,14 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     $scope.listaEstados=[];
     $scope.listaCompras = [];
 
+    $scope.foo = function (index) {
+        $scope.filaSeleccionada =  $scope.listaCompras[index];
+    }
+
     $scope.limpiar= function(){
         $scope.datos = {};
         $scope.listaCompras=[];
+        delete $scope.filaSeleccionada;
     }
 
     $scope.listarTaller = function(){
@@ -3955,7 +3960,6 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaEstados = response.data;
-
             }else{
                 alert("Error al cargar los tipos");
             }
@@ -3972,8 +3976,8 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         })
     }
 
-    $scope.anular = function(index) {
-        var element = $scope.listaCompras[index];
+    $scope.anular = function() {
+        var element =  $scope.filaSeleccionada;
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea anular?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
             //alert(resultado);
@@ -4000,21 +4004,24 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
 
 
 
-    $scope.recepcion = function(index){
-        $rootScope.compras =   $scope.listaCompras[index];
+    $scope.recepcion = function(){
+        $rootScope.compras =   $scope.filaSeleccionada;
         $location.path( '/recepcion-compra');
     }
 
 
 
-    $scope.ver = function(index){
-        var element =   $scope.listaCompras[index];
+    $scope.ver = function(){
+        var element = $scope.filaSeleccionada;  //$scope.listaCompras[index];
         if(element.estado =='ACTIVO'){
             element.titulo= "Ver Pedido";
             $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
         }else if(element.estado =='RECEPCIONADO'){
-                element.titulo= "Ver Recepcion";
-                $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
+            element.titulo= "Ver Recepcion";
+            $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
+        }else if(element.estado =='CON ND'){
+            element.titulo= "Ver ";
+            $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
         }else{
             alert("FUCK NINGEN");
         }
@@ -4031,7 +4038,7 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     }
 
     $scope.pagar = function(index){
-        var element =   $scope.listaCompras[index];
+        var element =   $scope.filaSeleccionada;// $scope.listaCompras[index];
         $location.path( '/pago-proveedores').search({param: element, other:'ok'});
     }
 
@@ -9012,6 +9019,8 @@ app.controller('verCompraController', function($scope, $location, $rootScope, $c
                 $scope.listarDetalle($scope.datos.codigo);
                 delete $scope.datos.plazo;
             }else if("RECEPCIONADO"){
+                $scope.listarDetalle($scope.datos.codigo);
+            }else if("CON ND"){
                 $scope.listarDetalle($scope.datos.codigo);
             }else{
                 alert("FUCK NINGEN");

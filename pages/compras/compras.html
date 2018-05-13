@@ -42,10 +42,33 @@
             </div>
 
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+                <!--<div class="col-sm-offset-2 col-sm-10">-->
+                <div class="col-sm-offset-1 col-sm-10">
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
-                    <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar Pedido" />
+                    <button type="button" class="btn btn-primary  btn-sm" ng-click="agregar()">
+                        <span class="glyphicon glyphicon-plus"></span> Pedido
+                    </button>
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado=='ANULADO'" type="button" class="btn btn-danger  btn-sm" ng-click="anular($index)">
+                        <span class="glyphicon glyphicon-minus"></span> Anular
+                    </button>
+
+                    <!--<input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar Pedido" />-->
+
+
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='ACTIVO'" type="button" class="btn btn-success  btn-sm" ng-click="recepcion($index)">
+                        <span class="glyphicon glyphicon-edit"></span> Recepcionar
+                    </button>
+                    <button ng-disabled="!filaSeleccionada" type="button" class="btn btn-info  btn-sm" ng-click="ver($index)">
+                        <span class="glyphicon glyphicon-eye-open"></span> Ver
+                    </button>
+                    <button ng-disabled="!filaSeleccionada || !(filaSeleccionada.estado=='CON ND' || filaSeleccionada.estado=='RECEPCIONADO')" type="button" class="btn btn-default btn-sm" ng-click="pagar($index)">
+                        <span class="glyphicon glyphicon-usd"></span> Pagar
+                    </button>
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='RECEPCIONADO'"
+                            type="button" class="btn btn-warning  btn-sm" ng-click="notaDebito($index)">
+                        <span class="glyphicon glyphicon-plus">NC</span>
+                    </button>
                 </div>
             </div>
         </form>
@@ -58,6 +81,7 @@
         <table class="table" >
             <thead>
             <tr>
+                <th></th>
                 <th>Codigo</th>
                 <th>Sucursal</th>
                 <th>Proveedor</th>
@@ -70,6 +94,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in listaCompras">
+                <td><input type="radio" name="compras" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.codigo}}</td>
                 <td>{{item.sucursal}}</td>
                 <td>{{item.proveedor}}</td>
@@ -79,39 +104,39 @@
                 <td>{{item.estado}}</td>
                 <td>
 
-                    <div ng-show="item.estado == 'RECEPCIONADO' && item.estado != 'ANULADO'">
-                        <button class="btn btn-danger btn-xs" ng-click="anular($index)">
-                            Anular
-                        </button>
-                        <button  class="btn btn-warning btn-xs" ng-click="notaDebito($index)">
-                            N. Debito
-                        </button>
-                        <button  class="btn btn-primary btn-xs" ng-click="pagar($index)">
-                            Pagar
-                        </button>
-                        <button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">
-                            <span class="glyphicon glyphicon-eye-open"></span>
-                        </button>
-                    </div>
-                    <div ng-show="item.estado == 'ACTIVO' ">
-                        <button class="btn btn-danger btn-xs" ng-click="anular($index)">
-                            Anular
-                        </button>
-                        <button  class="btn btn-success btn-xs" ng-click="recepcion($index)">
-                            Recepcionar
-                        </button>
-                        <button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">
-                            <span class="glyphicon glyphicon-eye-open"></span>
-                        </button>
-                     </div>
-                    <div ng-show="item.estado == 'CON ND' ">
-                        <button  class="btn btn-primary btn-xs" ng-click="pagar($index)">
-                            Pagar
-                        </button>
-                        <button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">
-                            <span class="glyphicon glyphicon-eye-open"></span>
-                        </button>
-                    </div>
+                    <!--<div ng-show="item.estado == 'RECEPCIONADO' && item.estado != 'ANULADO'">-->
+                        <!--<button class="btn btn-danger btn-xs" ng-click="anular($index)">-->
+                            <!--Anular-->
+                        <!--</button>-->
+                        <!--<button  class="btn btn-primary btn-xs" ng-click="pagar($index)">-->
+                            <!--Pagar-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">-->
+                            <!--<span class="glyphicon glyphicon-eye-open"></span>-->
+                        <!--</button>-->
+                    <!--</div>-->
+                    <!--<div ng-show="item.estado == 'ACTIVO' ">-->
+                        <!--<button class="btn btn-danger btn-xs" ng-click="anular($index)">-->
+                            <!--Anular-->
+                        <!--</button>-->
+                        <!--<button  class="btn btn-success btn-xs" ng-click="recepcion($index)">-->
+                            <!--Recepcionar-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">-->
+                            <!--<span class="glyphicon glyphicon-eye-open"></span>-->
+                        <!--</button>-->
+                     <!--</div>-->
+                    <!--<div ng-show="item.estado == 'CON ND' ">-->
+                        <!--<button  class="btn btn-primary btn-xs" ng-click="pagar($index)">-->
+                            <!--Pagar-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn btn-danger  btn-xs" ng-click="notaDebito($index)">-->
+                            <!--<span class="glyphicon glyphicon-minus">NC</span>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn btn-info  btn-xs" ng-click="ver($index)">-->
+                            <!--<span class="glyphicon glyphicon-eye-open"></span>-->
+                        <!--</button>-->
+                    <!--</div>-->
                 </td>
             </tr>
             </tbody>

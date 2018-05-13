@@ -49,9 +49,14 @@
                         <th class="width-10">Codigo</th>
                         <th>Descripcion</th>
                         <th>Precio U</th>
+                        <!--<th>Unidad</th>-->
                         <th class="width-10">Cantidad</th>
+                        <!--<th>Descuento</th>-->
                         <th>Impuesto</th>
                         <th>Importe</th>
+                        <th>
+
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -62,6 +67,12 @@
                         <td>{{item.cantidad}}</td>
                         <td>{{item.impuesto}}</td>
                         <td>{{item.total}}</td>
+                         <td>
+                             <div ng-show="item.estado != 'COPIADO' ">
+                                 <button ng-click="copiar($index)" class="btn btn-primary btn-xs">Copiar</button>
+                             </div>
+
+                        </td>
                     </tr>
                     </tbody>
                 </table>
