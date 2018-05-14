@@ -66,8 +66,8 @@
                         <span class="glyphicon glyphicon-usd"></span> Pagar
                     </button>
                     <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='RECEPCIONADO'"
-                            type="button" class="btn btn-warning  btn-sm" ng-click="notaDebito($index)">
-                        <span class="glyphicon glyphicon-plus">NC</span>
+                            type="button" class="btn btn-primary  btn-sm" ng-click="notaDebito($index)">
+                        <span class="glyphicon glyphicon-plus"> NC</span>
                     </button>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                 <th>Fecha Creacion</th>
                 <th>Usuario</th>
                 <th>Estado</th>
-                <th></th>
+                <!--<th></th>-->
             </tr>
             </thead>
             <tbody>
@@ -102,7 +102,7 @@
                 <td>{{item.fechaCreacion}}</td>
                 <td>{{item.usuario}}</td>
                 <td>{{item.estado}}</td>
-                <td>
+                <!--<td>-->
 
                     <!--<div ng-show="item.estado == 'RECEPCIONADO' && item.estado != 'ANULADO'">-->
                         <!--<button class="btn btn-danger btn-xs" ng-click="anular($index)">-->
@@ -137,7 +137,7 @@
                             <!--<span class="glyphicon glyphicon-eye-open"></span>-->
                         <!--</button>-->
                     <!--</div>-->
-                </td>
+                <!--</td>-->
             </tr>
             </tbody>
         </table>

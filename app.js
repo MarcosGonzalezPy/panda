@@ -4029,7 +4029,7 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
 
 
     $scope.notaDebito = function(index){
-        var element =   $scope.listaCompras[index];
+        var element =   $scope.filaSeleccionada;
         $location.path( '/nota-debito').search({param: element, other:'ok'});
     }
 
