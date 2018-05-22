@@ -3924,6 +3924,29 @@ app.service('ComprasService', function($http) {
         return myResponseData;
     }
 
+    this.listarNC = function(codigo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/listar-nota-credito/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.anularNC = function(datos){
+        var obj={
+            //"codigo":datos.codigo,
+            //"estado":datos.estado,
+            //"sucursal": datos.sucursal
+        }
+        var json = angular.toJson(obj);
+        var encoJson = encodeURIComponent(json);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/compras/anular-nc?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 });
 
@@ -4027,6 +4050,12 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         }
     }
 
+    $scope.verNC = function(){
+        var element = $scope.filaSeleccionada;
+        element.esNC = "SI";
+        element.titulo= "Ver Nota Credito";
+        $location.path( '/compras/ver-compra').search({param: element, other:'ok'});
+    }
 
     $scope.notaDebito = function(index){
         var element =   $scope.filaSeleccionada;
@@ -4040,6 +4069,30 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
     $scope.pagar = function(index){
         var element =   $scope.filaSeleccionada;// $scope.listaCompras[index];
         $location.path( '/pago-proveedores').search({param: element, other:'ok'});
+    }
+
+    $scope.anularNC = function() {
+        var element =  $scope.filaSeleccionada;
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea anular la Nota de Credito?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            ComprasService.anularND(element).then(function(response){
+                if(response.status == 200&& response.data.respuesta =="OK"){
+                    var resultado = response.data;
+                    if(resultado == "true"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion Exitosa'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al anular'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+        },function(){
+        });
     }
 
     var init = function () {
@@ -9009,10 +9062,29 @@ app.controller('verCompraController', function($scope, $location, $rootScope, $c
         })
     };
 
+
+    $scope.listarNC = function(id){
+        ComprasService.listarNC(id).then(function(response){
+            if(response.status == 200){
+                $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].precio = separadorDeMil($scope.lista[i].precio);
+                    $scope.lista[i].total = separadorDeMil($scope.lista[i].total);
+                    $scope.lista[i].impuesto = separadorDeMil($scope.lista[i].impuesto);
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
     var init =function(){
         var urlParams = $location.search().param;
         if(typeof urlParams.titulo == 'undefined'){
             $scope.cancelar();
+        }else if(urlParams.esNC == "SI"){
+            /**Es nota credito**/
+            $scope.listarNC(urlParams.codigo);
         }else{
             $scope.datos=urlParams;
             if($scope.datos.estado=='ACTIVO'){
