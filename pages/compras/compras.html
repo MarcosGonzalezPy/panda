@@ -62,17 +62,17 @@
                     <button ng-disabled="!filaSeleccionada" type="button" class="btn btn-info  btn-sm" ng-click="ver($index)">
                         <span class="glyphicon glyphicon-eye-open"></span> Ver
                     </button>
-                    <button ng-disabled="!filaSeleccionada || !(filaSeleccionada.estado=='NOTACRE' || filaSeleccionada.estado=='RECEPCIONADO')" type="button" class="btn btn-default btn-sm" ng-click="pagar($index)">
+                    <button ng-disabled="!filaSeleccionada || !(filaSeleccionada.nc=='S' || filaSeleccionada.estado=='RECEPCIONADO')" type="button" class="btn btn-default btn-sm" ng-click="pagar($index)">
                         <span class="glyphicon glyphicon-usd"></span> Pagar
                     </button>
-                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='NOTACRE' " type="button" class="btn btn-info  btn-sm" ng-click="verNC()">
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc!='S' " type="button" class="btn btn-info  btn-sm" ng-click="verNC()">
                         <span class="glyphicon glyphicon-eye-open"></span> Ver NC
                     </button>
-                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='RECEPCIONADO'"
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc=='S' || filaSeleccionada.estado!='RECEPCIONADO'"
                             type="button" class="btn btn-primary  btn-sm" ng-click="notaDebito($index)">
                         <span class="glyphicon glyphicon-plus"> NC</span>
                     </button>
-                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.estado!='NOTACRE' " type="button" class="btn btn-danger  btn-sm" ng-click="anularND($index)">
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc!='S' " type="button" class="btn btn-danger  btn-sm" ng-click="anularNC($index)">
                         <span class="glyphicon glyphicon-minus"></span> NC
                     </button>
                 </div>
@@ -95,7 +95,8 @@
                 <th>Fecha Creacion</th>
                 <th>Usuario</th>
                 <th>Estado</th>
-                <!--<th></th>-->
+                <th>Monto</th>
+                <th>NC</th>
             </tr>
             </thead>
             <tbody>
@@ -108,6 +109,8 @@
                 <td>{{item.fechaCreacion}}</td>
                 <td>{{item.usuario}}</td>
                 <td>{{item.estado}}</td>
+                <td>{{item.monto}}</td>
+                <td>{{item.nc}}</td>
                 <!--<td>-->
 
                     <!--<div ng-show="item.estado == 'RECEPCIONADO' && item.estado != 'ANULADO'">-->

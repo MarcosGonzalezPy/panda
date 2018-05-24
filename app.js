@@ -194,7 +194,7 @@ app.config(function($routeProvider) {
         })
         .when('/inventario', {
             templateUrl : 'pages/inventario/inventario.html',
-            controller  : 'invlentarioController'
+            controller  : 'inventarioController'
         })
         .when('/roles/agregar', {
             templateUrl : 'pages/personas/roles/agregar-roles.html',
@@ -3934,9 +3934,8 @@ app.service('ComprasService', function($http) {
 
     this.anularNC = function(datos){
         var obj={
-            //"codigo":datos.codigo,
-            //"estado":datos.estado,
-            //"sucursal": datos.sucursal
+            "numeroFactura":datos.codigo,
+            "sucursal": datos.sucursal
         }
         var json = angular.toJson(obj);
         var encoJson = encodeURIComponent(json);
@@ -3989,10 +3988,19 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         })
     }
 
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
     $scope.buscar= function(){
         ComprasService.listarJson($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.listaCompras = response.data;
+                for(i=0;i<$scope.listaCompras.length;i++){
+                    $scope.listaCompras[i].monto=separadorDeMil($scope.listaCompras[i].monto);
+                }
             }else{
                 dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
             }
@@ -4075,7 +4083,7 @@ app.controller('comprasController', function($scope, $location, $rootScope, $coo
         var element =  $scope.filaSeleccionada;
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea anular la Nota de Credito?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
-            ComprasService.anularND(element).then(function(response){
+            ComprasService.anularNC(element).then(function(response){
                 if(response.status == 200&& response.data.respuesta =="OK"){
                     var resultado = response.data;
                     if(resultado == "true"){
