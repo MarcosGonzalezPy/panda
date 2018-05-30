@@ -41,10 +41,26 @@
             </div>
 
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+                <div class="col-sm-offset-1 col-sm-10">
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
+                    <input ng-disabled="!filaSeleccionada || filaSeleccionada.estado == 'ANULADO'" type="button" ng-click="anularFactura($index)"  class="btn btn-danger btn-sm" value="Anular" />
+                    <!--<input ng-disabled="!filaSeleccionada ||filaSeleccionada.estado == 'COBRADO'" type="button" ng-click="notaCredito($index)"  class="btn btn-primary btn-sm" value="Nota Credito" />-->
+                    <input ng-disabled="!filaSeleccionada || !filaSeleccionada.estado == 'BORRADOR'" type="button" ng-click="facturar($index)"  class="btn btn-info btn-sm" value="Facturar" />
+                    <input ng-disabled="!filaSeleccionada ||!filaSeleccionada.estado == 'BORRADOR'" type="button" ng-click="editar($index)"  class="btn btn-success btn-sm" value="Editar" />
+                    <!--<input ng-disabled="!filaSeleccionada ||filaSeleccionada.estado == 'BORRADOR'" type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Anular" />-->
+
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc!='S' " type="button" class="btn btn-info  btn-sm" ng-click="verNC()">
+                        <span class="glyphicon glyphicon-eye-open"></span> Ver NC
+                    </button>
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc=='S' || (filaSeleccionada.estado!='FACTURADO'&&filaSeleccionada.estado!='PAGADO')"
+                            type="button" class="btn btn-primary  btn-sm" ng-click="notaCredito($index)">
+                        <span class="glyphicon glyphicon-plus"> NC</span>
+                    </button>
+                    <button ng-disabled="!filaSeleccionada || filaSeleccionada.nc!='S' " type="button" class="btn btn-danger  btn-sm" ng-click="anularNC($index)">
+                        <span class="glyphicon glyphicon-minus"></span> NC
+                    </button>
                 </div>
             </div>
         </form>
@@ -57,26 +73,31 @@
         <table class="table" >
             <thead>
             <tr>
+                <th></th>
+                <th>Monto</th>
                 <th>Numero Factura</th>
                 <th>Cliente</th>
                 <th>Sucursal</th>
                 <th>Estado</th>
-                <th></th>
+                <th>NC</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
+                <td><input type="radio" name="ventas" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td></td>
+                <td>{{item.monto}}</td>
                 <td>{{item.numeroFactura}}</td>
                 <td>{{item.cliente}}</td>
                 <td>{{item.sucursal}}</td>
                 <td>{{item.estado}}</td>
-                <td>
-                    <input ng-show="item.estado == 'PENDIENTE_PAGO' || item.estado == 'COBRADO'" type="button" ng-click="anularFactura($index)"  class="btn btn-default btn-sm" value="Anular" />
-                    <input ng-show="item.estado == 'COBRADO'" type="button" ng-click="notaCredito($index)"  class="btn btn-primary btn-sm" value="Nota Credito" />
-                    <input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="facturar($index)"  class="btn btn-info btn-sm" value="Facturar" />
-                    <input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="editar($index)"  class="btn btn-success btn-sm" value="Editar" />
-                    <input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />
-                </td>
+                <td>{{item.nc}}</td>
+                <!--<td>-->
+                    <!--<input ng-show="item.estado == 'PENDIENTE_PAGO' || item.estado == 'COBRADO'" type="button" ng-click="anularFactura($index)"  class="btn btn-default btn-sm" value="Anular" />-->
+                    <!--<input ng-show="item.estado == 'COBRADO'" type="button" ng-click="notaCredito($index)"  class="btn btn-primary btn-sm" value="Nota Credito" />-->
+                    <!--<input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="facturar($index)"  class="btn btn-info btn-sm" value="Facturar" />-->
+                    <!--<input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="editar($index)"  class="btn btn-success btn-sm" value="Editar" />-->
+                    <!--<input ng-show="item.estado == 'BORRADOR'" type="button" ng-click="remove($index)"  class="btn btn-danger btn-sm" value="Eliminar" />-->
+                <!--</td>-->
             </tr>
             </tbody>
         </table>

@@ -2,7 +2,7 @@
 <html >
 <body>
 <div class="panel panel-primary">
-    <div class="panel-heading">Realizar Pago</div>
+    <div class="panel-heading">Facturar</div>
     <div class="panel-body padding-minimo" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-4">
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="form-group">
+                <div class="form-group" ng-show=false>
                     <div class="col-sm-5  control-label">Cambio</div>
                     <div class="col-sm-7">
                         <input disabled type="text" class="form-control input-sm" ng-model="datos.cambio" maxlength="50"/>
@@ -61,13 +61,9 @@
                         Cuotas
                     </div>
                     <div class="col-sm-7">
-                        <select class="form-control input-sm" ng-model="datos.cantidadCuotas" ng-disabled="inhabilitarCredito">
-                            <option value> --Seleccionar --</option>
-                            <option value="3">3</option>
-                            <option value="6">6</option>
-                            <option value="9">9</option>
-                            <option value="12">12</option>
-                        </select>
+                        <input  type="text" class="form-control input-sm" ng-model="datos.cantidadCuotas" maxlength="50"
+                                ng-disabled="inhabilitarCredito"/>
+
                     </div>
                 </div>
 
@@ -77,8 +73,8 @@
     </div>
 
 </div>
-
-<div class="panel panel-primary" ng-show="datos.condicionCompra =='CONTADO'">
+<!--ng-show="datos.condicionCompra =='CONTADO'"-->
+<div class="panel panel-primary" ng-show=false>
     <div class="panel-body padding-minimo" >
         <form ng-submit="add()" class="form-horizontal">
             <div class="col-lg-4">
