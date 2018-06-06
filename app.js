@@ -204,6 +204,14 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/compras/compras.html',
             controller  : 'comprasController'
         })
+        .when('/cobros', {
+            templateUrl : 'pages/ventas/cobros/cobros.html',
+            controller  : 'cobrosController'
+        })
+        .when('/cobros/cobrar', {
+            templateUrl : 'pages/ventas/cobros/cobrar.html',
+            controller  : 'cobrarController'
+        })
         .when('/pedido-compra', {
             templateUrl : 'pages/compras/pedido-compra.html',
             controller  : 'pedidoCompraController'
@@ -4966,6 +4974,14 @@ app.service('VentasService', function($http) {
         return myResponseData;
     }
 
+    this.anularNotaCredito = function(id){
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/ventas/anular-nota-credito/'+id)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 
@@ -5053,7 +5069,29 @@ app.controller('ventasController', function($scope, $location, $rootScope, $cook
                         $scope.limpiar();
                         $scope.buscar();
                     }else{
-                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Anular'},{key: false,back: 'static'});
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:resultado},{key: false,back: 'static'});
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+        },function(){
+        });
+    }
+
+    $scope.anularNotaCredito = function() {
+        var element =  $scope.filaSeleccionada;
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea anular?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            VentasService.anularNotaCredito(element.numeroFactura).then(function(response){
+                if(response.status == 200){
+                    var resultado = response.data.respuesta;
+                    if(resultado == "ok"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion Exitosa'},{key: false,back: 'static'});
+                        $scope.limpiar();
+                        $scope.buscar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:resultado},{key: false,back: 'static'});
                     }
                 }else{
                     dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
@@ -6177,13 +6215,19 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
         if($scope.itemCredito.precioNuevo){
             $scope.itemCredito.precioNuevo = Number($scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,''));
         }
+        if($scope.itemCredito.precio  && typeof $scope.itemCredito.precio== 'string' ){
+            $scope.itemCredito.precio = Number($scope.itemCredito.precio.replace(/[^0-9]+/g,''));
+        }
         if(typeof $scope.itemCredito.precioNuevo=="undefined"||$scope.itemCredito.precioNuevo <0 || $scope.itemCredito.precioNuevo> $scope.itemCredito.precio ){
-             $scope.inhabilitarItem = true;
-         }else{
-             $scope.inhabilitarItem=false;
-         }
+            if(typeof $scope.itemCredito.cantidadNueva=="undefined"||$scope.itemCredito.cantidadNueva <0 || $scope.itemCredito.cantidadNueva> $scope.itemCredito.cantidad ){
+                $scope.inhabilitarItem = true;
+            }else{
+                $scope.inhabilitarItem=false;
+            }
+        }else{
+            $scope.inhabilitarItem=false;
+        }
         $scope.nuevoResumen();
-        //$scope.itemCredito.precioNuevo=  Number($scope.itemCredito.precioNuevo).toLocaleString();
     }
 
     $scope.changeNuevaCantidad=function(){
@@ -6191,7 +6235,12 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
              $cope.itemCredito.cantidadNueva= Number($scope.itemCredito.cantidadNueva);
          }
         if(typeof $scope.itemCredito.cantidadNueva=="undefined"||$scope.itemCredito.cantidadNueva <0 || $scope.itemCredito.cantidadNueva> $scope.itemCredito.cantidad ){
-            $scope.inhabilitarItem = true;
+            if(typeof $scope.itemCredito.precioNuevo=="undefined"||$scope.itemCredito.precioNuevo <0 || $scope.itemCredito.precioNuevo> $scope.itemCredito.precio ){
+                $scope.inhabilitarItem = true;
+            }else{
+                $scope.inhabilitarItem=false;
+            }
+
         }else{
             $scope.inhabilitarItem=false;
         }
@@ -6201,8 +6250,13 @@ app.controller('notaCreditoController', function($scope, $location, $rootScope, 
     $scope.nuevoResumen= function(){
 
         $scope.itemCredito.total = $scope.itemCredito.total.replace(/[^0-9]+/g,'');
-        $scope.itemCredito.precioNuevo = $scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,'');
-        $scope.itemCredito.precio = $scope.itemCredito.precio.replace(/[^0-9]+/g,'');
+
+        if($scope.itemCredito.precioNuevo && typeof $scope.itemCredito.precioNuevo == 'string'){
+            $scope.itemCredito.precioNuevo = $scope.itemCredito.precioNuevo.replace(/[^0-9]+/g,'');
+        }
+        if($scope.itemCredito.precio && typeof $scope.itemCredito.precio == 'string'){
+            $scope.itemCredito.precio = $scope.itemCredito.precio.replace(/[^0-9]+/g,'');
+        }
 
         $scope.itemCredito.total =  nvl($scope.itemCredito.precioNuevo,$scope.itemCredito.precio)
             * nvl($scope.itemCredito.cantidadNueva,$scope.itemCredito.cantidad )
@@ -9139,7 +9193,144 @@ app.controller('verCompraController', function($scope, $location, $rootScope, $c
     init();
 });
 
+app.controller('cobrosController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, ValoresService) {
+    $scope.datos = {};
+    $scope.inhabilitarCambio= true;
 
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
+    $scope.listarFondoCredito = function(){
+        CobrosService.listarFondoCredito($scope.datos).then(function(response){
+            if(response.status == 200){
+                $scope.lista =response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.lista[i].monto = separadorDeMil($scope.lista[i].monto);
+                }
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
+    $scope.listarEstados= function(){
+        var json =angular.toJson({"dominio":"ESTADOS_FONDO"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaEstados = response.data;
+            }else{
+                alert("Error al cargar los Estados");
+            }
+        })
+    }
+
+    $scope.foo = function (index) {
+        var element =  $scope.lista[index];
+        for(i=0;i<$scope.lista.length;i++){
+            if(element.codigo == $scope.lista[i].codigo){
+                if($scope.lista[i].checkActivo=='S'){
+                    $scope.lista[i].checkActivo = 'N';
+                }else{
+                    $scope.lista[i].checkActivo = 'S';
+                }
+            }
+        }
+        var activos = false;
+        for(j=0;j<$scope.lista.length;j++){
+            if($scope.lista[j].checkActivo=='S'){
+                activos= true;
+                break;
+            }
+        }
+        if(activos==true){
+            $scope.inhabilitarCambio= false;
+        }
+        else{
+            $scope.inhabilitarCambio= true;
+        }
+    }
+
+    $scope.cobrar = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/cobros/cobrar').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+    var init = function(){
+        $scope.listarFondoCredito();
+        $scope.listarEstados();
+    }
+
+    init();
+});
+
+
+app.service('CobrosService', function($http) {
+    delete $http.defaults.headers.common['X-Requested-With'];
+
+    this.listarFondoCredito = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/cobros/listar-fondo-credito?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+});
+
+app.controller('cobrarController', function($scope, $location, $rootScope, $cookies, $dialogs) {
+    $scope.datos = {};
+    $scope.lista = [];
+
+    $scope.cancelar = function(){
+        $location.path( '/cobros' );
+    }
+
+    $scope.listarCredito = function(codigoPersona){
+        var obj = {
+            cliente : codigoPersona,
+            estado: 'PENDIENTE'
+        }
+        VentasService.listarFondoDebito(obj).then(function(response){
+            if(response.status ==200){
+                $scope.listaFondoDebito = response.data;
+                if($scope.listaFondoDebito.length>0){
+                    $scope.agregarNotaCredito=true;
+
+                }
+            }else{
+                alert("Error al cargar el Fondo Debito");
+            }
+        })
+
+    }
+
+    var init = function(){
+        var lista = $location.search().param;
+        if(!Array.isArray(lista)){
+            $scope.cancelar();
+        }else{
+            $scope.lista =lista;
+        }
+        $scope.listarCredito(codigoPersona);
+    }
+
+    init();
+});
 
 
 
