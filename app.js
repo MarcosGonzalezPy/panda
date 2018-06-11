@@ -9290,47 +9290,19 @@ app.service('CobrosService', function($http) {
         return myResponseData;
     }
 
+    this.cobrar = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/cobros/cobrar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
-app.controller('cobrarController', function($scope, $location, $rootScope, $cookies, $dialogs) {
-    $scope.datos = {};
-    $scope.lista = [];
 
-    $scope.cancelar = function(){
-        $location.path( '/cobros' );
-    }
-
-    $scope.listarCredito = function(codigoPersona){
-        var obj = {
-            cliente : codigoPersona,
-            estado: 'PENDIENTE'
-        }
-        VentasService.listarFondoDebito(obj).then(function(response){
-            if(response.status ==200){
-                $scope.listaFondoDebito = response.data;
-                if($scope.listaFondoDebito.length>0){
-                    $scope.agregarNotaCredito=true;
-
-                }
-            }else{
-                alert("Error al cargar el Fondo Debito");
-            }
-        })
-
-    }
-
-    var init = function(){
-        var lista = $location.search().param;
-        if(!Array.isArray(lista)){
-            $scope.cancelar();
-        }else{
-            $scope.lista =lista;
-        }
-        $scope.listarCredito(codigoPersona);
-    }
-
-    init();
-});
 
 
 
