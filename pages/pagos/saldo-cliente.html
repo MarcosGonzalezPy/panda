@@ -43,8 +43,11 @@
                 <div class="col-sm-offset-2 col-sm-10">
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
-                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="generarCheque()"  class="btn btn-success btn-sm" value="Generar Cheque" />
-                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="efectivizar()"  class="btn btn-info btn-sm" value="Efectivizar" />
+                    <!--<input type="button" ng-disabled="inhabilitarCambio" ng-click="generarCheque()"  class="btn btn-success btn-sm" value="Generar Cheque" />-->
+                    <!--<input type="button" ng-disabled="inhabilitarCambio" ng-click="efectivizar()"  class="btn btn-info btn-sm" value="Efectivizar" />-->
+
+                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="pagar()"  class="btn btn-info btn-sm" value="Pagar" />
+                    <input type="button" ng-disabled="inhabilitarAnular" ng-click="anular()"  class="btn btn-danger btn-sm" value="Anular" />
                 </div>
             </div>
 
@@ -72,7 +75,8 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <!--<td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>-->
+                <td><input ng-disabled="item.estado == 'ANULADO'"   type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.nombre}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.fechaVencimiento}}</td>

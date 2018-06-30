@@ -58,6 +58,7 @@
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-disabled="inhabilitarCambio" ng-click="cobrar()"  class="btn btn-info btn-sm" value="Cobrar" />
+                    <input type="button" ng-disabled="inhabilitarAnular" ng-click="anular()"  class="btn btn-danger btn-sm" value="Anular" />
                 </div>
             </div>
         </form>
@@ -92,7 +93,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-disabled="item.estado != 'PENDIENTE'"  type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <td><input ng-disabled="item.estado == 'ANULADO'"  type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.monto}}</td>
                 <td>{{item.documento}}</td>
                 <td>{{item.documentoNumero}}</td>

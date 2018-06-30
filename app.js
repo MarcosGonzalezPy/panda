@@ -94,6 +94,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/404.html',
             controller  : 'salirController'
         })
+        .when('/ayuda', {
+            templateUrl : 'pages/404.html',
+            controller  : 'ayudaController'
+        })
         .when('/ingresar-equipo', {
             templateUrl : 'pages/servicios/ingresar-equipo.html',
             controller  : 'ingresarEquipoController'
@@ -211,6 +215,10 @@ app.config(function($routeProvider) {
         .when('/cobros/cobrar', {
             templateUrl : 'pages/ventas/cobros/cobrar.html',
             controller  : 'cobrarController'
+        })
+        .when('/cobros/anular', {
+            templateUrl : 'pages/ventas/cobros/anular-cobro.html',
+            controller  : 'anularCobrosController'
         })
         .when('/pedido-compra', {
             templateUrl : 'pages/compras/pedido-compra.html',
@@ -704,6 +712,13 @@ app.controller('agregarDominiosController', function($scope, $location,DominiosS
 app.controller('salirController', function($scope, $location, $rootScope, $cookies) {
     $cookies.usuario = null;
     $location.path( '/' );
+});
+
+app.controller('ayudaController', function($scope, $location, $rootScope, $cookies,$window) {
+
+    //$window.open('Panda.html', null);  //semi funciona
+    $window.open('help/help.html', null);
+    //$location.path( '/' );
 });
 
 app.controller('dialogServiceTest',function($scope,$rootScope,$timeout,$dialogs){
@@ -9196,6 +9211,7 @@ app.controller('verCompraController', function($scope, $location, $rootScope, $c
 app.controller('cobrosController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, ValoresService) {
     $scope.datos = {};
     $scope.inhabilitarCambio= true;
+    $scope.inhabilitarAnular= true;
 
     function separadorDeMil(numero) {
         if(numero){
@@ -9203,10 +9219,20 @@ app.controller('cobrosController', function($scope, $location, $rootScope, $cook
         }
     }
 
+    $scope.buscar = function(){
+        $scope.listarFondoCredito();
+    }
+
     $scope.listarFondoCredito = function(){
         CobrosService.listarFondoCredito($scope.datos).then(function(response){
             if(response.status == 200){
                 $scope.lista =response.data;
+                for(var j = $scope.lista.length; j--;){
+                    if($scope.lista[j].estado=="ANULADO"){
+                        $scope.lista.splice(j,1);
+                    }
+                }
+
                 for(i=0;i<$scope.lista.length;i++){
                     $scope.lista[i].monto = separadorDeMil($scope.lista[i].monto);
                 }
@@ -9239,17 +9265,36 @@ app.controller('cobrosController', function($scope, $location, $rootScope, $cook
             }
         }
         var activos = false;
+        var cantidadActivos = 0;
+        var estadoActivo = "";
+        var habCambioPorEstado = true;
         for(j=0;j<$scope.lista.length;j++){
             if($scope.lista[j].checkActivo=='S'){
                 activos= true;
-                break;
+                cantidadActivos++;
+                estadoActivo = $scope.lista[j].estado;
+                if($scope.lista[j].estado!='PENDIENTE'){
+                    habCambioPorEstado = false;
+                }
             }
         }
         if(activos==true){
-            $scope.inhabilitarCambio= false;
+            if(habCambioPorEstado){
+                $scope.inhabilitarCambio= false;
+            }else{
+                $scope.inhabilitarCambio= true;
+            }
+
+
+            if(cantidadActivos==1 && estadoActivo=='COBRADO'){
+                $scope.inhabilitarAnular= false;
+            }else{
+                $scope.inhabilitarAnular= true;
+            }
         }
         else{
             $scope.inhabilitarCambio= true;
+            $scope.inhabilitarAnular= true;
         }
     }
 
@@ -9266,6 +9311,29 @@ app.controller('cobrosController', function($scope, $location, $rootScope, $cook
             delete $scope.listaACobrar[j].fecha;
         }
         $location.path( '/cobros/cobrar').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+    $scope.anular = function(index) {
+        var listaCopy  = angular.copy($scope.lista);
+        $scope.listaACobrar=[];
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){
+                $scope.listaACobrar.push(listaCopy[i]);
+            }
+        }
+        for(j=0;j<$scope.listaACobrar.length;j++){
+            delete $scope.listaACobrar[j].checkActivo;
+            delete $scope.listaACobrar[j].fecha;
+        }
+        $location.path( '/cobros/anular').search({param: $scope.listaACobrar, other:'ok'});
+    }
+
+
+    $scope.limpiar = function(){
+        $scope.lista = [];
+        $scope.datos = {};
+        $scope.inhabilitarCambio= true;
+        $scope.inhabilitarAnular= true;
     }
 
     var init = function(){
@@ -9300,6 +9368,100 @@ app.service('CobrosService', function($http) {
         return myResponseData;
     }
 
+    this.listarReciboCabecera = function(codigo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/cobros/listar-recibo-cabecera/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.anularCobro = function(codigo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/cobros/anular-cobro/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+});
+
+app.controller('anularCobrosController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService) {
+    $scope.datos = {};
+
+
+    $scope.cancelar = function(){
+        $location.path( '/cobros' );
+    }
+
+    $scope.listarFondoCredito = function(){
+        $scope.total=0;
+        CobrosService.listarFondoCredito($scope.datos).then(function(response){
+            if(response.status ==200){
+                $scope.lista = response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.total += parseInt($scope.lista[i].monto);
+                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                }
+                $scope.total = separadorDeMil($scope.total);
+            }else{
+                alert("Error al cargar los Fondos Creditos");
+            }
+        })
+    }
+
+    $scope.listarReciboCabecera = function(){
+        CobrosService.listarReciboCabecera($scope.datos.cobroDetalle).then(function(response){
+            if(response.status ==200){
+                var respuesta = response.data;
+                $scope.datos.nombre = respuesta[0].nombrePersona;
+                $scope.datos.codigoPersona = respuesta[0].codigoPersona;
+            }else{
+                alert("Error al cargar los Fondos Creditos");
+            }
+        })
+    }
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
+    $scope.anular= function(){
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea Anular?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            CobrosService.anularCobro($scope.datos.cobroDetalle).then(function(response){
+                if(response.status == 200){
+                    var resultado = response.data.respuesta;
+                    if(resultado == "OK"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion Exitosa'},{key: false,back: 'static'});
+                        $scope.cancelar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Anular'},{key: false,back: 'static'});
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+    }
+
+
+    var init = function(){
+        var lista = $location.search().param;
+        if(!Array.isArray(lista) || typeof lista[0].monto == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.cobroDetalle = lista[0].cobroDetalle;
+        $scope.listarFondoCredito();
+        $scope.listarReciboCabecera();
+    }
+
+    init();
 });
 
 

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html >
+<body>
+
+<div class="panel panel-primary" >
+    <div class="panel-heading">Anular Cobro</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Cliente</label>
+                    <div class="col-sm-9">
+                        <input disabled  ng-model="datos.nombre" class="form-control input-sm" uppercase list="browsers"
+                               name="browser" class="nopadding col-sm-8" ng-change="changePersonas()">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Codigo</label>
+                    <div class="col-sm-9">
+                        <input disabled autofocus ng-model="datos.codigoPersona" class="form-control input-sm" uppercase
+                               name="codigoPersona" class="nopadding col-sm-8" ng-change="changePersonas()">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Total</label>
+                    <div class="col-sm-7">
+                        <input disabled required type="text" class="form-control input-sm" ng-model="total" maxlength="50"/>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="lista.length >0">
+    <div  id="div1">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Monto</th>
+                <th>Documento</th>
+                <th>Doc Numero</th>
+                <!--<th>Nombre</th>-->
+                <th>Estado</th>
+                <th>Vencimiento</th>
+                <th>Numero</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+
+                <td>{{item.monto}}</td>
+                <td>{{item.documento}}</td>
+                <td>{{item.documentoNumero}}</td>
+                <!--<td>{{item.nombre}}</td>-->
+                <td>{{item.estado}}</td>
+                <td>{{item.fechaVencimiento}}</td>
+                <td>{{item.numero}}</td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="listaPago.length > 0">
+    <div  id="div2">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Medio Pago</th>
+                <th>Tipo/Numero</th>
+                <th>Importe</th>
+                <!--<th></th>-->
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaPago">
+                <td>{{item.medioPago}}</td>
+                <td>{{item.marcaTarjeta}}</td>
+                <td>{{item.importe}}</td>
+                <!--<td>
+                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                </td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="form-group" >
+    <div class="col-sm-offset-4 col-sm-10">
+        <input  type="button" ng-click="anular()"  class="btn btn-primary btn-sm" value="Anular" />
+        <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+        <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+    </div>
+</div>
+
+</body>
+</html>
