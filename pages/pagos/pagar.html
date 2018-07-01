@@ -1,9 +1,233 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
+<div class="panel panel-primary" ng-show="showPrincipal">
+    <div class="panel-heading">Pagar</div>
+    <div class="panel-body padding-minimo" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-4">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Cliente</label>
+                    <div class="col-sm-9">
+                        <input disabled ng-model="datos.nombre" class="form-control input-sm" uppercase list="browsers"
+                               name="browser" class="nopadding col-sm-8" ng-change="changePersonas()">
+                        <datalist id="browsers" >
+                            <option ng-repeat="c in listaPersonas"
+                                    value="{{c.nombre}} {{c.apellido}}">
+                        </datalist>
+                    </div>
+                </div>
 
-</body>
-</html>
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-3 control-label">Codigo</label>
+                    <div class="col-sm-9">
+                        <input disabled ng-model="datos.codigoPersona" class="form-control input-sm" uppercase
+                               name="codigoPersona" class="nopadding col-sm-8" ng-change="changePersonas()">
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Medio Pago</label>
+                    <div class="col-sm-7">
+                        <select ng-model="datos.medioPago" class="form-control input-sm"  ng-change="changeMedioPago()">
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaMediosPago"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Marca Tarjeta</label>
+                    <div class="col-sm-7">
+                        <select ng-model="datos.marcaTarjeta"  class="form-control input-sm" ng-disabled="inhabilitarTC">
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaMarcaTarjeta"
+                                    value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Importe</label>
+                    <div class="col-sm-7">
+                        <input ng-change="changeImporte()" ng-disabled="!datos.medioPago" required type="text" class="form-control input-sm" ng-model="datos.importe" maxlength="50"/>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Importe Total</label>
+                    <div class="col-sm-7">
+                        <input disabled required type="text" class="form-control input-sm" ng-model="datos.importeTotal" maxlength="50"/>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+            <div class="col-lg-4">
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Total</label>
+                    <div class="col-sm-7">
+                        <input disabled required type="text" class="form-control input-sm" ng-model="datos.total" maxlength="50"/>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-5 control-label">Cambio</label>
+                    <div class="col-sm-7">
+                        <input disabled required type="text" class="form-control input-sm" ng-model="datos.cambio" maxlength="50"/>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5">
+                    <div class="col-sm-offset-1 col-sm-10">
+                        <input  ng-disabled=" !datos.medioPago || !datos.importe" type="button" ng-click="agregarSimple()"  class="btn btn-primary btn-sm" value="Agregar" />
+                        <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="lista.length >0 && showPrincipal">
+    <div  id="div1">
+        <table class="table">
+            <thead>
+            <tr>
+
+                <th>Monto</th>
+                <th>Documento</th>
+                <th>Doc Numero</th>
+                <!--<th>Nombre</th>-->
+                <th>Estado</th>
+                <th>Vencimiento</th>
+                <th>Numero</th>
+
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in lista">
+
+                <td>{{item.monto}}</td>
+                <td>{{item.documento}}</td>
+                <td>{{item.documentoNumero}}</td>
+                <!--<td>{{item.nombre}}</td>-->
+                <td>{{item.estado}}</td>
+                <td>{{item.fechaVencimiento}}</td>
+                <td>{{item.numero}}</td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="listaPago.length > 0 && showPrincipal">
+    <div  id="div2">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Medio Pago</th>
+                <th>Tipo/Numero</th>
+                <th>Importe</th>
+                <!--<th></th>-->
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaPago">
+                <td>{{item.medioPago}}</td>
+                <td>{{item.marcaTarjeta}}</td>
+                <td>{{item.importe}}</td>
+                <!--<td>
+                    <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                </td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showPrincipal">
+    <div class="col-sm-offset-4 col-sm-10">
+        <input  type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+        <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
+        <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+    </div>
+</div>
+
+<div class="panel panel-primary" ng-show="!showPrincipal">
+    <div class="panel-heading">NOTA CREDITO</div>
+    <div class="panel-body" >
+        <form ng-submit="add()" class="form-horizontal">
+            <div class="col-lg-6">
+                <div class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Cliente</label>
+                    <div class="col-sm-8">
+                        <input disabled class="form-control input-sm"
+                               list="browsers" name="browser" ng-model="datos.nombre"  >
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div  ng-show="datos.total" class="form-group margin-bottom-5">
+                    <label class="col-sm-4 control-label">Codigo Persona</label>
+                    <div class="col-sm-4">
+                        <input disabled class="form-control input-sm" list="browsers" name="browser" ng-model="datos.codigoPersona" >
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<div class="panel panel-default" ng-show="!showPrincipal">
+    <div  id="div3">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th></th>
+                <!--<th>Nombre</th>-->
+                <th>Estado</th>
+                <th>Vencimiento</th>
+                <th>Numero</th>
+                <th>Documento</th>
+                <th>Doc Numero</th>
+                <th>Monto</th>
+                <!--<th></th>-->
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in listaFondoCredito">
+                <td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <!--<td>{{item.nombre}}</td>-->
+                <td>{{item.estado}}</td>
+                <td>{{item.fechaVencimiento}}</td>
+                <td>{{item.numero}}</td>
+                <td>{{item.documento}}</td>
+                <td>{{item.documentoNumero}}</td>
+                <td>{{item.monto}}</td>
+                <!--<td>-->
+                <!--{{item.checkActivo}}-->
+                <!--</td>-->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<div class="form-group" ng-show="!showPrincipal">
+    <div class="col-sm-offset-4 col-sm-10">
+        <input  type="button" ng-click="agregarNC()"  class="btn btn-primary btn-sm" value="Agregar" />
+        <input type="button" ng-click="cancelarNC()"  class="btn btn-danger btn-sm" value="Cancelar" />
+        <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
+    </div>
+</div>
