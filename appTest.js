@@ -312,29 +312,15 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
 
 
 
-app.controller('anularPagoController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService) {
+app.controller('anularPagoController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, VentasService, PagosService) {
     $scope.datos = {};
+    $scope.path="";
 
 
     $scope.cancelar = function(){
-        $location.path( '/cobros' );
+        $location.path( $scope.path );
     }
 
-    $scope.listarFondoCredito = function(){
-        $scope.total=0;
-        CobrosService.listarFondoCredito($scope.datos).then(function(response){
-            if(response.status ==200){
-                $scope.lista = response.data;
-                for(i=0;i<$scope.lista.length;i++){
-                    $scope.total += parseInt($scope.lista[i].monto);
-                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
-                }
-                $scope.total = separadorDeMil($scope.total);
-            }else{
-                alert("Error al cargar los Fondos Creditos");
-            }
-        })
-    }
 
     $scope.listarReciboCabecera = function(){
         CobrosService.listarReciboCabecera($scope.datos.cobroDetalle).then(function(response){
@@ -357,7 +343,7 @@ app.controller('anularPagoController', function($scope, $location, $rootScope, $
     $scope.anular= function(){
         dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea Anular?'},{key: false,back: 'static'});
         dlg.result.then(function(resultado){
-            CobrosService.anularCobro($scope.datos.cobroDetalle).then(function(response){
+            PagosService.anularPago($scope.datos.pagoDetalle).then(function(response){
                 if(response.status == 200){
                     var resultado = response.data.respuesta;
                     if(resultado == "OK"){
@@ -376,15 +362,35 @@ app.controller('anularPagoController', function($scope, $location, $rootScope, $
         });
     }
 
+    $scope.listarFondoDebito = function(){
+        $scope.total=0;
+        VentasService.listarFondoDebito($scope.datos).then(function(response){
+            if(response.status ==200){
+                $scope.lista = response.data;
+                for(var i = $scope.lista.length; i--;){
+                    $scope.total += parseInt($scope.lista[i].monto);
+                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                }
+                $scope.total = separadorDeMil($scope.total);
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
 
     var init = function(){
         var lista = $location.search().param;
         if(!Array.isArray(lista) || typeof lista[0].monto == 'undefined'){
             $scope.cancelar();
         }
-        $scope.datos.cobroDetalle = lista[0].cobroDetalle;
-        $scope.listarFondoCredito();
-        $scope.listarReciboCabecera();
+        $scope.path =$location.search().path;
+        $scope.datos.pagoDetalle = lista[0].pagoDetalle;
+        $scope.listarFondoDebito();
+        $scope.datos.nombre = lista[0].nombre;
+        $scope.datos.codigoPersona = lista[0].codigoPersona;
+        //$scope.datos.cobroDetalle = lista[0].cobroDetalle;
+        //$scope.listarFondoDebito();
+        //$scope.listarReciboCabecera();
     }
 
     init();
