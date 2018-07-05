@@ -66,6 +66,10 @@ app.config(function($routeProvider) {
             templateUrl : 'pages/pagos/anular-pago.html',
             controller  : 'anularPagoController'
         })
+        .when('/anular-cobro', {
+            templateUrl : 'pages/ventas/cobros/pagos/anular-cobro.html',
+            controller  : 'anularCobrosController'
+        })
         .when('/ventas/nota-credito', {
             templateUrl : 'pages/ventas/ventas/nota-credito.html',
             controller  : 'notaCreditoController'
@@ -5530,6 +5534,26 @@ app.service('PagosService', function($http) {
             });
         return myResponseData;
     }
+
+
+    this.pagar = function(datos) {
+        var jsonObj = angular.toJson(datos);
+        var encoJson = encodeURIComponent(jsonObj);
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/pagar?paramJson='+encoJson)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
+    this.anularPago = function(codigo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/pagos/anular-pago/'+codigo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 
 });
 

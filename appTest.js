@@ -1,4 +1,5 @@
-app.controller('pagarController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, ValoresService) {
+app.controller('pagarController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, ValoresService,
+           CajasService, PagosService) {
     $scope.datos = {};
     $scope.path="";
     $scope.showPrincipal = true;
@@ -191,6 +192,100 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
         $scope.inhabilitarAgregarNC= true;
     }
 
+    $scope.guardar = function(){
+        var total= separadorDeMil($scope.datos.total);
+        var importeTotal = separadorDeMil($scope.datos.importeTotal);
+        var cambio =separadorDeMil($scope.datos.cambio);
+        if(importeTotal< total){
+            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'El importe total no puede ser menor al monto total.'},{key: false,back: 'static'});
+        }else{
+            var totalNoEfectivo= 0;
+            var totalEfectivo=0;
+            var listaPago =angular.copy($scope.listaPago);
+            for(i=0;i<listaPago.length;i++){
+                if(typeof listaPago[i].marcaTarjeta!= 'undefined'){
+                    totalNoEfectivo += listaPago[i].importe;
+                }else{
+                    totalEfectivo +=listaPago[i].importe;
+                }
+            }
+            var continuar = true ;
+            if(totalNoEfectivo > $scope.datos.total){
+                var mensaje ="Los montos de NC y TC no se pueden fraccionar, esta seguro que desea continuar";
+                dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:mensaje},{key: false,back: 'static'});
+                dlg.result.then(function(resultado){
+                    continuar = false;
+
+                },function(){
+                });
+            }
+
+            for(k=0;k<listaPago.length;k++){
+                listaPago[k].importe= listaPago[k].importe.replace(/[^0-9]+/g,'');
+            }
+            if($scope.datos.cambio>0){
+                for(k=0;k<listaPago.length;k++){
+                    if(listaPago[k].medioPago=="EFECTIVO"){
+                        listaPago[k].importe = listaPago[k].importe - cambio;
+
+                    }
+                }
+            }
+            var listaFondoCredito = angular.copy($scope.lista);
+            for(i=0;i<listaFondoCredito.length;i++){
+                listaFondoCredito[i].monto = listaFondoCredito[i].monto.replace(/[^0-9]+/g,'');
+                delete listaFondoCredito[i].fechaPago;
+                delete listaFondoCredito[i].fechaVencimiento;
+                delete listaFondoCredito[i].nombre;
+                delete listaFondoCredito[i].codigoPersona;
+            }
+
+            var reciboCabecera={
+                'codigoPersona': $scope.datos.codigoPersona,
+                'nombre': $scope.datos.nombre,
+                'sucursal':$scope.datos.sucursal,
+                'caja': $scope.datos.nroCaja,
+                'cajero': $cookies.usuario
+            }
+            var obj={
+                'pagosCabecera': reciboCabecera,
+                'listaDetallePago': listaPago,
+                'listaFondoDebito':listaFondoCredito
+            }
+            PagosService.pagar(obj).then(function(response){
+                if(response.status == 200){
+                    var resultado = response.data.respuesta;
+                    if(resultado == "OK"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Regostro Exitoso'},{key: false,back: 'static'});
+                        $scope.cancelar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Registrar'},{key: false,back: 'static'});
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            })
+        }
+    }
+
+    $scope.obtenerSucursalTimbrado = function(usuario){
+        CajasService.obtenerSucursalTimbrado(usuario).then(function(response){
+            if(response.status == 200){
+                if(typeof response.data.caja != 'undefined'){
+                    $scope.datos.timbrado = response.data.timbrado;
+                    $scope.datos.sucursal = response.data.sucursal;
+                    $scope.datos.nroCaja = response.data.caja;
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'El usuario '+usuario+' no esta asignado a una caja'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }
+
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+            }
+        })
+    };
+
     var init=function(){
         var lista = $location.search().param;
         $scope.path =$location.search().path;
@@ -201,15 +296,96 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
             $scope.lista =lista;
             $scope.datos.nombre=lista[0].nombre;
             $scope.datos.codigoPersona=lista[0].codigoPersona;
+            $scope.listarFondoCredito();
+            $scope.datos.total=0;
             for(i=0;i<$scope.lista.length;i++){
                 $scope.datos.total+= parseInt($scope.lista[i].monto.replace(/[^0-9]+/g,''));
             }
             $scope.datos.total=separadorDeMil($scope.datos.total);
-            $scope.listarFondoCredito();
-            $scope.datos.total=0;
             $scope.datos.importeTotal="0";
             $scope.listarMarcaTarjeta();
+            $scope.obtenerSucursalTimbrado($cookies.usuario);
         }
     }
+    init();
+});
+
+
+
+app.controller('anularPagoController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService) {
+    $scope.datos = {};
+
+
+    $scope.cancelar = function(){
+        $location.path( '/cobros' );
+    }
+
+    $scope.listarFondoCredito = function(){
+        $scope.total=0;
+        CobrosService.listarFondoCredito($scope.datos).then(function(response){
+            if(response.status ==200){
+                $scope.lista = response.data;
+                for(i=0;i<$scope.lista.length;i++){
+                    $scope.total += parseInt($scope.lista[i].monto);
+                    $scope.lista[i].monto=separadorDeMil($scope.lista[i].monto);
+                }
+                $scope.total = separadorDeMil($scope.total);
+            }else{
+                alert("Error al cargar los Fondos Creditos");
+            }
+        })
+    }
+
+    $scope.listarReciboCabecera = function(){
+        CobrosService.listarReciboCabecera($scope.datos.cobroDetalle).then(function(response){
+            if(response.status ==200){
+                var respuesta = response.data;
+                $scope.datos.nombre = respuesta[0].nombrePersona;
+                $scope.datos.codigoPersona = respuesta[0].codigoPersona;
+            }else{
+                alert("Error al cargar los Fondos Creditos");
+            }
+        })
+    }
+
+    function separadorDeMil(numero) {
+        if(numero){
+            return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
+        }
+    }
+
+    $scope.anular= function(){
+        dlg = $dialogs.create('/dialogs/confirmar.html', 'confirmarController' ,{msg:'Esta seguro que desea Anular?'},{key: false,back: 'static'});
+        dlg.result.then(function(resultado){
+            CobrosService.anularCobro($scope.datos.cobroDetalle).then(function(response){
+                if(response.status == 200){
+                    var resultado = response.data.respuesta;
+                    if(resultado == "OK"){
+                        dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Anulacion Exitosa'},{key: false,back: 'static'});
+                        $scope.cancelar();
+                    }else{
+                        dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al Anular'},{key: false,back: 'static'});
+                    }
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error de Sistema, consulte con el administrador'},{key: false,back: 'static'});
+                }
+            });
+
+        },function(){
+            //$scope.name = 'You decided not to enter in your name, that makes me sad.';
+        });
+    }
+
+
+    var init = function(){
+        var lista = $location.search().param;
+        if(!Array.isArray(lista) || typeof lista[0].monto == 'undefined'){
+            $scope.cancelar();
+        }
+        $scope.datos.cobroDetalle = lista[0].cobroDetalle;
+        $scope.listarFondoCredito();
+        $scope.listarReciboCabecera();
+    }
+
     init();
 });
