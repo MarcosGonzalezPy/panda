@@ -385,6 +385,11 @@ app.config(function($routeProvider) {
             controller  : 'generarChequeController'
         })
 
+        .when('/hechauka', {
+            templateUrl : 'pages/reportes/hechauka.html',
+            controller  : 'HechaukaController'
+        })
+
         .otherwise({
             redirectTo: '/' ,
             templateUrl : 'pages/404.html',
@@ -2533,6 +2538,7 @@ app.controller('agregarServiciosController', function($scope, $location, $rootSc
             }
         })
     }
+
     $scope.agregar = function() {
         $scope.datos.precioUnitario=$scope.datos.precioUnitario.replace(/[^0-9]+/g,'');
         ServiciosService.insertarServicios($scope.datos).then(function(response){
@@ -3875,13 +3881,14 @@ app.service('UtilService', function($http) {
         return myResponseData;
     }
 
-//    this.secuencia = function() {
-//        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/inventario/secuencia-registro-inventario')
-//            .then(function (response) {
-//                return response;
-//            });
-//        return myResponseData;
-//    }
+    this.hechauka = function(archivo,tipo) {
+        var myResponseData = $http.get('http://localhost:8080/panda-sys/webapi/util/descargar-archivo/'+archivo+'/'+tipo)
+            .then(function (response) {
+                return response;
+            });
+        return myResponseData;
+    }
+
 });
 
 app.service('ComprasService', function($http) {
@@ -5194,7 +5201,7 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
             if(response.status == 200){
                 if(typeof response.data.caja != 'undefined'){
                     var aux  = response.data;
-                    $scope.datos.timbrado = response.data.timbrado;
+                    $scope.datos.timbrado = 11963881;//response.data.timbrado;
                     $scope.datos.sucursal = response.data.sucursal;
                     $scope.datos.nroCaja = response.data.caja;
                 }else{
@@ -8937,6 +8944,7 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
     $scope.datos = {};
     $scope.inhabilitarCambio = true;
     $rootScope.dir ='/pago-proveedores';
+    $scope.direccionActual  ='/pago-proveedores';
 
     $scope.limpiar = function(){
         $scope.datos = {}
@@ -9024,6 +9032,8 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
     }
 
 
+
+
     $scope.generarCheque = function(index) {
         var listaCopy  = angular.copy($scope.lista);
         $scope.listaACobrar=[];
@@ -9070,11 +9080,45 @@ app.controller('pagoProveedoresController', function($scope, $location, $rootSco
         return Number(numero.toString().replace(/[^0-9]+/g,'')).toLocaleString();
     }
 
+
+    $scope.pagar=function(){ $scope.accionar('pagar'); }
+
+    $scope.anular=function(){ $scope.accionar('anular-pago'); }
+
+    $scope.accionar = function(goTo) {
+        var listaCopy  = angular.copy($scope.lista);   var lista=[];   var habilitar="OK";
+        for(i=0;i<listaCopy.length;i++){
+            if(listaCopy[i].checkActivo=='S'){ lista.push(listaCopy[i]); }
+        }
+        var cliente = null;
+        for(j=0;j<lista.length;j++){
+            delete lista[j].checkActivo;   delete lista[j].fecha;
+            if(goTo=='pagar' && lista[j].estado!='PENDIENTE'){
+                habilitar="Para pagar todos los registros deben estar Pendientes."
+                break;
+            }else if(goTo=='anular' && lista[j].estado== 'PAGADO'){
+                habilitar="Para anular todos los registros deben estar Pagados."
+                break;
+            }
+            if(cliente ==null){
+                cliente= lista[j].codigoPersona;
+            }else if(cliente!= lista[j].codigoPersona){
+                habilitar="No se pueden procesar clientes diferentes en una misma transaccion.";
+                break;
+            }
+        } //goTo = pagar, anular-pago
+        if(habilitar=="OK"){
+            $location.path(goTo).search({param: lista, path:$scope.direccionActual ,other:'ok'});
+        }else{
+            dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:habilitar},{key: false,back: 'static'});
+        }
+    }
+
     var init = function(){
         var urlParams = $location.search().param;
         if(urlParams){
-           $scope.datos.documento ='COMPRA';
-           $scope.datos.documentoNumero =urlParams.codigo;
+           //$scope.datos.documento ='COMPRA';
+           //$scope.datos.documentoNumero =urlParams.codigo;
         }
         $scope.listarProveedores();
         $scope.listarEstados();
@@ -9862,6 +9906,45 @@ app.controller('cobrarController', function($scope, $location, $rootScope, $cook
     }
 
     init();
+});
+
+
+app.controller('HechaukaController', function($scope, $location, $rootScope, $cookies, $dialogs, UtilService, ValoresService) {
+    $scope.datos = {};
+    $scope.listaHechauka=[];
+    $scope.direccion="C:/hechauka";
+
+    $scope.limpiar=function(){
+       $scope.datos= {}
+    }
+
+    $scope.generar=function(){
+        UtilService.hechauka($scope.datos.nombre, $scope.datos.reporte).then(function(response){
+            if(response.status == 200 && response.data=="OK"){
+
+                dlg = $dialogs.create('/dialogs/exito.html', 'exitoController' ,{msg:'Generado existoso'},{key: false,back: 'static'});
+            }else{
+                dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'Error al generar'},{key: false,back: 'static'});
+            }
+        })
+    }
+
+    $scope.listarHechauka= function(){
+        var json =angular.toJson({"dominio":"REPORTES_HECHAUKA"});
+        ValoresService.listarJson(json).then(function(response){
+            if(response.status ==200){
+                $scope.listaHechauka= response.data;
+            }else{
+                alert("Error al cargar los Estados");
+            }
+        })
+    }
+    var init=function(){
+         $scope.listarHechauka()
+    }
+
+    init();
+
 });
 
 

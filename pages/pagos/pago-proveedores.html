@@ -52,7 +52,7 @@
 
 
                     <input type="button" ng-disabled="inhabilitarCambio" ng-click="pagar()"  class="btn btn-info btn-sm" value="Pagar" />
-                    <input type="button" ng-disabled="inhabilitarAnular" ng-click="anular()"  class="btn btn-danger btn-sm" value="Anular"/ >
+                    <input type="button" ng-disabled="inhabilitarAnular" ng-click="anular()"  class="btn btn-danger btn-sm" value="Anular" />
                 </div>
             </div>
         </form>
@@ -85,7 +85,8 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-disabled="item.estado != 'PENDIENTE'" ng-show="item.estado != 'COBRADO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <!--ng-show="item.estado != 'COBRADO'" ng-disabled="item.estado != 'PENDIENTE'"  -->
+                <td><input type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
                 <td>{{item.nombre}}</td>
                 <td>{{item.estado}}</td>
                 <td>{{item.fechaVencimiento}}</td>
