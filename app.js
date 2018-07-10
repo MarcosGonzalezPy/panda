@@ -5201,7 +5201,7 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
             if(response.status == 200){
                 if(typeof response.data.caja != 'undefined'){
                     var aux  = response.data;
-                    $scope.datos.timbrado = 11963881;//response.data.timbrado;
+                    $scope.datos.timbrado = response.data.timbrado;    //11963881;//
                     $scope.datos.sucursal = response.data.sucursal;
                     $scope.datos.nroCaja = response.data.caja;
                 }else{
@@ -5809,7 +5809,7 @@ app.service('UsuarioSucursalService', function($http) {
 });
 
 
-app.controller('pagarFacturaController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, VentasService) {
+app.controller('pagarFacturaController', function($scope, $location, $rootScope, $cookies, $dialogs, ValoresService, VentasService, CajasService) {
     $scope.datos = {};
     $scope.lista = [];
     $scope.inhabilitarCredito = true;
@@ -5961,9 +5961,24 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         }else{
             $scope.datos.cambio = separadorDeMil($scope.datos.cambio);
         }
-
-
     }
+
+    $scope.obtenerSucursalTimbrado = function(usuario){
+        CajasService.obtenerSucursalTimbrado(usuario).then(function(response){
+            if(response.status == 200){
+                if(typeof response.data.caja != 'undefined'){
+                    var aux  = response.data;
+                    $scope.datos.timbrado = response.data.timbrado;    //11963881;//
+                    $scope.datos.sucursal = response.data.sucursal;
+                    $scope.datos.caja = response.data.caja;
+                    $scope.datos.puntoExpedicion = response.data.puntoExpedicion;
+                }else{
+                    dlg = $dialogs.create('/dialogs/error.html', 'errorDialogController' ,{msg:'El usuario '+usuario+' no esta asignado a una caja'},{key: false,back: 'static'});
+                    $scope.cancelar();
+                }
+            }
+        })
+    };
 
     $scope.guardar = function(){
         var listaFormaPago
@@ -5974,10 +5989,11 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
             plazo: $scope.datos.plazo,
             timbrado:  $scope.datos.timbrado,
             caja:  $scope.datos.caja,
-            cajero: $scope.datos.cajero,
+            cajero: $cookies.usuario,
             sucursal:  $scope.datos.sucursal,
             monto: $rootScope.montoTotal,
-            cliente: $rootScope.pago.codigoPersona
+            cliente: $rootScope.pago.codigoPersona ,
+            puntoExpedicion: $scope.datos.puntoExpedicion
         }
         obj.listaFormaPago =  angular.copy($scope.lista);
 
@@ -6028,7 +6044,7 @@ app.controller('pagarFacturaController', function($scope, $location, $rootScope,
         $scope.datos.numeroFactura = $rootScope.venta.numeroFactura;
         $scope.listarCondicionesCompra();
         $scope.listarMarcaTarjeta();
-
+        $scope.obtenerSucursalTimbrado($cookies.usuario);
     }
 
     init();

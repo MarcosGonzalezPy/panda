@@ -40,11 +40,11 @@
                     <div class="col-sm-7">
                         <select class="form-control input-sm" ng-model="datos.plazo"  ng-disabled="inhabilitarCredito">
                             <option value> --Seleccionar --</option>
-                            <option value="1 DIA">1 DIA</option>
-                            <option value="15 DIAS">15 DIAS</option>
-                            <option value="1 MES">1 MES</option>
-                            <option value="2 MESES">2 MESES</option>
-                            <option value="3 MESES">3 MESES</option>
+                            <option value="1">1</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="60">60</option>
                         </select>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
 
     <div class="col-sm-offset-5 col-sm-10">
         <input  type="button" ng-click="atras()"  class="btn btn-primary btn-sm" value="Atras" />
-        <input  type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
+        <input ng-disabled="!datos.condicionCompra || ((datos.condicionCompra=='CREDITO'&& !datos.plazo) && !datos.cantidadCuotas)" type="button" ng-click="guardar()"  class="btn btn-success btn-sm" value="Guardar" />
         <input type="button" ng-click="cancelar()"  class="btn btn-danger btn-sm" value="Cancelar" />
         <!--<input type="button" ng-click="confirm()"  class="btn btn-warning btn-sm" value="Confirmar" />-->
     </div>
