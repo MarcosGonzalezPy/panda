@@ -36,13 +36,24 @@
             </div>
             <div class="col-lg-4">
 
-                <div class="form-group margin-bottom-5">
+                <div class="form-group margin-bottom-5"  ng-show="!tarjeta">
                     <label class="col-sm-5 control-label">Marca Tarjeta</label>
                     <div class="col-sm-7">
                         <select ng-model="datos.marcaTarjeta"  class="form-control input-sm" ng-disabled="inhabilitarTC">
                             <option value> --Seleccionar --</option>
                             <option ng-repeat="c in listaMarcaTarjeta"
                                     value="{{c.valor}}">{{c.valor}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group margin-bottom-5" ng-show="tarjeta">
+                    <label class="col-sm-5 control-label">Nro Cheque</label>
+                    <div class="col-sm-7">
+                        <select ng-model="datos.marcaTarjeta"  class="form-control input-sm"  ng-change="changeMarcaTarjeta()" >
+                            <option value> --Seleccionar --</option>
+                            <option ng-repeat="c in listaCheques"
+                                    value="{{c.numeroCheque}}">{{c.numeroCheque}}</option>
                         </select>
                     </div>
                 </div>

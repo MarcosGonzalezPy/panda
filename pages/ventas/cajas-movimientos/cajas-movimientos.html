@@ -51,7 +51,7 @@
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
-                </div>
+                    </div>
             </div>
         </form>
 
@@ -89,6 +89,7 @@
                 <td>{{item.fechaCierre}}</td>
                 <td>
                     <button ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-click="cerrar($index)" class="btn btn-info btn-xs">Cerrar</button>
                 </td>
             </tr>
             </tbody>

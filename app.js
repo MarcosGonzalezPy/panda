@@ -2031,7 +2031,7 @@ app.controller('agregarArticulosController', function($scope, $location, $rootSc
     }
 
     $scope.listarTipos = function(){
-        var json =angular.toJson({"dominio":"TIPOS"});
+        var json =angular.toJson({"dominio":"TIPOS_ARTICULO"});
         ValoresService.listarJson(json).then(function(response){
             if(response.status ==200){
                 $scope.listaTipos = response.data;
@@ -5303,7 +5303,8 @@ app.controller('FacturarController', function($scope, $location, $rootScope, $co
     init();
 });
 
-app.controller('saldoClienteController', function($scope, $location, $rootScope, $cookies, $dialogs, ClientesService, PagosService, ValoresService) {
+app.controller('saldoClienteController', function($scope, $location, $rootScope, $cookies, $dialogs, ClientesService,
+                                                  PagosService, ValoresService) {
     $scope.datos = {};
     $rootScope.dir ='/saldo-cliente';
     $scope.direccionActual ='/saldo-cliente';
@@ -5493,10 +5494,14 @@ app.controller('saldoClienteController', function($scope, $location, $rootScope,
         })
     }
 
+
+
     var init = function(){
+
         $scope.buscarClientes();
         $scope.listarEstados();
         $scope.buscar();
+
     }
 
     init();
@@ -9600,6 +9605,7 @@ app.controller('cobrarController', function($scope, $location, $rootScope, $cook
     $scope.datos.importeTotal = '0';
     $scope.showPrincipal = true;
     $scope.inhabilitarAgregarNC= true;
+    $scope.tarjeta=false;
 
     $scope.cancelar = function(){
         $location.path( '/cobros' );
@@ -9663,12 +9669,20 @@ app.controller('cobrarController', function($scope, $location, $rootScope, $cook
         }else{
             $scope.inhabilitarTC = true;
             $scope.datos.marcaTarjeta ='';
-
         }
 
         if($scope.datos.medioPago == 'NOTA CREDITO'){
             $scope.showPrincipal =false;
         }
+
+        if($scope.datos.medioPago=='CHEQUE'){
+            $scope.datos.marcaTarjeta =""
+            $scope.tarjeta=true;
+        }else{
+            $scope.datos.marcaTarjeta =""
+            $scope.tarjeta=false;
+        }
+
     }
 
     $scope.limpiar = function(){

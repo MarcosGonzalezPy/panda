@@ -1,5 +1,5 @@
 app.controller('pagarController', function($scope, $location, $rootScope, $cookies, $dialogs, CobrosService, ValoresService,
-           CajasService, PagosService) {
+           CajasService, PagosService, ChequesService) {
     $scope.datos = {};
     $scope.path="";
     $scope.showPrincipal = true;
@@ -7,6 +7,7 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
     $scope.inhabilitarAgregarNC= true;
     $scope.listaPago = [];
     $scope.inhabilitarTC = true;
+    $scope.tarjeta=false;
 
 
     $scope.cancelar = function(){
@@ -91,6 +92,7 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
     $scope.changeMedioPago= function(){
         if($scope.datos.medioPago == 'TARJETA DE CREDITO'){
             $scope.inhabilitarTC = false;
+            $scope.tarjeta=false;
         }else{
             $scope.inhabilitarTC = true;
             $scope.datos.marcaTarjeta ='';
@@ -99,6 +101,14 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
 
         if($scope.datos.medioPago == 'NOTA CREDITO'){
             $scope.showPrincipal =false;
+        }
+
+        if($scope.datos.medioPago=='CHEQUE'){
+            $scope.datos.marcaTarjeta =""
+            $scope.tarjeta=true;
+        }else{
+            $scope.datos.marcaTarjeta =""
+            $scope.tarjeta=false;
         }
     }
 
@@ -161,6 +171,20 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
 
     $scope.changeImporte=function(){
         $scope.datos.importe = separadorDeMil($scope.datos.importe);
+    }
+
+    $scope.changeMarcaTarjeta=function(){
+        if($scope.datos.medioPago=='CHEQUE'){
+            if($scope.datos.marcaTarjeta){
+                for(i=0;i<$scope.listaCheques.length;i++){
+                    if($scope.listaCheques[i].numeroCheque==$scope.datos.marcaTarjeta){
+                        $scope.datos.importe = separadorDeMil( $scope.listaCheques[i].monto);
+                    }
+
+                }
+            }
+        }
+
     }
 
     $scope.agregarSimple=function(){
@@ -286,7 +310,21 @@ app.controller('pagarController', function($scope, $location, $rootScope, $cooki
         })
     };
 
+    $scope.listarCheques = function(){
+        var param={
+            'estado':"PENDIENTE"
+        }
+        ChequesService.listar(param).then(function(response){
+            if(response.status ==200){
+                $scope.listaCheques = response.data;
+            }else{
+                alert("Error al cargar los tipos");
+            }
+        })
+    }
+
     var init=function(){
+        $scope.listarCheques();
         var lista = $location.search().param;
         $scope.path =$location.search().path;
         //$scope.titulo =$location.search().titulo;

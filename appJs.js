@@ -1259,7 +1259,7 @@ app.controller('agregarChequesController', function($scope,    $location, $rootS
 
     var init = function () {
         $scope.listarBancos();
-        $scope.datos.estado='PENDIENTE_COBRO';
+        $scope.datos.estado='PENDIENTE';
     }
 
     init();

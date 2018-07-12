@@ -49,8 +49,8 @@
                     <input type="button" ng-click="buscar()"  class="btn btn-primary btn-sm" value="Buscar" />
                     <input type="button" ng-click ="limpiar()" class="btn btn-warning btn-sm" value="Limpiar"/>
                     <input type="button" ng-click="agregar()"  class="btn btn-primary btn-sm" value="Agregar" />
-                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="cobrar()"  class="btn btn-success btn-sm" value="Cobrar" />
-                    <input type="button" ng-disabled="inhabilitarCambio" ng-click="depositar()"  class="btn btn-info btn-sm" value="Depositar" />
+                    <input ng-show=false type="button" ng-disabled="inhabilitarCambio" ng-click="cobrar()"  class="btn btn-success btn-sm" value="Cobrar" />
+                    <input ng-show=false type="button" ng-disabled="inhabilitarCambio" ng-click="depositar()"  class="btn btn-info btn-sm" value="Depositar" />
                 </div>
             </div>
         </form>
@@ -70,7 +70,7 @@
         <table class="table" >
             <thead>
             <tr>
-                <th></th>
+                <!--<th></th>-->
                 <th>N&uacute;mero</th>
                 <th>Banco</th>
                 <th>Fecha</th>
@@ -82,7 +82,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="item in lista">
-                <td><input ng-show="item.estado == 'PENDIENTE_COBRO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>
+                <!--<td><input ng-show="item.estado == 'PENDIENTE_COBRO'" type="checkbox" name="vehicle" value={{item.codigo}} ng-model="check" ng-click='foo($index)'></td>-->
                 <td>{{item.numeroCheque}}</td>
                 <td>{{item.banco}}</td>
                 <td>{{item.fecha}}</td>
@@ -91,8 +91,8 @@
                 <td>{{item.glosa}}</td>
 
                 <td>
-                    <button ng-show="item.estado != 'PENDIENTE_COBRO'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
-                    <button ng-show="item.estado == 'PENDIENTE_COBRO'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
+                    <button ng-show="item.estado == 'PENDIENTE'" ng-click="remove($index)" class="btn btn-danger btn-xs">Eliminar</button>
+                    <button ng-show="item.estado == 'PENDIENTE'" ng-click="modificar($index)" class="btn btn-success btn-xs">Modificar</button>
                 </td>
                 <!--<td>-->
                     <!--{{item.checkActivo}}-->
